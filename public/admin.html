@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rugby LIVE — Control Panel</title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .admin { width:min(980px,100%); margin:auto; padding:24px; }
+    h1 { margin:0 0 18px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .panel { background:#111; border:1px solid #262626; border-radius:20px; padding:20px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    input, button {
+      font:inherit; border-radius:12px; border:1px solid #333; padding:12px 14px;
+    }
+    input { background:#080808; color:white; }
+    button { background:white; color:black; font-weight:800; cursor:pointer; }
+    button.red { background:#ff453a; color:white; }
+    button.green { background:#35ff25; color:#001b00; }
+    .bigscore { font-size:72px; color:#35ff25; font-weight:900; margin:8px 0 16px; }
+    label { display:block; color:#aaa; margin-bottom:6px; }
+    .pin { max-width:150px; }
+    .preview { color:#aaa; font-size:14px; margin-top:8px; }
+    a { color:white; }
+    @media(max-width:720px){
+      .grid{grid-template-columns:1fr;}
+      .admin{padding:14px;}
+      .panel{padding:16px;}
+      button{min-height:50px; min-width:58px; font-size:18px;}
+      .row{gap:8px;}
+      .bigscore{font-size:64px;}
+      h1{font-size:28px;}
+      input{width:100%;}
+      .pin{max-width:none;}
+    }
+  </style>
+</head>
+<body>
+<div class="admin">
+  <h1>Rugby LIVE — Control Panel</h1>
+
+  <div class="panel" style="margin-bottom:18px">
+    <div class="row">
+      <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="1234" />
+      <button class="green" onclick="act('startMatch')">Start LIVE</button>
+      <button class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
+      <a href="/" target="_blank">Open public LIVE page ↗</a>
+    </div>
+    <div class="preview">The public link is always the main server address.</div>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <label>Home Team</label>
+      <input id="homeName" value="Team 1" />
+      <div class="bigscore" id="homeScore">0</div>
+      <div class="row">
+        <button onclick="score('home',1)">+1</button>
+        <button onclick="score('home',2)">+2</button>
+        <button onclick="score('home',3)">+3</button>
+        <button onclick="score('home',5)">+5</button>
+        <button onclick="score('home',-1)">−1</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <label>Away Team</label>
+      <input id="awayName" value="Team 2" />
+      <div class="bigscore" id="awayScore">0</div>
+      <div class="row">
+        <button onclick="score('away',1)">+1</button>
+        <button onclick="score('away',2)">+2</button>
+        <button onclick="score('away',3)">+3</button>
+        <button onclick="score('away',5)">+5</button>
+        <button onclick="score('away',-1)">−1</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <label>Match Clock</label>
+      <div class="clock" id="clock" style="font-size:64px">40:00</div>
+      <div class="row">
+        <button onclick="act('toggleClock')" id="clockBtn">Start Clock</button>
+        <button onclick="act('resetClock')">Reset to 40:00</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <label>Half</label>
+      <div class="row">
+        <button onclick="act('setHalf',{half:1})">1st Half</button>
+        <button onclick="act('setHalf',{half:2})">2nd Half</button>
+      </div>
+      <br>
+      <button class="green" onclick="newMatch()">New Match / 0:0</button>
+    </section>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+let last = null;
+
+function fmt(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
+}
+
+function render(s) {
+  last = s;
+  $('homeScore').textContent = s.homeScore;
+  $('awayScore').textContent = s.awayScore;
+  $('clock').textContent = fmt(s.remainingSeconds);
+  if (document.activeElement !== $('homeName')) $('homeName').value = s.homeName;
+  if (document.activeElement !== $('awayName')) $('awayName').value = s.awayName;
+  $('clockBtn').textContent = s.running ? 'Stop Clock' : 'Start Clock';
+}
+
+async function act(action,payload={}) {
+  const r = await fetch('/api/admin', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pin:$('pin').value,action,payload})
+  });
+  const data = await r.json();
+  if(!r.ok) alert(data.error || 'Error');
+}
+
+function score(team,delta){ act('score',{team,delta}); }
+
+function newMatch(){
+  act('newMatch',{
+    homeName:$('homeName').value,
+    awayName:$('awayName').value
+  });
+}
+
+let nameTimer;
+function saveNames(){
+  clearTimeout(nameTimer);
+  nameTimer=setTimeout(()=>act('setNames',{
+    homeName:$('homeName').value,
+    awayName:$('awayName').value
+  }),400);
+}
+
+$('homeName').addEventListener('input',saveNames);
+$('awayName').addEventListener('input',saveNames);
+
+fetch('/api/state').then(r=>r.json()).then(render);
+const socket=io();
+socket.on('state',render);
+</script>
+</body>
+</html>

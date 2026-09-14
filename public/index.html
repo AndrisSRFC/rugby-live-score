@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rugby LIVE</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="wrap">
+  <main class="card">
+    <div class="top">
+      <div class="clock" id="clock">40:00</div>
+      <div class="half"><span id="half">1</span><span id="halfSuffix">st</span> Half</div>
+    </div>
+
+    <section class="board">
+      <div class="team">
+        <div class="name" id="homeName">Team 1</div>
+        <div class="score" id="homeScore">0</div>
+      </div>
+      <div class="vs">–</div>
+      <div class="team">
+        <div class="name" id="awayName">Team 2</div>
+        <div class="score" id="awayScore">0</div>
+      </div>
+    </section>
+
+    <div class="status" id="status">Loading...</div>
+  </main>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+
+function fmt(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
+}
+
+function render(s) {
+  $('homeName').textContent = s.homeName;
+  $('awayName').textContent = s.awayName;
+  $('homeScore').textContent = s.homeScore;
+  $('awayScore').textContent = s.awayScore;
+  $('half').textContent = s.half;
+  $('halfSuffix').textContent = Number(s.half) === 2 ? 'nd' : 'st';
+  $('clock').textContent = fmt(s.remainingSeconds);
+
+  if (s.matchLive) {
+    $('status').innerHTML = '<span class="live-pill">LIVE</span>Score updates automatically';
+  } else if (s.message === 'Spēle beigusies') {
+    $('status').textContent = 'Full Time';
+  } else if (s.message === 'Šobrīd spēle nenotiek') {
+    $('status').textContent = 'No match in progress';
+  } else {
+    $('status').textContent = s.message || 'No match in progress';
+  }
+}
+
+fetch('/api/state').then(r=>r.json()).then(render);
+const socket = io();
+socket.on('state', render);
+</script>
+</body>
+</html>
