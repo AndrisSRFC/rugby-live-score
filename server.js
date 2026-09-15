@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
+const { Pool } = require("pg");
 
 const app = express();
 const server = http.createServer(app);
@@ -10,35 +11,84 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 const ADMIN_PIN = process.env.ADMIN_PIN || "1234";
 
-let state = {
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL
+});
+
+const defaultState = {
   homeName: "Team 1",
   awayName: "Team 2",
   homeScore: 0,
   awayScore: 0,
   half: 1,
-  durationSeconds: 40 * 60,
-  remainingSeconds: 40 * 60,
+
+  // Rugby clock counts UP.
+  // 1st Half starts at 00:00.
+  // 2nd Half starts at 40:00.
+  elapsedSeconds: 0,
   running: false,
   startedAt: null,
+
   matchLive: false,
   message: "No match in progress"
 };
 
+let state = { ...defaultState };
+
+async function initDatabase() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS rugby_state (
+      id INTEGER PRIMARY KEY,
+      data JSONB NOT NULL
+    )
+  `);
+
+  const result = await pool.query(
+    "SELECT data FROM rugby_state WHERE id = 1"
+  );
+
+  if (result.rows.length > 0) {
+    state = {
+      ...defaultState,
+      ...result.rows[0].data
+    };
+    console.log("Saved match state loaded from database");
+  } else {
+    await saveState();
+    console.log("New match state created in database");
+  }
+}
+
+async function saveState() {
+  await pool.query(
+    `
+    INSERT INTO rugby_state (id, data)
+    VALUES (1, $1::jsonb)
+    ON CONFLICT (id)
+    DO UPDATE SET data = EXCLUDED.data
+    `,
+    [JSON.stringify(state)]
+  );
+}
+
 function currentState() {
   const copy = { ...state };
+
   if (copy.running && copy.startedAt) {
-    const elapsed = Math.floor((Date.now() - copy.startedAt) / 1000);
-    copy.remainingSeconds = Math.max(0, copy.remainingSeconds - elapsed);
-    if (copy.remainingSeconds === 0) {
-      copy.running = false;
-      copy.startedAt = null;
-    }
+    const elapsedSinceStart = Math.floor(
+      (Date.now() - copy.startedAt) / 1000
+    );
+
+    copy.elapsedSeconds =
+      copy.elapsedSeconds + elapsedSinceStart;
   }
+
   return copy;
 }
 
 function commitClock() {
   state = currentState();
+  state.startedAt = null;
 }
 
 function broadcast() {
@@ -48,78 +98,133 @@ function broadcast() {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/api/state", (req, res) => res.json(currentState()));
+app.get("/api/state", (req, res) => {
+  res.json(currentState());
+});
 
-app.post("/api/admin", (req, res) => {
+app.post("/api/admin", async (req, res) => {
   const { pin, action, payload = {} } = req.body || {};
+
   if (String(pin) !== String(ADMIN_PIN)) {
     return res.status(401).json({ error: "Incorrect PIN" });
   }
 
-  commitClock();
+  try {
+    commitClock();
 
-  switch (action) {
-    case "score":
-      if (payload.team === "home") state.homeScore = Math.max(0, state.homeScore + Number(payload.delta || 0));
-      if (payload.team === "away") state.awayScore = Math.max(0, state.awayScore + Number(payload.delta || 0));
-      break;
-    case "setNames":
-      if (typeof payload.homeName === "string") state.homeName = payload.homeName.trim() || "Team 1";
-      if (typeof payload.awayName === "string") state.awayName = payload.awayName.trim() || "Team 2";
-      break;
-    case "toggleClock":
-      if (state.running) {
+    switch (action) {
+      case "score":
+        if (payload.team === "home") {
+          state.homeScore = Math.max(
+            0,
+            state.homeScore + Number(payload.delta || 0)
+          );
+        }
+
+        if (payload.team === "away") {
+          state.awayScore = Math.max(
+            0,
+            state.awayScore + Number(payload.delta || 0)
+          );
+        }
+        break;
+
+      case "setNames":
+        if (typeof payload.homeName === "string") {
+          state.homeName =
+            payload.homeName.trim() || "Team 1";
+        }
+
+        if (typeof payload.awayName === "string") {
+          state.awayName =
+            payload.awayName.trim() || "Team 2";
+        }
+        break;
+
+      case "toggleClock":
+        if (state.running) {
+          state.running = false;
+          state.startedAt = null;
+        } else {
+          state.running = true;
+          state.startedAt = Date.now();
+        }
+        break;
+
+      case "resetClock":
         state.running = false;
         state.startedAt = null;
-      } else if (state.remainingSeconds > 0) {
-        state.running = true;
-        state.startedAt = Date.now();
-      }
-      break;
-    case "resetClock":
-      state.running = false;
-      state.startedAt = null;
-      state.remainingSeconds = state.durationSeconds;
-      break;
-    case "setClock":
-      state.running = false;
-      state.startedAt = null;
-      state.remainingSeconds = Math.max(0, Number(payload.seconds || 0));
-      break;
-    case "setHalf":
-      state.half = Number(payload.half) === 2 ? 2 : 1;
-      break;
-    case "startMatch":
-      state.matchLive = true;
-      state.message = "";
-      break;
-    case "endMatch":
-      state.matchLive = false;
-      state.running = false;
-      state.startedAt = null;
-      state.message = payload.message || "Full Time";
-      break;
-    case "newMatch":
-      state = {
-        ...state,
-        homeName: payload.homeName?.trim() || "Team 1",
-        awayName: payload.awayName?.trim() || "Team 2",
-        homeScore: 0,
-        awayScore: 0,
-        half: 1,
-        remainingSeconds: state.durationSeconds,
-        running: false,
-        startedAt: null,
-        matchLive: true,
-        message: ""
-      };
-      break;
-    default:
-      return res.status(400).json({ error: "Unknown action" });
-  }
+        state.elapsedSeconds =
+          state.half === 2 ? 40 * 60 : 0;
+        break;
 
-  broadcast();
-  res.json({ ok: true, state: currentState() });
+      case "setClock":
+        state.running = false;
+        state.startedAt = null;
+        state.elapsedSeconds = Math.max(
+          0,
+          Number(payload.seconds || 0)
+        );
+        break;
+
+      case "setHalf":
+        state.running = false;
+        state.startedAt = null;
+
+        if (Number(payload.half) === 2) {
+          state.half = 2;
+          state.elapsedSeconds = 40 * 60;
+        } else {
+          state.half = 1;
+          state.elapsedSeconds = 0;
+        }
+        break;
+
+      case "startMatch":
+        state.matchLive = true;
+        state.message = "";
+        break;
+
+      case "endMatch":
+        state.matchLive = false;
+        state.running = false;
+        state.startedAt = null;
+        state.message =
+          payload.message || "Full Time";
+        break;
+
+      case "newMatch":
+        state = {
+          ...defaultState,
+          homeName:
+            payload.homeName?.trim() || "Team 1",
+          awayName:
+            payload.awayName?.trim() || "Team 2",
+          matchLive: true,
+          message: ""
+        };
+        break;
+
+      default:
+        return res
+          .status(400)
+          .json({ error: "Unknown action" });
+    }
+
+    await saveState();
+    broadcast();
+
+    res.json({
+      ok: true,
+      state: currentState()
+    });
+  } catch (error) {
+    console.error("Admin action error:", error);
+
+    res.status(500).json({
+      error: "Database error"
+    });
+  }
 });
 
 io.on("connection", (socket) => {
@@ -127,9 +232,27 @@ io.on("connection", (socket) => {
 });
 
 setInterval(() => {
-  if (state.running) broadcast();
+  if (state.running) {
+    broadcast();
+  }
 }, 1000);
 
-server.listen(PORT, () => {
-  console.log(`Rugby Live Score running on port ${PORT}`);
-});
+async function startServer() {
+  try {
+    await initDatabase();
+
+    server.listen(PORT, () => {
+      console.log(
+        `Rugby Live Score running on port ${PORT}`
+      );
+    });
+  } catch (error) {
+    console.error(
+      "Could not start Rugby Live Score:",
+      error
+    );
+    process.exit(1);
+  }
+}
+
+startServer();
