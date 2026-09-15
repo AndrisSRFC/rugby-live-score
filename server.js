@@ -83,7 +83,7 @@ function currentState() {
       copy.elapsedSeconds + elapsedSinceStart;
   }
 
-  copy.remainingSeconds = Math.max(0, (copy.half === 2 ? 40 * 60 : 40 * 60) - copy.elapsedSeconds);
+  copy.remainingSeconds = copy.elapsedSeconds;
   return copy;
 }
 
