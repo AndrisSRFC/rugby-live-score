@@ -89,8 +89,8 @@
     <section class="panel">
       <label>Half</label>
       <div class="row">
-        <button onclick="act('setHalf',{half:1})">1st Half</button>
-        <button onclick="act('setHalf',{half:2})">2nd Half</button>
+        <button id="half1Btn" onclick="act('setHalf',{half:1})">1st Half</button>
+        <button id="half2Btn" onclick="act('setHalf',{half:2})">2nd Half</button>
       </div>
       <br>
       <button class="green" onclick="newMatch()">New Match / 0:0</button>
@@ -116,6 +116,8 @@ function render(s) {
   if (document.activeElement !== $('homeName')) $('homeName').value = s.homeName;
   if (document.activeElement !== $('awayName')) $('awayName').value = s.awayName;
   $('clockBtn').textContent = s.running ? 'Stop Clock' : 'Start Clock';
+  $('half1Btn').className = s.half === 1 ? 'green' : '';
+  $('half2Btn').className = s.half === 2 ? 'green' : '';
 }
 
 async function act(action,payload={}) {
