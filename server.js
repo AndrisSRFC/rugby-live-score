@@ -175,7 +175,7 @@ app.post("/api/admin", async (req, res) => {
 
         if (Number(payload.half) === 2) {
           state.half = 2;
-          state.elapsedSeconds = 40 * 60;
+          state.elapsedSeconds = ({ U13:25, U14:25, U15:30, U16:35, Colts:40, "1st XV":40, "2nd XV":40 }[state.ageGroup] || 40) * 60;
         } else {
           state.half = 1;
           state.elapsedSeconds = 0;
