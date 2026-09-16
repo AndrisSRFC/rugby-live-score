@@ -34,3 +34,6 @@ body {
   .score { font-size: 92px; }
   .top { gap:18px; margin-bottom:22px; }
 }
+
+.broadcast { position:fixed; top:18px; right:22px; text-align:right; color:#aaa; font-size:14px; line-height:1.35; }
+.broadcast strong { color:#fff; font-size:18px; font-weight:700; }
