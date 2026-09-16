@@ -1,0 +1,16 @@
+{
+  "name": "Rugby LIVE",
+  "short_name": "Rugby LIVE",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/RUGBY%20LIVE.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
