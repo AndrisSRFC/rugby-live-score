@@ -32,6 +32,7 @@ const defaultState = {
   matchLive: false,
   message: "No match in progress",
   ageGroup: "U13"
+  matchType: "Friendly"
 };
 
 let state = { ...defaultState };
@@ -183,6 +184,9 @@ app.post("/api/admin", async (req, res) => {
         break;
         case "setAgeGroup":
   state.ageGroup = String(payload.ageGroup || "U13");
+  break;
+        case "setMatchType":
+  state.matchType = String(payload.matchType || "Friendly");
   break;
 
       case "startMatch":
