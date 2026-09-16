@@ -109,7 +109,13 @@
     <button id="age2ndXV" onclick="act('setAgeGroup',{ageGroup:'2nd XV'})">2nd XV</button>
   </div>
 </section>
-    
+<section class="panel">
+  <label>Match Type</label>
+  <div class="row">
+    <button id="matchFriendly" onclick="act('setMatchType',{matchType:'Friendly'})">Friendly</button>
+    <button id="matchNLD" onclick="act('setMatchType',{matchType:'NLD'})">NLD</button>
+  </div>
+</section>    
   </div>
 </div>
 
@@ -134,7 +140,8 @@ function render(s) {
   $('half1Btn').className = s.half === 1 ? 'green' : '';
   $('half2Btn').className = s.half === 2 ? 'green' : '';
   ['U13','U14','U15','U16','Colts','1st XV','2nd XV'].forEach(g => { $(g === 'Colts' ? 'ageColts' : g === '1st XV' ? 'age1stXV' : g === '2nd XV' ? 'age2ndXV' : 'age' + g).className = s.ageGroup === g ? 'green' : ''; });
-}
+$('matchFriendly').className = s.matchType === 'Friendly' ? 'green' : '';
+$('matchNLD').className = s.matchType === 'NLD' ? 'green' : '';}
 
 async function act(action,payload={}) {
   const r = await fetch('/api/admin', {
