@@ -181,6 +181,9 @@ app.post("/api/admin", async (req, res) => {
           state.elapsedSeconds = 0;
         }
         break;
+        case "setAgeGroup":
+  state.ageGroup = String(payload.ageGroup || "U13");
+  break;
 
       case "startMatch":
         state.matchLive = true;
