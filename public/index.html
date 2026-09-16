@@ -19,7 +19,7 @@
         <div class="name" id="homeName">Team 1</div>
         <div class="score" id="homeScore">0</div>
       </div>
-      <div class="vs">–</div>
+      <div class="vs" id="ageGroup">U13</div>
       <div class="team">
         <div class="name" id="awayName">Team 2</div>
         <div class="score" id="awayScore">0</div>
@@ -47,6 +47,7 @@ function render(s) {
   $('half').textContent = s.half;
   $('halfSuffix').textContent = Number(s.half) === 2 ? 'nd' : 'st';
   $('clock').textContent = fmt(s.remainingSeconds);
+  $('ageGroup').textContent = s.ageGroup || 'U13';
 
   if (s.matchLive) {
     $('status').innerHTML = '<span class="live-pill">LIVE</span>Score updates automatically';
