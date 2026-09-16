@@ -30,7 +30,8 @@ const defaultState = {
   startedAt: null,
 
   matchLive: false,
-  message: "No match in progress"
+  message: "No match in progress",
+  ageGroup: "U13"
 };
 
 let state = { ...defaultState };
