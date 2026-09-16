@@ -24,7 +24,7 @@ body {
   line-height: .85; font-weight: 900; font-variant-numeric: tabular-nums;
   text-shadow: 0 0 24px rgba(53,255,37,.18);
 }
-.vs { font-size:clamp(42px, 7vw, 90px); font-weight:800; color:#fff; }
+.vs { font-size:clamp(42px, 7vw, 90px); font-weight:800; color:##FFD700; }
 .status { text-align:center; color:#fff; margin-top:34px; font-size:26px; font-weight:800; min-height:30px; }
 .live-pill { display:inline-block; background:#d20b0b; padding:7px 12px; border-radius:999px; color:white; font-weight:800; letter-spacing:.08em; font-size:13px; margin-right:8px; }
 @media (max-width: 700px) {
