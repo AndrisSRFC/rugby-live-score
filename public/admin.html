@@ -95,6 +95,19 @@
       <br>
       <button class="green" onclick="newMatch()">New Match / 0:0</button>
     </section>
+<section class="panel">
+  <label>Age Group</label>
+  <div class="row">
+    <button id="ageU13" onclick="act('setAgeGroup',{ageGroup:'U13'})">U13</button>
+    <button id="ageU14" onclick="act('setAgeGroup',{ageGroup:'U14'})">U14</button>
+    <button id="ageU15" onclick="act('setAgeGroup',{ageGroup:'U15'})">U15</button>
+    <button id="ageU16" onclick="act('setAgeGroup',{ageGroup:'U16'})">U16</button>
+    <button id="ageColts" onclick="act('setAgeGroup',{ageGroup:'Colts'})">Colts</button>
+    <button id="age1stXV" onclick="act('setAgeGroup',{ageGroup:'1st XV'})">1st XV</button>
+    <button id="age2ndXV" onclick="act('setAgeGroup',{ageGroup:'2nd XV'})">2nd XV</button>
+  </div>
+</section>
+    
   </div>
 </div>
 
@@ -118,6 +131,7 @@ function render(s) {
   $('clockBtn').textContent = s.running ? 'Stop Clock' : 'Start Clock';
   $('half1Btn').className = s.half === 1 ? 'green' : '';
   $('half2Btn').className = s.half === 2 ? 'green' : '';
+  ['U13','U14','U15','U16','Colts','1st XV','2nd XV'].forEach(g => { $(g === 'Colts' ? 'ageColts' : g === '1st XV' ? 'age1stXV' : g === '2nd XV' ? 'age2ndXV' : 'age' + g).className = s.ageGroup === g ? 'green' : ''; });
 }
 
 async function act(action,payload={}) {
