@@ -4,5 +4,13 @@
   "start_url": "/admin.html",
   "display": "standalone",
   "background_color": "#050505",
-  "theme_color": "#050505"
+  "theme_color": "#050505",
+  "icons": [
+  {
+    "src": "/f62cb52c-b0d4-47a3-bd04-6d7ce168e7c9.png",
+    "sizes": "1024x1024",
+    "type": "image/png",
+    "purpose": "any maskable"
+  }
+]
 }
