@@ -22,7 +22,10 @@
         <div class="name" id="homeName">Team 1</div>
         <div class="score" id="homeScore">0</div>
       </div>
-      <div class="vs" id="ageGroup">U13</div>
+      <div class="center-info">
+  <div class="vs" id="ageGroup">U13</div>
+  <div class="match-type" id="matchType">Friendly</div>
+</div>
       <div class="team">
         <div class="name" id="awayName">Team 2</div>
         <div class="score" id="awayScore">0</div>
@@ -51,7 +54,7 @@ function render(s) {
   $('halfSuffix').textContent = Number(s.half) === 2 ? 'nd' : 'st';
   $('clock').textContent = fmt(s.remainingSeconds);
   $('ageGroup').textContent = s.ageGroup || 'U13';
-
+$('matchType').textContent = s.matchType || 'Friendly';
   if (s.matchLive) {
     $('status').innerHTML = '<span class="live-pill">LIVE</span>Score updates automatically';
   } else if (s.message === 'Spēle beigusies') {
