@@ -1,7 +1,7 @@
 {
   "name": "Rugby LIVE",
   "short_name": "Rugby LIVE",
-  "start_url": "/",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
