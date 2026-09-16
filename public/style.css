@@ -35,5 +35,6 @@ body {
   .top { gap:18px; margin-bottom:22px; }
 }
 
-.broadcast { position:fixed; top:18px; right:22px; text-align:right; color:#aaa; font-size:14px; line-height:1.35; }
-.broadcast strong { color:#fff; font-size:18px; font-weight:700; }
+.broadcast { position:fixed; top:28px; right:35px; text-align:right; color:#aaa; font-size:17px; line-height:1.35; }
+.broadcast strong { display:inline-block; color:#fff; font-size:24px; font-weight:800; padding-bottom:5px; }
+.broadcast strong::after { content:""; display:block; height:3px; background:#ff3b30; margin-top:4px; }
