@@ -39,7 +39,6 @@ body {
   background: #555;
   margin: 12px 0;
 }
-}
 @media (max-width: 700px) {
   .board { gap:14px; }
   .name { font-size: 24px; }
