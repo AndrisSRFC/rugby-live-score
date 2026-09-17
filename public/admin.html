@@ -45,7 +45,7 @@
   <div class="panel" style="margin-bottom:18px">
     <div class="row">
       <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
-      <button class="green" onclick="act('startMatch')">Start LIVE</button>
+      <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
       <button class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
       <a href="/" target="_blank">Open public LIVE page ↗</a>
     </div>
@@ -138,6 +138,7 @@ function fmt(sec) {
 
 function render(s) {
   last = s;
+  $('startLiveBtn').className = s.matchLive ? 'green' : '';
   $('homeScore').textContent = s.homeScore;
   $('awayScore').textContent = s.awayScore;
   $('clock').textContent = fmt(s.remainingSeconds);
