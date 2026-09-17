@@ -61,7 +61,7 @@ function render(s) {
   $('clock').textContent = fmt(s.remainingSeconds);
   const age = s.ageGroup || 'U13';
 $('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
-$('matchType').textContent = s.matchType || 'Friendly';
+$('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME';
   $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
   if (s.matchLive) {
     $('status').textContent = '';
