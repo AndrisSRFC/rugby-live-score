@@ -67,7 +67,7 @@ $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME'
   if (s.matchLive) {
     $('status').textContent = '';
   } else if (s.message === 'Spēle beigusies') {
-    $('status').textContent = 'Full Time';
+    $('status').textContent = '';
   } else if (s.message === 'Šobrīd spēle nenotiek') {
     $('status').textContent = 'No match in progress';
   } else {
