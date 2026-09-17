@@ -40,3 +40,5 @@ body {
 .broadcast { position:fixed; top:24px; right:30px; text-align:right; color:#aaa; font-size:13px; font-weight:400; letter-spacing:0px; line-height:1.4;font-style:italic; }
 .broadcast strong { display:inline-block; color:#fff; font-size:18px; font-weight:800; padding-bottom:5px; }
 .broadcast strong::after { content:""; display:block; height:2px; background:#ff3b30; margin-top:4px; }
+.live-corner { display:none; position:fixed; top:24px; left:24px; background:#ff2020; color:#fff; padding:10px 18px; border-radius:18px; font-size:24px; font-weight:900; z-index:10; }
+.live-corner::before { content:"●"; color:#fff; margin-right:10px; }
