@@ -199,7 +199,7 @@ app.post("/api/admin", async (req, res) => {
         state.matchLive = false;
         state.running = false;
         state.startedAt = null;
-        state.message = "Full Time";s
+        state.message = "Full Time";
         break;
 
       case "newMatch":
