@@ -213,7 +213,9 @@ app.post("/api/admin", async (req, res) => {
           message: ""
         };
         break;
-
+case "setNextLive":
+  state.nextLive = String(payload.nextLive || "").trim();
+  break;
       default:
         return res
           .status(400)
