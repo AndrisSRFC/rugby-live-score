@@ -63,15 +63,6 @@ function render(s) {
 $('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
 $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME';
   $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
-  if (s.matchLive) {
-    $('status').textContent = '';
-  } else if (s.message === 'Spēle beigusies') {
-    $('status').textContent = '';
-  } else if (s.message === 'Šobrīd spēle nenotiek') {
-    $('status').textContent = 'No match in progress';
-  } else {
-    $('status').textContent = s.message || 'No match in progress';
-  }
 }
 
 fetch('/api/state').then(r=>r.json()).then(render);
