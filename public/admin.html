@@ -142,6 +142,7 @@ function render(s) {
   ['U13','U14','U15','U16','Colts','1st XV','2nd XV'].forEach(g => { $(g === 'Colts' ? 'ageColts' : g === '1st XV' ? 'age1stXV' : g === '2nd XV' ? 'age2ndXV' : 'age' + g).className = s.ageGroup === g ? 'green' : ''; });
 $('matchFriendly').className = s.matchType === 'Friendly' ? 'green' : '';
 $('matchNLD').className = s.matchType === 'NLD' ? 'green' : '';}
+  $('liveBtn').className = s.matchLive ? 'green' : '';
 
 async function act(action,payload={}) {
   const r = await fetch('/api/admin', {
