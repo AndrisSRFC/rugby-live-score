@@ -115,7 +115,14 @@
     <button id="matchFriendly" onclick="act('setMatchType',{matchType:'Friendly'})">Friendly</button>
     <button id="matchNLD" onclick="act('setMatchType',{matchType:'NLD'})">NLD</button>
   </div>
-</section>    
+</section>
+    <section class="panel">
+  <label>Next Live</label>
+  <div class="row">
+    <input id="nextLive" placeholder="e.g. Today 14:30">
+    <button onclick="act('setNextLive',{nextLive:$('nextLive').value})">Save Next Live</button>
+  </div>
+</section>
   </div>
 </div>
 
@@ -136,6 +143,7 @@ function render(s) {
   $('clock').textContent = fmt(s.remainingSeconds);
   if (document.activeElement !== $('homeName')) $('homeName').value = s.homeName;
   if (document.activeElement !== $('awayName')) $('awayName').value = s.awayName;
+  if (document.activeElement !== $('nextLive')) $('nextLive').value = s.nextLive || '';
   $('clockBtn').textContent = s.running ? 'Stop Clock' : 'Start Clock';
   $('half1Btn').className = s.half === 1 ? 'green' : '';
   $('half2Btn').className = s.half === 2 ? 'green' : '';
