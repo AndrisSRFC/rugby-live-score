@@ -63,7 +63,9 @@ function render(s) {
 $('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
 $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME';
   $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
-  $('nextLiveBox').textContent = !s.matchLive && s.nextLive ? 'Next Live: ' + s.nextLive : '';
+  $('nextLiveBox').innerHTML = (!s.matchLive && s.nextLive)
+  ? '<div class="next-title">Next Live:</div><div class="next-time">' + s.nextLive + '</div>'
+  : '';
 }
 
 fetch('/api/state').then(r=>r.json()).then(render);
