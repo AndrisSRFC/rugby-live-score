@@ -22,7 +22,7 @@
         <div class="center-line"></div>
         <div class="top">
   <div class="clock" id="clock">40:00</div>
-  <div class="half"><span id="half">1</span><span id="halfSuffix">st</span> Half</div>
+  <div class="half"><span id="half">1</span><span id="halfSuffix">st</span><span id="halfWord"> Half</span></div>
           <div class="center-line"></div>
 </div>
         </div>
@@ -56,8 +56,9 @@ function render(s) {
   $('awayName').textContent = s.awayName;
   $('homeScore').textContent = s.homeScore;
   $('awayScore').textContent = s.awayScore;
-  $('half').textContent = s.half;
-  $('halfSuffix').textContent = Number(s.half) === 2 ? 'nd' : 'st';
+  $('half').textContent = s.matchLive ? s.half : 'Full Time';
+  $('halfSuffix').textContent = s.matchLive ? (s.half === 1 ? 'st' : 'nd') : '';
+  $('halfWord').textContent = s.matchLive ? ' Half' : '';
   $('clock').textContent = fmt(s.remainingSeconds);
   const age = s.ageGroup || 'U13';
 $('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
