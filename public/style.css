@@ -110,3 +110,36 @@ body {
   font-weight: 800;
   border-radius: 6px;
 }
+
+.next-title {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.next-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.next-icon {
+  font-size: 28px;
+}
+
+.next-teams {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.next-details {
+  margin-top: 3px;
+  color: #aaa;
+  font-size: 14px;
+}
+
+.next-time {
+  margin-top: 6px;
+  font-size: 18px;
+  font-weight: 800;
+}
