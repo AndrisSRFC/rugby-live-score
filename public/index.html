@@ -59,7 +59,8 @@ function render(s) {
   $('half').textContent = s.half;
   $('halfSuffix').textContent = Number(s.half) === 2 ? 'nd' : 'st';
   $('clock').textContent = fmt(s.remainingSeconds);
-  $('ageGroup').textContent = s.ageGroup || 'U13';
+  const age = s.ageGroup || 'U13';
+$('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
 $('matchType').textContent = s.matchType || 'Friendly';
   $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
   if (s.matchLive) {
