@@ -56,7 +56,7 @@ function render(s) {
   $('awayName').textContent = s.awayName;
   $('homeScore').textContent = s.homeScore;
   $('awayScore').textContent = s.awayScore;
-  $('half').textContent = s.matchLive ? s.half : 'Full Time';
+  $('half').textContent = s.matchLive ? s.half : (s.message === 'Spēle beigusies' ? 'Full Time' : s.half);
   $('halfSuffix').textContent = s.matchLive ? (s.half === 1 ? 'st' : 'nd') : '';
   $('halfWord').textContent = s.matchLive ? ' Half' : '';
   $('clock').textContent = fmt(s.remainingSeconds);
