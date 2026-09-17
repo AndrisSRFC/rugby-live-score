@@ -10,6 +10,7 @@
 </head>
 <body>
   <div class="broadcast">Broadcast<br><strong>Andris Sudmalis</strong></div>
+  <div class="live-corner" id="liveCorner">LIVE</div>
 <div class="wrap">
   <main class="card">
     <div class="top">
@@ -55,8 +56,9 @@ function render(s) {
   $('clock').textContent = fmt(s.remainingSeconds);
   $('ageGroup').textContent = s.ageGroup || 'U13';
 $('matchType').textContent = s.matchType || 'Friendly';
+  $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
   if (s.matchLive) {
-    $('status').innerHTML = '<span class="live-pill">LIVE</span>Score updates automatically';
+    $('status').textContent = '';
   } else if (s.message === 'Spēle beigusies') {
     $('status').textContent = 'Full Time';
   } else if (s.message === 'Šobrīd spēle nenotiek') {
