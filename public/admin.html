@@ -122,9 +122,10 @@
     <input id="nextHome" placeholder="Next Home Team">
     <input id="nextAway" placeholder="Next Away Team">
     <input id="nextAge" placeholder="Age Group, e.g. U14">
-    <input id="nextType" placeholder="Match Type, e.g. Friendly">
+    <button id="nextFriendly" type="button" onclick="setNextType('Friendly')">FRIENDLY</button>
+<button id="nextNLD" type="button" onclick="setNextType('NLD')">NLD</button>
     <input id="nextLive" placeholder="e.g. Today 14:30">
-    <button onclick="act('setNextLive',{nextHome:$('nextHome').value,nextAway:$('nextAway').value,nextAge:$('nextAge').value,nextType:$('nextType').value,nextLive:$('nextLive').value})">Save Next Live</button>
+    <button onclick="act('setNextLive',{nextHome:$('nextHome').value,nextAway:$('nextAway').value,nextAge:$('nextAge').value,nextType:nextType:nextTypeSelected,nextLive:$('nextLive').value})">Save Next Live</button>
   </div>
 </section>
   </div>
@@ -134,6 +135,12 @@
 <script>
 const $ = id => document.getElementById(id);
 let last = null;
+  let nextTypeSelected = 'Friendly';
+  function setNextType(type) {
+  nextTypeSelected = type;
+  $('nextFriendly').className = type === 'Friendly' ? 'green' : '';
+  $('nextNLD').className = type === 'NLD' ? 'green' : '';
+}
 
 function fmt(sec) {
   sec = Math.max(0, Math.floor(sec || 0));
@@ -151,7 +158,9 @@ function render(s) {
   if (document.activeElement !== $('nextHome')) $('nextHome').value = s.nextHome || '';
   if (document.activeElement !== $('nextAway')) $('nextAway').value = s.nextAway || '';
   if (document.activeElement !== $('nextAge')) $('nextAge').value = s.nextAge || '';
-  if (document.activeElement !== $('nextType')) $('nextType').value = s.nextType || '';
+  nextTypeSelected = s.nextType || 'Friendly';
+  $('nextFriendly').className = nextTypeSelected === 'Friendly' ? 'green' : '';
+  $('nextNLD').className = nextTypeSelected === 'NLD' ? 'green' : '';
   if (document.activeElement !== $('nextLive')) $('nextLive').value = s.nextLive || '';
   $('clockBtn').textContent = s.running ? 'Stop Clock' : 'Start Clock';
   $('half1Btn').className = s.half === 1 ? 'green' : '';
