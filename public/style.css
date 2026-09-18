@@ -119,12 +119,21 @@ body {
   gap: 16px;
     border: 1px solid #555;
   border-radius: 14px;
-  padding: 12px 18px;
-  min-width: 320px;
-  border-left: 5px solid #ff2020;
+  padding: 16px 22px;
+  min-width: 500px;
   overflow: hidden;
+  position: relative;
 }
-
+.next-card::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 12px;
+  bottom: 12px;
+  width: 6px;
+  background: #ff2020;
+  border-radius: 6px;
+}
 .next-icon {
   font-size: 28px;
 }
