@@ -179,3 +179,18 @@ max-width: calc(100vw - 18px);
     box-sizing: border-box;
   }
 }
+#installApp {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  background: #111;
+  color: #fff;
+  border: 2px solid #35ff25;
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 20;
+  box-shadow: 0 0 18px rgba(53,255,37,.22);
+  }
