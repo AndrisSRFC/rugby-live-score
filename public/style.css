@@ -118,6 +118,10 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
+    border: 1px solid #555;
+  border-radius: 14px;
+  padding: 12px 18px;
+  min-width: 320px;
 }
 
 .next-icon {
