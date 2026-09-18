@@ -166,11 +166,15 @@ bottom: -8px;
     left: 4px;
     width: max-content;
 max-width: calc(100vw - 18px);
+    .next-teams {
+  white-space: nowrap;
+}
   }
 
   .next-card {
     min-width: 0;
-    width: 100%;
+    width: max-content;
+    max-width: calc(100vw - 30px);
     box-sizing: border-box;
   }
 }
