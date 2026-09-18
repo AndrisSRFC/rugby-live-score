@@ -135,6 +135,8 @@ bottom: 4px;
 }
 .next-icon {
   font-size: 28px;
+  align-self: flex-start;
+  margin-top: 2px;
 }
 
 .next-teams {
