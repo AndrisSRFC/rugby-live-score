@@ -63,7 +63,7 @@ function render(s) {
 $('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
 $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME';
   $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
- $('nextLiveBox').innerHTML = (!s.matchLive && s.nextLive)
+ $('nextLiveBox').innerHTML = (s.nextLive)
   ? '<div class="next-title">Next Live:</div>' +
     '<div class="next-card">' +
       '<div class="next-icon">🗓️</div>' +
