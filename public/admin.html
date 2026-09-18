@@ -135,6 +135,7 @@
 <script>
 const $ = id => document.getElementById(id);
 let last = null;
+  let nextLiveLoaded = false;
   let nextTypeSelected = 'Friendly';
   function setNextType(type) {
   nextTypeSelected = type;
@@ -148,6 +149,13 @@ function fmt(sec) {
 }
 
 function render(s) {
+  if (!nextLiveLoaded) {
+    $('nextHome').value = s.nextHome || '';
+    $('nextAway').value = s.nextAway || '';
+    $('nextAge').value = s.nextAge || '';
+    $('nextLive').value = s.nextLive || '';
+    nextLiveLoaded = true;
+    }
   last = s;
   $('startLiveBtn').className = s.matchLive ? 'green' : '';
   $('homeScore').textContent = s.homeScore;
@@ -155,15 +163,11 @@ function render(s) {
   $('clock').textContent = fmt(s.remainingSeconds);
   if (document.activeElement !== $('homeName')) $('homeName').value = s.homeName;
   if (document.activeElement !== $('awayName')) $('awayName').value = s.awayName;
-  if (document.activeElement !== $('nextHome')) $('nextHome').value = s.nextHome || '';
-  if (document.activeElement !== $('nextAway')) $('nextAway').value = s.nextAway || '';
-  if (document.activeElement !== $('nextAge')) $('nextAge').value = s.nextAge || '';
   if (document.activeElement !== $('nextFriendly') && document.activeElement !== $('nextNLD')) {
   nextTypeSelected = s.nextType || 'Friendly';
 }
   $('nextFriendly').className = nextTypeSelected === 'Friendly' ? 'green' : '';
   $('nextNLD').className = nextTypeSelected === 'NLD' ? 'green' : '';
-  if (document.activeElement !== $('nextLive')) $('nextLive').value = s.nextLive || '';
   $('clockBtn').textContent = s.running ? 'Stop Clock' : 'Start Clock';
   $('half1Btn').className = s.half === 1 ? 'green' : '';
   $('half2Btn').className = s.half === 2 ? 'green' : '';
