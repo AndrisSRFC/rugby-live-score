@@ -112,7 +112,7 @@ body {
   font-size: 24px;
   font-weight: 500;
   color: #aaa;
-  margin-left: 16px;
+  margin-left: 26px;
 }
 
 .next-card {
@@ -135,7 +135,7 @@ body {
 bottom: -8px;
   width: 10px;
   background: #ff2020;
-  border-radius: 20px 0 0 20px;
+  border-radius: 50px 0 0 50px;
 }
 .next-icon {
   font-size: 28px;
