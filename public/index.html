@@ -66,7 +66,7 @@ $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME'
  $('nextLiveBox').innerHTML = (!s.matchLive && s.nextLive)
   ? '<div class="next-title">Next Live:</div>' +
     '<div class="next-card">' +
-      '<div class="next-icon">▣</div>' +
+      '<div class="next-icon">🗓️</div>' +
       '<div>' +
         '<div class="next-teams">' + s.homeName + ' vs ' + s.awayName + '</div>' +
         '<div class="next-details">' + (['U13','U14','U15','U16'].includes(s.ageGroup) ? s.ageGroup + "'s" : s.ageGroup) + ' • ' + (s.matchType || 'Friendly').toUpperCase() + ' GAME</div>' +
