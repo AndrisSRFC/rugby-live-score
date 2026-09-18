@@ -3,7 +3,7 @@
   "name": "Rugby LIVE",
   "short_name": "Rugby LIVE",
   "start_url": "/index.html",
-  "scope": "/index.html",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
