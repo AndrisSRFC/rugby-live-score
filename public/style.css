@@ -102,13 +102,10 @@ body {
   position: fixed;
   left: 30px;
   bottom: 30px;
-  padding: 16px 22px;
-  border-left: 4px solid #ff2020;
-  background: #111;
+  padding: 0 0 0 18px;
+  border-left: 3px solid #ff2020;
   color: #fff;
-  font-size: 20px;
   font-weight: 800;
-  border-radius: 6px;
 }
 
 .next-title {
