@@ -124,7 +124,8 @@ body {
   
   border-radius: 18px;
   padding: 16px 22px;
-  min-width: 500px;
+  min-width: 0;
+  width: max-content;
   position: relative;
   margin-left: 10px;
 }
