@@ -119,7 +119,7 @@ body {
   align-items: center;
   gap: 16px;
     border: 1px solid #555;
-  border-radius: 14px;
+  border-radius: 18px;
   padding: 16px 22px;
   min-width: 500px;
   position: relative;
@@ -129,7 +129,7 @@ body {
   position: absolute;
   left: -10px;
   top: -28px;
-bottom: 4px;
+bottom: -8px;
   width: 8px;
   background: #ff2020;
   border-radius: 6px;
