@@ -215,6 +215,10 @@ app.post("/api/admin", async (req, res) => {
         break;
 case "setNextLive":
   state.nextLive = String(payload.nextLive || "").trim();
+        state.nextHome = String(payload.nextHome || "").trim();
+        state.nextAway = String(payload.nextAway || "").trim();
+        state.nextAge = String(payload.nextAge || "").trim();
+        state.nextType = String(payload.nextType || "").trim();
   break;
       default:
         return res
