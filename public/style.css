@@ -121,7 +121,6 @@ body {
   border-radius: 14px;
   padding: 16px 22px;
   min-width: 500px;
-  overflow: hidden;
   position: relative;
 }
 .next-card::before {
