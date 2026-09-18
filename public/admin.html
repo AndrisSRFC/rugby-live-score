@@ -148,6 +148,10 @@ function render(s) {
   $('clock').textContent = fmt(s.remainingSeconds);
   if (document.activeElement !== $('homeName')) $('homeName').value = s.homeName;
   if (document.activeElement !== $('awayName')) $('awayName').value = s.awayName;
+  if (document.activeElement !== $('nextHome')) $('nextHome').value = s.nextHome || '';
+  if (document.activeElement !== $('nextAway')) $('nextAway').value = s.nextAway || '';
+  if (document.activeElement !== $('nextAge')) $('nextAge').value = s.nextAge || '';
+  if (document.activeElement !== $('nextType')) $('nextType').value = s.nextType || '';
   if (document.activeElement !== $('nextLive')) $('nextLive').value = s.nextLive || '';
   $('clockBtn').textContent = s.running ? 'Stop Clock' : 'Start Clock';
   $('half1Btn').className = s.half === 1 ? 'green' : '';
