@@ -119,8 +119,12 @@
     <section class="panel">
   <label>Next Live</label>
   <div class="row">
+    <input id="nextHome" placeholder="Next Home Team">
+    <input id="nextAway" placeholder="Next Away Team">
+    <input id="nextAge" placeholder="Age Group, e.g. U14">
+    <input id="nextType" placeholder="Match Type, e.g. Friendly">
     <input id="nextLive" placeholder="e.g. Today 14:30">
-    <button onclick="act('setNextLive',{nextLive:$('nextLive').value})">Save Next Live</button>
+    <button onclick="act('setNextLive',{nextHome:$('nextHome').value,nextAway:$('nextAway').value,nextAge:$('nextAge').value,nextType:$('nextType').value,nextLive:$('nextLive').value})">Save Next Live</button>
   </div>
 </section>
   </div>
