@@ -121,7 +121,7 @@ body {
   align-items: center;
   gap: 16px;
     border: 1px solid #555;
-  
+  text-align: center;
   border-radius: 18px;
   padding: 16px 10px;
   min-width: 0;
