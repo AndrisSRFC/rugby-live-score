@@ -158,7 +158,7 @@ function render(s) {
   if (document.activeElement !== $('nextHome')) $('nextHome').value = s.nextHome || '';
   if (document.activeElement !== $('nextAway')) $('nextAway').value = s.nextAway || '';
   if (document.activeElement !== $('nextAge')) $('nextAge').value = s.nextAge || '';
-  nextTypeSelected = s.nextType || 'Friendly';
+  
   $('nextFriendly').className = nextTypeSelected === 'Friendly' ? 'green' : '';
   $('nextNLD').className = nextTypeSelected === 'NLD' ? 'green' : '';
   if (document.activeElement !== $('nextLive')) $('nextLive').value = s.nextLive || '';
