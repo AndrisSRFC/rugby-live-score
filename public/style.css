@@ -108,7 +108,7 @@ body {
 }
 
 .next-title {
-  margin-bottom: 10px;
+  margin-bottom: 4px;
   font-size: 24px;
   font-weight: 500;
   color: #aaa;
@@ -120,7 +120,7 @@ body {
   gap: 16px;
     border: 1px solid #555;
   
-  border-radius: 28px 18px 18px 28px;
+  border-radius: 18px;
   padding: 16px 22px;
   min-width: 500px;
   position: relative;
@@ -129,12 +129,12 @@ body {
 .next-card::before {
   content: "";
   position: absolute;
-  left: -10px;
+  left: -6px;
   top: -28px;
 bottom: -8px;
   width: 10px;
   background: #ff2020;
-  border-radius: 6px;
+  border-radius: 6px 0 0 6px;
 }
 .next-icon {
   font-size: 28px;
