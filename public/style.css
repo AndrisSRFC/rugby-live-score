@@ -110,7 +110,8 @@ body {
 .next-title {
   margin-bottom: 10px;
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 500;
+  color: #aaa;
 }
 
 .next-card {
