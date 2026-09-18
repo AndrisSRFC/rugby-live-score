@@ -109,7 +109,7 @@ body {
 
 .next-title {
   margin-bottom: 10px;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 800;
 }
 
@@ -138,18 +138,18 @@ bottom: 4px;
 }
 
 .next-teams {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 900;
 }
 
 .next-details {
   margin-top: 3px;
   color: #aaa;
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .next-time {
   margin-top: 6px;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 800;
 }
