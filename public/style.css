@@ -159,3 +159,17 @@ bottom: -8px;
   font-size: 22px;
   font-weight: 800;
 }
+
+@media (max-width: 700px) {
+  .next-live {
+    left: 14px;
+    right: 14px;
+    width: auto;
+  }
+
+  .next-card {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
