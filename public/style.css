@@ -105,6 +105,7 @@ body {
   padding: 0 0 0 18px;
   color: #fff;
   font-weight: 800;
+  width: max-content;
 }
 
 .next-title {
@@ -163,8 +164,8 @@ bottom: -8px;
 @media (max-width: 700px) {
   .next-live {
     left: 4px;
-    right: 14px;
-    width: auto;
+    width: max-content;
+max-width: calc(100vw - 18px);
   }
 
   .next-card {
