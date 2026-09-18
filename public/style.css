@@ -174,7 +174,7 @@ max-width: calc(100vw - 18px);
   .next-card {
     min-width: 0;
     width: max-content;
-    max-width: calc(100vw - 30px);
+    max-width: calc(100vw - 50px);
     box-sizing: border-box;
   }
 }
