@@ -48,6 +48,7 @@
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
       <button class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
       <a href="/" target="_blank">Open public LIVE page ↗</a>
+      <button id="copyLiveLink" type="button" onclick="copyLiveLink()">📋 Copy LIVE Link</button>
     </div>
     <div class="preview">The public link is always the main server address.</div>
   </div>
@@ -133,6 +134,15 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+  async function copyLiveLink() {
+      const liveUrl = window.location.origin + '/';
+      await navigator.clipboard.writeText(liveUrl);
+    const btn = document.getElementById('copyLiveLink');
+    btn.textContent = '✓ Link Copied!';
+    setTimeout(() => {
+      btn.textContent = '📋 Copy LIVE Link';
+      }, 2000);
+    }
 const $ = id => document.getElementById(id);
 let last = null;
   let nextLiveLoaded = false;
