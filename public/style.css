@@ -204,4 +204,10 @@ max-width: calc(100vw - 18px);
   .next-live {
     display: none;
     }
+  .broadcast {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    }
+  
   }
