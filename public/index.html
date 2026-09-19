@@ -90,7 +90,7 @@ const socket = io();
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    $('installApp').style.display = 'block';
+    if (!/SamsungBrowser/i.test(navigator.userAgent)) $('installApp').style.display = 'block';
     });
   $('installApp').addEventListener('click', async () => {
     if (!deferredPrompt) return;
