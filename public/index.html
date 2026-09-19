@@ -99,7 +99,7 @@ const socket = io();
     });
   $('installApp').addEventListener('click', async () => {
     if (/SamsungBrowser/i.test(navigator.userAgent)) {
-  alert('To install Rugby LIVE, please open this page in Google Chrome.');
+  window.location.href = 'intent://rugby-live-score.onrender.com/#Intent;scheme=https;package=com.android.chrome;end';
   return;
 }
     if (!deferredPrompt) return;
