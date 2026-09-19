@@ -211,3 +211,9 @@ max-width: calc(100vw - 18px);
     }
   
   }
+.next-note {
+  color: #aaa;
+  font-size: 14px;
+  font-weight: 400;
+  margin-top: 6px;
+  }
