@@ -65,13 +65,14 @@ $('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s"
 $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME';
   $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
  $('nextLiveBox').innerHTML = (s.nextLive)
-  ? '<div class="next-title">Next Live:</div>' +
+  ? '<div class="next-title">Planned Live:</div>' +
     '<div class="next-card">' +
       '<div class="next-icon">🗓️</div>' +
       '<div>' +
         '<div class="next-teams">' + s.nextHome + ' vs ' + s.nextAway + '</div>' +
         '<div class="next-details">' + (['U13','U14','U15','U16'].includes(s.nextAge) ? s.nextAge + "'s" : s.nextAge) + ' ' + (s.nextType || 'Friendly').toUpperCase() + ' GAME</div>' +
         '<div class="next-time">' + s.nextLive + '</div>' +
+   '<div class="next-note">Subject to availability</div>' +
       '</div>' +
     '</div>'
   : '';
