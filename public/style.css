@@ -194,3 +194,9 @@ max-width: calc(100vw - 18px);
   z-index: 20;
   box-shadow: 0 0 18px rgba(53,255,37,.22);
   }
+
+@media (max-width: 700px) {
+  #installApp {
+    bottom: 150px;
+    }
+  }
