@@ -90,7 +90,8 @@ const socket = io();
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    if (/SamsungBrowser/i.test(navigator.userAgent)) {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile && /SamsungBrowser/i.test(navigator.userAgent)) {
   $('installApp').textContent = '📱 Install Rugby LIVE with Chrome';
   $('installApp').style.display = 'block';
 } else {
