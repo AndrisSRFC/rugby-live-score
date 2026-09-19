@@ -201,6 +201,10 @@ max-width: calc(100vw - 18px);
     }
   }
 @media (max-width: 900px) and (orientation: landscape) {
+    #installApp {
+    left: 20px;
+    right: auto;
+  }
   .next-live {
     display: none;
     }
