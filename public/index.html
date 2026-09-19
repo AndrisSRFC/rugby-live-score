@@ -90,9 +90,18 @@ const socket = io();
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    if (!/SamsungBrowser/i.test(navigator.userAgent)) $('installApp').style.display = 'block';
+    if (/SamsungBrowser/i.test(navigator.userAgent)) {
+  $('installApp').textContent = '📱 Install Rugby LIVE with Chrome';
+  $('installApp').style.display = 'block';
+} else {
+  $('installApp').style.display = 'block';
+}
     });
   $('installApp').addEventListener('click', async () => {
+    if (/SamsungBrowser/i.test(navigator.userAgent)) {
+  alert('To install Rugby LIVE, please open this page in Google Chrome.');
+  return;
+}
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     deferredPrompt = null;
