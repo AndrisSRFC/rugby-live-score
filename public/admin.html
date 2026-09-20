@@ -176,7 +176,17 @@ white-space:nowrap;
 </section>
   </div>
 </div>
-
+<section class="panel">
+  <label>NLD Match History</label>
+  <div class="row">
+    <input id="historyGeneration" placeholder="Generation, e.g. 2013">
+    <input id="historyOpponent" placeholder="Opponent">
+    <input id="historyWins" type="number" min="0" value="0" placeholder="Wins">
+<input id="historyDraws" type="number" min="0" value="0" placeholder="Draws">
+<input id="historyLosses" type="number" min="0" value="0" placeholder="Losses">
+    <button type="button" onclick="addHistory()">Add NLD History</button>
+  </div>
+</section>
 <script src="/socket.io/socket.io.js"></script>
 <script>
   async function copyLiveLink() {
@@ -188,6 +198,32 @@ white-space:nowrap;
       btn.textContent = '📋 Copy LIVE Link';
       }, 2000);
     }
+
+  async function addHistory() {
+  const generation = $('historyGeneration').value.trim();
+  const opponent = $('historyOpponent').value.trim();
+  const wins = Number($('historyWins').value) || 0;
+  const draws = Number($('historyDraws').value) || 0;
+  const losses = Number($('historyLosses').value) || 0;
+
+  if (!generation || !opponent) {
+    alert('Enter generation and opponent');
+    return;
+  }
+
+  const response = await fetch('/api/history', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ generation, opponent, wins, draws, losses })
+  });
+
+  if (!response.ok) {
+    alert('Could not save history');
+    return;
+  }
+
+  alert('NLD history saved');
+}
 const $ = id => document.getElementById(id);
 let last = null;
   let nextLiveLoaded = false;
