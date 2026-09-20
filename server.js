@@ -265,6 +265,23 @@ app.get("/api/history", async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
+app.post("/api/history", async (req, res) => {
+  try {
+    const { generation, opponent, wins = 0, draws = 0, losses = 0 } = req.body;
+
+    const result = await pool.query(
+      `INSERT INTO nld_history (generation, opponent, wins, draws, losses)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [generation, opponent, wins, draws, losses]
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Add history error:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 io.on("connection", (socket) => {
   socket.emit("state", currentState());
 });
