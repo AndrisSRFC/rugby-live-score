@@ -93,6 +93,7 @@ function currentState() {
 function commitClock() {
   state = currentState();
   state.startedAt = null;
+  if (state.running) state.startedAt = Date.now();
 }
 
 function broadcast() {
