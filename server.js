@@ -254,7 +254,17 @@ case "setNextLive":
     });
   }
 });
-
+app.get("/api/history", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM nld_history ORDER BY id DESC"
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("History error:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 io.on("connection", (socket) => {
   socket.emit("state", currentState());
 });
