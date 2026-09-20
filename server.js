@@ -160,7 +160,10 @@ app.post("/api/admin", async (req, res) => {
         state.running = false;
         state.startedAt = null;
         state.elapsedSeconds =
-          state.half === 2 ? 40 * 60 : 0;
+          state.elapsedSeconds =
+  state.half === 2
+    ? ({ U13:25, U14:25, U15:30, U16:35, Colts:40, "1st XV":40, "2nd XV":40 }[state.ageGroup] || 40) * 60
+    : 0;
         break;
 
       case "setClock":
