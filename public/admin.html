@@ -29,12 +29,27 @@
       .grid{grid-template-columns:1fr;}
       .admin{padding:14px;}
       .panel{padding:16px;}
-      button{min-height:50px; min-width:58px; font-size:18px;}
+      button{min-height:44px; min-width:58px; font-size:18px;}
       .row{gap:8px;}
-      .bigscore{font-size:64px;}
+      .bigscore{font-size:52px;}
+      #clock{font-size:52px;}
       h1{font-size:28px;}
-      input{width:100%;}
+      input{width:100%; font-size:22px; padding:16px;}
       .pin{max-width:none;}
+      #startLive,#endMatch, #copyLiveLink {
+  min-height:40px;
+  font-size:16px;
+  padding:8px 12px;
+}
+      .public-live-btn{
+  display:inline-block;
+  font-size:22px;
+  font-weight:800;
+  padding:14px 18px;
+  border:2px solid #35ff25;
+  border-radius:12px;
+  text-decoration:none;
+}
     }
   </style>
 </head>
@@ -46,8 +61,8 @@
     <div class="row">
       <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
-      <button class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
-      <a href="/" target="_blank">Open public LIVE page ↗</a>
+      <button id="endMatch" class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
+      <a href="/" target="_blank" class="public-live-btn">Open public LIVE page ↗</a>
       <button id="copyLiveLink" type="button" onclick="copyLiveLink()">📋 Copy LIVE Link</button>
     </div>
     <div class="preview">The public link is always the main server address.</div>
