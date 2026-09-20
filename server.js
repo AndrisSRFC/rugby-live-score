@@ -45,7 +45,16 @@ async function initDatabase() {
       data JSONB NOT NULL
     )
   `);
-
+await pool.query(`
+  CREATE TABLE IF NOT EXISTS nld_history (
+    id SERIAL PRIMARY KEY,
+    generation TEXT NOT NULL,
+    opponent TEXT NOT NULL,
+    wins INTEGER NOT NULL DEFAULT 0,
+    draws INTEGER NOT NULL DEFAULT 0,
+    losses INTEGER NOT NULL DEFAULT 0
+  )
+`);
   const result = await pool.query(
     "SELECT data FROM rugby_state WHERE id = 1"
   );
