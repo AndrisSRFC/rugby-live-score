@@ -32,7 +32,8 @@
       button{min-height:44px; min-width:58px; font-size:18px;}
       .row{gap:8px;}
       .bigscore{font-size:52px;}
-      #clock{font-size:52px;}
+      #clock{font-size:40px;}
+      .clock-controls{display:flex;align-items:center;gap:10px;}
       h1{font-size:28px;}
       input{width:100%; font-size:22px; padding:16px;}
       .pin{max-width:none;}
@@ -97,9 +98,10 @@
 
     <section class="panel">
       <label>Match Clock</label>
-      <div class="clock" id="clock" style="font-size:64px">40:00</div>
-      <div class="row">
+      
+      <div class="row clock-controls">
         <button onclick="act('toggleClock')" id="clockBtn">Start Clock</button>
+        <div class="clock" id="clock">40:00</div>
         <button onclick="act('resetClock')">Reset Time</button>
       </div>
     </section>
