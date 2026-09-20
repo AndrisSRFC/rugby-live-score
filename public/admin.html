@@ -41,15 +41,25 @@
 }
       h1{font-size:28px;}
       input{width:100%; font-size:22px; padding:16px;}
-      .pin{max-width:none;}
+      .pin{width:45%;max-width:45%;}
       #startLive,#endMatch, #copyLiveLink {
   min-height:40px;
   font-size:16px;
   padding:8px 12px;
 }
+      .live-actions{
+  display:flex;
+  flex-wrap:nowrap;
+  gap:6px;
+}
+      .live-actions button{
+  min-width:0;
+  font-size:13px;
+  padding:8px 7px;
+}
       .public-live-btn{
   display:inline-block;
-  font-size:22px;
+  font-size:14px;
   font-weight:800;
   padding:14px 18px;
   border:2px solid #35ff25;
@@ -64,11 +74,14 @@
   <h1>Rugby LIVE — Control Panel</h1>
 
   <div class="panel" style="margin-bottom:18px">
-    <div class="row">
+    <div class="row top-controls">
       <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
+      <a href="/" target="_blank" class="public-live-btn">Open public LIVE page ↗</a>
+      </div>
+<div class="row live-actions">
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
       <button id="endMatch" class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
-      <a href="/" target="_blank" class="public-live-btn">Open public LIVE page ↗</a>
+      
       <button id="copyLiveLink" type="button" onclick="copyLiveLink()">📋 Copy LIVE Link</button>
     </div>
     <div class="preview">The public link is always the main server address.</div>
