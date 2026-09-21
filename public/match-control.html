@@ -204,14 +204,14 @@
 
       <div class="score-row">
   <div class="score" id="homeScore">0</div>
-  <button class="minus-btn">−1</button>
+  <button class="minus-btn" onclick="changeScore('homeScore', -1)">−1</button>
 </div>
 
       <div class="score-buttons">
-        <button>+1</button>
-        <button>+2</button>
-        <button>+3</button>
-        <button>+5</button>
+        <<button onclick="changeScore('homeScore', 1)">+1</button>
+        <button onclick="changeScore('homeScore', 2)">+2</button>
+        <button onclick="changeScore('homeScore', 3)">+3</button>
+        <button onclick="changeScore('homeScore', 5)">+5</button>
       </div>
     </section>
 
@@ -221,14 +221,14 @@
 
       <div class="score-row">
   <div class="score" id="awayScore">0</div>
-  <button class="minus-btn">−1</button>
+  <button class="minus-btn" onclick="changeScore('awayScore', -1)">−1</button>
 </div>
 
       <div class="score-buttons">
-        <button>+1</button>
-        <button>+2</button>
-        <button>+3</button>
-        <button>+5</button>
+        <button onclick="changeScore('awayScore', 1)">+1</button>
+        <button onclick="changeScore('awayScore', 2)">+2</button>
+        <button onclick="changeScore('awayScore', 3)">+3</button>
+        <button onclick="changeScore('awayScore', 5)">+5</button>
       </div>
     </section>
 
@@ -255,5 +255,12 @@
 
 </div>
 
+  <script>
+    function changeScore(id, amount) {
+  const score = document.getElementById(id);
+  const current = Number(score.textContent) || 0;
+  score.textContent = Math.max(0, current + amount);
+}
+</script>
 </body>
 </html>
