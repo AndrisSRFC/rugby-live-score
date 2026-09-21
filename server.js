@@ -10,6 +10,7 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_PIN = process.env.ADMIN_PIN || "1234";
+const MATCH_CONTROL_PIN = process.env.MATCH_CONTROL_PIN || "5678";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL
@@ -119,7 +120,10 @@ app.get("/api/state", (req, res) => {
 app.post("/api/admin", async (req, res) => {
   const { pin, action, payload = {} } = req.body || {};
 
-  if (String(pin) !== String(ADMIN_PIN)) {
+  if (
+  String(pin) !== String(ADMIN_PIN) &&
+  String(pin) !== String(MATCH_CONTROL_PIN)
+) {
     return res.status(401).json({ error: "Incorrect PIN" });
   }
 
