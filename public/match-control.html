@@ -185,6 +185,7 @@
 <div class="control">
 
   <h1>Rugby LIVE — Match Control</h1>
+  <input id="matchPin" type="password" inputmode="numeric" placeholder="PIN" maxlength="4">
 
   <div class="info">
     <div class="badge" id="ageGroup">U16</div>
@@ -260,7 +261,11 @@
   const r = await fetch('/api/admin', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({pin: '', action, payload})
+   body: JSON.stringify({
+  pin: document.getElementById('matchPin').value,
+  action,
+  payload
+})
   });
 
   const data = await r.json();
