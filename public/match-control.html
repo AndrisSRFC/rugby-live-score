@@ -192,7 +192,7 @@
   </div>
 
   <div class="panel actions">
-    <button id="startLiveBtn" class="green">Start LIVE</button>
+   <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
     <button id="endMatch" class="red">End Match</button>
   </div>
 
@@ -256,6 +256,16 @@
 </div>
 
   <script>
+    async function act(action, payload = {}) {
+  const r = await fetch('/api/admin', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({pin: '', action, payload})
+  });
+
+  const data = await r.json();
+  if (!r.ok) alert(data.error || 'Error');
+}
     function changeScore(id, amount) {
   const score = document.getElementById(id);
   const current = Number(score.textContent) || 0;
