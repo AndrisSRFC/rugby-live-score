@@ -298,3 +298,15 @@ max-width: calc(100vw - 18px);
 .broadcast-text strong {
   padding-bottom: 4px;
 }
+/* Broadcast ball final position */
+.broadcast-logo {
+  width: 58px;
+  transform: translateY(-10px);
+}
+
+@media (max-width: 700px) {
+  .broadcast-logo {
+    width: 44px;
+    transform: translateY(-7px);
+  }
+}
