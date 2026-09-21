@@ -290,3 +290,12 @@ max-width: calc(100vw - 18px);
     font-size: 17px;
   }
 }
+/* Final broadcast layout */
+.broadcast-text span {
+  border-bottom: none;
+}
+
+.broadcast-text strong {
+  border-bottom: 2px solid #ff2020;
+  padding-bottom: 4px;
+}
