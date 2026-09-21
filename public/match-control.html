@@ -114,6 +114,27 @@
     .score-buttons {
       flex-wrap:wrap;
     }
+    .score-buttons button {
+  min-width:45%;
+  font-size:20px;
+  padding:14px 8px;
+}
+    .score-row {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+}
+
+.score-row .score {
+  margin:10px 0;
+}
+
+.minus-btn {
+  flex:none;
+  padding:8px 12px;
+  font-size:16px;
+}
 
     .score-buttons button {
       min-width:28%;
@@ -178,14 +199,16 @@
       <label>Home Team</label>
       <div class="team-name" id="homeName">Southwell</div>
 
-      <div class="score" id="homeScore">0</div>
+      <div class="score-row">
+  <div class="score" id="homeScore">0</div>
+  <button class="minus-btn">−1</button>
+</div>
 
       <div class="score-buttons">
         <button>+1</button>
         <button>+2</button>
         <button>+3</button>
         <button>+5</button>
-        <button>−1</button>
       </div>
     </section>
 
@@ -193,14 +216,16 @@
       <label>Away Team</label>
       <div class="team-name" id="awayName">Sleaford</div>
 
-      <div class="score" id="awayScore">0</div>
+      <div class="score-row">
+  <div class="score" id="awayScore">0</div>
+  <button class="minus-btn">−1</button>
+</div>
 
       <div class="score-buttons">
         <button>+1</button>
         <button>+2</button>
         <button>+3</button>
         <button>+5</button>
-        <button>−1</button>
       </div>
     </section>
 
