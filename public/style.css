@@ -228,3 +228,65 @@ max-width: calc(100vw - 18px);
   height: auto;
   margin: 12px auto;
 }
+/* Broadcast logo + name */
+.broadcast {
+  position: fixed;
+  top: 20px;
+  right: 25px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  z-index: 20;
+}
+
+.broadcast-logo {
+  width: 70px;
+  height: auto;
+  display: block;
+}
+
+.broadcast-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.broadcast-text span {
+  font-size: 22px;
+  font-style: italic;
+  font-weight: 400;
+  color: #ddd;
+  padding: 0 4px 6px 28px;
+  border-bottom: 2px solid #ff2020;
+}
+
+.broadcast-text strong {
+  margin-top: 8px;
+  font-size: 22px;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+/* Phone */
+@media (max-width: 700px) {
+  .broadcast {
+    top: 18px;
+    right: 16px;
+    gap: 7px;
+  }
+
+  .broadcast-logo {
+    width: 52px;
+  }
+
+  .broadcast-text span {
+    font-size: 16px;
+    padding-left: 18px;
+    padding-bottom: 4px;
+  }
+
+  .broadcast-text strong {
+    margin-top: 5px;
+    font-size: 17px;
+  }
+}
