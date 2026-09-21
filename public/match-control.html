@@ -3,10 +3,229 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050505">
   <title>Rugby LIVE — Match Control</title>
-  <link rel="stylesheet" href="/style.css">
+
+  <style>
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      background:#050505;
+      color:#fff;
+      font-family:Arial,sans-serif;
+    }
+
+    .control {
+      width:min(760px,100%);
+      margin:auto;
+      padding:14px;
+    }
+
+    h1 {
+      margin:0 0 14px;
+      font-size:26px;
+    }
+
+    .panel {
+      background:#111;
+      border:1px solid #262626;
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:10px;
+    }
+
+    .info {
+      display:flex;
+      gap:8px;
+      margin-bottom:10px;
+    }
+
+    .badge {
+      flex:1;
+      text-align:center;
+      background:#1b1b1b;
+      border:1px solid #333;
+      border-radius:12px;
+      padding:9px;
+      font-weight:800;
+    }
+
+    .actions,
+    .score-buttons,
+    .clock-controls,
+    .half-controls {
+      display:flex;
+      gap:7px;
+    }
+
+    button {
+      flex:1;
+      border:0;
+      border-radius:10px;
+      padding:10px 7px;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .green {
+      background:#35ff25;
+      color:#001b00;
+    }
+
+    .red {
+      background:#ff453a;
+      color:white;
+    }
+
+    .teams {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    label {
+      display:block;
+      color:#aaa;
+      font-size:14px;
+      margin-bottom:5px;
+    }
+
+    .team-name {
+      background:#080808;
+      border:1px solid #333;
+      border-radius:10px;
+      padding:9px;
+      font-size:17px;
+      font-weight:700;
+      text-align:center;
+    }
+
+    .score {
+      text-align:center;
+      color:#35ff25;
+      font-size:48px;
+      font-weight:900;
+      line-height:1;
+      margin:10px 0;
+    }
+
+    .score-buttons {
+      flex-wrap:wrap;
+    }
+
+    .score-buttons button {
+      min-width:28%;
+    }
+
+    .clock {
+      font-size:34px;
+      font-weight:900;
+      text-align:center;
+      min-width:90px;
+    }
+
+    .clock-controls {
+      align-items:center;
+    }
+
+    .clock-controls button {
+      background:white;
+      color:black;
+    }
+
+    .half-controls button {
+      background:white;
+      color:black;
+    }
+
+    .half-controls button.active {
+      background:#35ff25;
+      color:#001b00;
+    }
+
+    @media(max-width:500px) {
+      .control { padding:10px; }
+      h1 { font-size:22px; }
+      .panel { padding:11px; }
+      button { font-size:14px; padding:9px 5px; }
+      .score { font-size:42px; }
+      .team-name { font-size:15px; }
+    }
+  </style>
 </head>
+
 <body>
+
+<div class="control">
+
+  <h1>Rugby LIVE — Match Control</h1>
+
+  <div class="info">
+    <div class="badge" id="ageGroup">U16</div>
+    <div class="badge" id="matchType">FRIENDLY</div>
+  </div>
+
+  <div class="panel actions">
+    <button id="startLiveBtn" class="green">Start LIVE</button>
+    <button id="endMatch" class="red">End Match</button>
+  </div>
+
+  <div class="teams">
+
+    <section class="panel">
+      <label>Home Team</label>
+      <div class="team-name" id="homeName">Southwell</div>
+
+      <div class="score" id="homeScore">0</div>
+
+      <div class="score-buttons">
+        <button>+1</button>
+        <button>+2</button>
+        <button>+3</button>
+        <button>+5</button>
+        <button>−1</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <label>Away Team</label>
+      <div class="team-name" id="awayName">Sleaford</div>
+
+      <div class="score" id="awayScore">0</div>
+
+      <div class="score-buttons">
+        <button>+1</button>
+        <button>+2</button>
+        <button>+3</button>
+        <button>+5</button>
+        <button>−1</button>
+      </div>
+    </section>
+
+  </div>
+
+  <section class="panel">
+    <label>Match Clock</label>
+
+    <div class="clock-controls">
+      <button>Start Clock</button>
+      <div class="clock" id="clock">35:00</div>
+      <button>Reset Time</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <label>Half</label>
+
+    <div class="half-controls">
+      <button>1st Half</button>
+      <button class="active">2nd Half</button>
+    </div>
+  </section>
+
+</div>
 
 </body>
 </html>
