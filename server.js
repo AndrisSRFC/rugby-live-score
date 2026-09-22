@@ -90,12 +90,12 @@ function halfStartSeconds(teamKey) {
 async function saveState(teamKey, stateToSave = getState(teamKey)) {
   const key = normalizeTeamKey(teamKey);
   await pool.query(
-    \`
+    `
     INSERT INTO rugby_state (id, data)
     VALUES ($1, $2::jsonb)
     ON CONFLICT (id)
     DO UPDATE SET data = EXCLUDED.data
-    \`,
+    `,
     [TEAM_IDS[key], JSON.stringify(stateToSave)]
   );
 }
@@ -129,14 +129,14 @@ function broadcast(teamKey) {
 }
 
 async function initDatabase() {
-  await pool.query(\`
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS rugby_state (
       id INTEGER PRIMARY KEY,
       data JSONB NOT NULL
     )
-  \`);
+  `);
 
-  await pool.query(\`
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS nld_history (
       id SERIAL PRIMARY KEY,
       generation TEXT NOT NULL,
@@ -145,7 +145,7 @@ async function initDatabase() {
       draws INTEGER NOT NULL DEFAULT 0,
       losses INTEGER NOT NULL DEFAULT 0
     )
-  \`);
+  `);
 
   const result = await pool.query(
     "SELECT id, data FROM rugby_state ORDER BY id"
@@ -187,7 +187,7 @@ async function initDatabase() {
     }
   }
 
-  console.log(\`Loaded \${TEAM_CONFIG.length} independent rugby match states\`);
+  console.log(`Loaded \${TEAM_CONFIG.length} independent rugby match states`);
 }
 
 app.use(express.json());
@@ -368,11 +368,11 @@ app.post("/api/history", async (req, res) => {
     } = req.body;
 
     const result = await pool.query(
-      \`
+      `
       INSERT INTO nld_history (generation, opponent, wins, draws, losses)
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *
-      \`,
+      `,
       [generation, opponent, wins, draws, losses]
     );
 
@@ -416,7 +416,7 @@ async function startServer() {
     await initDatabase();
 
     server.listen(PORT, () => {
-      console.log(\`Rugby Live Score running on port \${PORT}\`);
+      console.log(`Rugby Live Score running on port \${PORT}`);
     });
   } catch (error) {
     console.error("Could not start Rugby Live Score:", error);
