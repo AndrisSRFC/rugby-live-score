@@ -86,7 +86,7 @@ white-space:nowrap;
   <div class="panel" style="margin-bottom:18px">
     <div class="row top-controls">
       <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
-      <a href="/" target="_blank" class="public-live-btn">Open public LIVE page ↗</a>
+      <a id="publicLiveLink" href="/live.html?team=U16" target="_blank" class="public-live-btn">Open selected LIVE page ↗</a>
       </div>
 <div class="row live-actions">
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
@@ -190,7 +190,7 @@ white-space:nowrap;
 <script src="/socket.io/socket.io.js"></script>
 <script>
   async function copyLiveLink() {
-      const liveUrl = window.location.origin + '/';
+      const liveUrl = window.location.origin + '/live.html?team=' + encodeURIComponent(selectedTeam);
       await navigator.clipboard.writeText(liveUrl);
     const btn = document.getElementById('copyLiveLink');
     btn.textContent = '✓ Link Copied!';
@@ -266,11 +266,25 @@ function render(s) {
 $('matchFriendly').className = s.matchType === 'Friendly' ? 'green' : '';
 $('matchNLD').className = s.matchType === 'NLD' ? 'green' : '';}
 
+function selectTeam(team) {
+  selectedTeam = team;
+  const url = new URL(window.location.href);
+  url.searchParams.set('team', team);
+  history.replaceState(null, '', url);
+  const link = $('publicLiveLink');
+  if (link) link.href = '/live.html?team=' + encodeURIComponent(team);
+  if (socket) socket.emit('selectTeam', team);
+  fetch('/api/state?team=' + encodeURIComponent(team)).then(r=>r.json()).then(render);
+}
+
 async function act(action,payload={}) {
+  if (action === 'setAgeGroup') {
+    selectTeam(payload.ageGroup);
+  }
   const r = await fetch('/api/admin', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({pin:$('pin').value,action,payload})
+    body:JSON.stringify({pin:$('pin').value,action,payload,team:selectedTeam})
   });
   const data = await r.json();
   if(!r.ok) alert(data.error || 'Error');
@@ -297,8 +311,11 @@ function saveNames(){
 $('homeName').addEventListener('input',saveNames);
 $('awayName').addEventListener('input',saveNames);
 
-fetch('/api/state').then(r=>r.json()).then(render);
-const socket=io();
+fetch('/api/state?team=' + encodeURIComponent(selectedTeam))
+  .then(r=>r.json())
+  .then(render);
+
+socket = io({ query: { team: selectedTeam } });
 socket.on('state',render);
 </script>
 </body>

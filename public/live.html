@@ -88,8 +88,14 @@ $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME'
   : '';
 }
 
-fetch('/api/state').then(r=>r.json()).then(render);
-const socket = io();
+const params = new URLSearchParams(location.search);
+const selectedTeam = params.get('team') || 'U13';
+
+fetch('/api/state?team=' + encodeURIComponent(selectedTeam))
+  .then(r => r.json())
+  .then(render);
+
+const socket = io({ query: { team: selectedTeam } });
   navigator.serviceWorker.register('/sw.js');
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
