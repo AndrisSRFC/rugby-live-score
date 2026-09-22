@@ -272,9 +272,8 @@
   if (!r.ok) alert(data.error || 'Error');
 }
     function changeScore(id, amount) {
-  const score = document.getElementById(id);
-  const current = Number(score.textContent) || 0;
-  score.textContent = Math.max(0, current + amount);
+  const team = id === 'homeScore' ? 'home' : 'away';
+  act('score', { team, delta: amount });
 }
 </script>
 </body>
