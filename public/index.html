@@ -320,5 +320,22 @@
 
   </main>
 
+<script>
+async function refreshLiveButtons() {
+  try {
+    const states = await fetch('/api/teams').then(r => r.json());
+    document.querySelectorAll('.age-btn').forEach(btn => {
+      const url = new URL(btn.href);
+      const team = url.searchParams.get('team');
+      const item = states.find(x => x.key.replace(/ /g,'') === team || x.key === team);
+      btn.classList.toggle('live', !!item?.matchLive);
+    });
+  } catch (error) {
+    console.error('Could not load team status:', error);
+  }
+}
+refreshLiveButtons();
+setInterval(refreshLiveButtons, 5000);
+</script>
 </body>
 </html>
