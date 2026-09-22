@@ -1,119 +1,307 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta property="og:title" content="Rugby LIVE">
-  <meta property="og:description" content="Live rugby scores. Fast. Simple. Always LIVE.">
-  <meta property="og:url" content="https://rugby-live-score.onrender.com/">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://rugby-live-score.onrender.com/RUGBY%20LIVE.png">
-  <meta name="theme-color" content="#050505">
-  <link rel="manifest" href="/live-manifest.json">
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rugby LIVE</title>
-  <link rel="stylesheet" href="/style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rugby LIVE Score</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #050505;
+      color: white;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .home-screen {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(0,0,0,.78) 0%,
+          rgba(0,0,0,.28) 48%,
+          rgba(0,0,0,.45) 100%
+        ),
+        url("/broadcast-ball.png.png") center center / cover no-repeat;
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 22px 26px;
+    }
+
+    .live-area {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .menu {
+      font-size: 30px;
+      line-height: 1;
+      margin-right: 8px;
+    }
+
+    .live-badge {
+      background: #ff1616;
+      color: white;
+      font-weight: 900;
+      font-size: 18px;
+      padding: 9px 17px;
+      border-radius: 7px;
+      box-shadow: 0 0 20px rgba(255,0,0,.45);
+    }
+
+    .watching {
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .watching .eye {
+      margin-right: 5px;
+    }
+
+    .broadcast {
+      text-align: right;
+      line-height: 1.1;
+      text-shadow: 0 2px 8px black;
+    }
+
+    .broadcast-title {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .broadcast-name {
+      margin-top: 5px;
+      font-size: 18px;
+      font-weight: 800;
+      font-style: italic;
+    }
+
+    .broadcast-line {
+      width: 130px;
+      height: 3px;
+      margin: 7px 0 0 auto;
+      background: #e21c23;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      padding: 20px 7vw 120px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(46px, 7vw, 94px);
+      line-height: .84;
+      font-weight: 1000;
+      font-style: italic;
+      letter-spacing: -3px;
+      text-transform: uppercase;
+      text-shadow: 0 5px 15px rgba(0,0,0,.9);
+      transform: rotate(-3deg);
+    }
+
+    .title span {
+      display: block;
+      color: #39ff14;
+      margin-left: 45px;
+    }
+
+    .bottom {
+      position: relative;
+      z-index: 3;
+      padding: 0 20px 22px;
+    }
+
+    .age-groups {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      max-width: 1050px;
+      margin: 0 auto 18px;
+    }
+
+    .age-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50px;
+      padding: 10px 6px;
+      color: white;
+      text-decoration: none;
+      font-size: 17px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 8px;
+      background: rgba(0,0,0,.28);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      text-shadow: 0 2px 5px black;
+    }
+
+    .age-btn.live {
+      color: #39ff14;
+      border: 2px solid #39ff14;
+      background: rgba(20,70,15,.28);
+      box-shadow:
+        0 0 8px #39ff14,
+        inset 0 0 10px rgba(57,255,20,.18);
+    }
+
+    .install-wrap {
+      text-align: center;
+    }
+
+    #installApp {
+      border: 1px solid #39ff14;
+      border-radius: 25px;
+      padding: 11px 25px;
+      background: rgba(0,0,0,.48);
+      color: #39ff14;
+      font-size: 16px;
+      font-weight: 900;
+      box-shadow: 0 0 10px rgba(57,255,20,.35);
+      cursor: pointer;
+    }
+
+    @media (max-width: 700px) {
+      .topbar {
+        padding: 16px 14px;
+      }
+
+      .menu {
+        font-size: 25px;
+        margin-right: 2px;
+      }
+
+      .live-area {
+        gap: 8px;
+      }
+
+      .live-badge {
+        font-size: 14px;
+        padding: 7px 11px;
+      }
+
+      .watching {
+        font-size: 11px;
+      }
+
+      .broadcast-title,
+      .broadcast-name {
+        font-size: 13px;
+      }
+
+      .broadcast-line {
+        width: 95px;
+      }
+
+      .content {
+        align-items: flex-start;
+        padding: 26vh 18px 105px;
+      }
+
+      .title {
+        font-size: clamp(43px, 14vw, 68px);
+      }
+
+      .title span {
+        margin-left: 25px;
+      }
+
+      .bottom {
+        padding: 0 10px 18px;
+      }
+
+      .age-groups {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+
+      .age-btn {
+        min-height: 44px;
+        font-size: 14px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <div class="broadcast">
-  <div class="broadcast-text">
-    <span>Broadcast</span>
-    <strong>Andris Sudmalis</strong>
-  </div>
-</div>
-  <div class="live-corner" id="liveCorner">LIVE</div>
-  <button id="installApp" style="display:none;">📱 Install Rugby LIVE</button>
-<div class="wrap">
-  <main class="card">
-    
 
-    <section class="board">
-      <div class="center-info">
-  <div class="vs" id="ageGroup">U13</div>
-  <div class="match-type" id="matchType">Friendly</div>
-        <div class="center-line"></div>
-        <div class="top">
-  <div class="clock" id="clock">40:00</div>
-  <div class="half"><span id="half">1</span><span id="halfSuffix">st</span><span id="halfWord"> Half</span></div>
-          <div class="center-line"></div>
-</div>
+  <main class="home-screen">
+
+    <div class="topbar">
+
+      <div class="live-area">
+        <div class="menu">☰</div>
+        <div class="live-badge">LIVE</div>
+
+        <div class="watching">
+          <span class="eye">👁</span>
+          <span id="totalViewers">0</span> WATCHING NOW
         </div>
-      <div class="team">
-        <div class="name" id="homeName">Team 1</div>
-        <div class="score" id="homeScore">0</div>
       </div>
-      
 
-      <div class="team">
-        <div class="name" id="awayName">Team 2</div>
-        <div class="score" id="awayScore">0</div>
+      <div class="broadcast">
+        <div class="broadcast-title">Broadcast</div>
+        <div class="broadcast-name">Andris Sudmalis</div>
+        <div class="broadcast-line"></div>
       </div>
-    </section>
 
-  <div id="nextLiveBox" class="next-live"></div></main>
-</div>
+    </div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-const $ = (id) => document.getElementById(id);
+    <div class="content">
+      <h1 class="title">
+        RUGBY LIVE
+        <span>SCORE</span>
+      </h1>
+    </div>
 
-function fmt(sec) {
-  sec = Math.max(0, Math.floor(sec || 0));
-  return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
-}
+    <div class="bottom">
 
-function render(s) {
-  $('homeName').textContent = s.homeName;
-  $('awayName').textContent = s.awayName;
-  $('homeScore').textContent = s.homeScore;
-  $('awayScore').textContent = s.awayScore;
-  $('half').textContent = s.matchLive ? s.half : 'Full Time';
-  $('halfSuffix').textContent = s.matchLive ? (s.half === 1 ? 'st' : 'nd') : '';
-  $('halfWord').textContent = s.matchLive ? ' Half' : '';
-  $('clock').textContent = fmt(s.remainingSeconds);
-  const age = s.ageGroup || 'U13';
-$('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
-$('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME';
-  $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
- $('nextLiveBox').innerHTML = (s.nextLive)
-  ? '<div class="next-title">Planned LIVE:</div>' +
-    '<div class="next-card">' +
-      '<div class="next-icon">🗓️</div>' +
-      '<div>' +
-        '<div class="next-teams">' + s.nextHome + ' vs ' + s.nextAway + '</div>' +
-        '<div class="next-details">' + (['U13','U14','U15','U16'].includes(s.nextAge) ? s.nextAge + "'s" : s.nextAge) + ' ' + (s.nextType || 'Friendly').toUpperCase() + ' GAME</div>' +
-        '<div class="next-time">' + s.nextLive + '</div>' +
-   '<div class="next-note">Subject to availability</div>' +
-      '</div>' +
-    '</div>'
-  : '';
-}
+      <div class="age-groups">
+        <a class="age-btn" href="/live.html?team=U13">U13's</a>
+        <a class="age-btn" href="/live.html?team=U14">U14's</a>
+        <a class="age-btn" href="/live.html?team=U15">U15's</a>
+        <a class="age-btn live" href="/live.html?team=U16">U16's</a>
+        <a class="age-btn" href="/live.html?team=Colts">Colts</a>
+        <a class="age-btn" href="/live.html?team=1stXV">1st XV</a>
+        <a class="age-btn" href="/live.html?team=2ndXV">2nd XV</a>
+      </div>
 
-fetch('/api/state').then(r=>r.json()).then(render);
-const socket = io();
-  navigator.serviceWorker.register('/sw.js');
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile && /SamsungBrowser/i.test(navigator.userAgent)) {
-  $('installApp').textContent = '📱 Install Rugby LIVE with Chrome';
-  $('installApp').style.display = 'block';
-} else {
-  $('installApp').style.display = 'block';
-}
-    });
-  $('installApp').addEventListener('click', async () => {
-    if (/SamsungBrowser/i.test(navigator.userAgent)) {
-  window.location.href = 'intent://rugby-live-score.onrender.com/#Intent;scheme=https;package=com.android.chrome;end';
-  return;
-}
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    deferredPrompt = null;
-    $('installApp').style.display = 'none';
-    });
-socket.on('state', render);
-</script>
+      <div class="install-wrap">
+        <button id="installApp">Install Rugby LIVE</button>
+      </div>
+
+    </div>
+
+  </main>
+
 </body>
 </html>
