@@ -311,30 +311,3 @@ transform: translate(25px, -22px);
   }
 }
 
-
-/* TEST public LIVE mobile layout */
-.live-layout-spacer { display:none; }
-@media (max-width:700px) {
-  .live-wrap {
-    min-height:100svh;
-    place-items:start center;
-    padding:118px 10px 96px;
-  }
-  .live-card {
-    width:100%;
-    transform:translateY(-12px);
-  }
-  .live-layout-spacer {
-    display:block;
-    height:72px;
-    visibility:hidden;
-  }
-  #installApp {
-    bottom:28px;
-    left:50%;
-    right:auto;
-    transform:translateX(-50%);
-    width:min(300px, calc(100vw - 40px));
-    text-align:center;
-  }
-}
