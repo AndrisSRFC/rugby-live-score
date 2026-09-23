@@ -58,12 +58,6 @@
   justify-content:center;
   text-align:center;
 }
-      .match-control-row{margin-top:8px;}
-      .match-control-row .public-live-btn{
-  width:100%;
-  justify-content:center;
-  text-align:center;
-}
       #startLive,#endMatch, #copyLiveLink {
   min-height:40px;
   font-size:16px;
@@ -104,15 +98,12 @@ white-space:nowrap;
       <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
       <a id="publicLiveLink" href="/live.html?team=U13" target="_blank" class="public-live-btn">Open selected LIVE page ↗</a>
       </div>
-    <div class="row match-control-row">
-      <a id="matchControlLink" href="/match-control.html?team=U13" target="_blank" class="public-live-btn">Open Match Control ↗</a>
-    </div>
 <div id="adminProtected">
 <div class="row live-actions">
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
       <button id="endMatch" class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
-      
       <button id="copyLiveLink" type="button" onclick="copyLiveLink()">📋 Copy LIVE Link</button>
+      <a id="matchControlLink" href="/match-control.html?team=U13" target="_blank" class="public-live-btn">Match Control ↗</a>
     </div>
     <div class="preview">The public link is always the main server address.</div>
   </div>
