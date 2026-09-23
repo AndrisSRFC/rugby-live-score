@@ -86,7 +86,8 @@ white-space:nowrap;
   <div class="panel" style="margin-bottom:18px">
     <div class="row top-controls">
       <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
-      <a id="publicLiveLink" href="/live.html?team=U16" target="_blank" class="public-live-btn">Open selected LIVE page ↗</a>
+      <a id="publicLiveLink" href="/live.html?team=U13" target="_blank" class="public-live-btn">Open selected LIVE page ↗</a>
+      <a id="matchControlLink" href="/match-control.html?team=U13" target="_blank" class="public-live-btn">Open Match Control ↗</a>
       </div>
 <div class="row live-actions">
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
@@ -225,6 +226,8 @@ white-space:nowrap;
   alert('NLD history saved');
 }
 const $ = id => document.getElementById(id);
+let selectedTeam = new URLSearchParams(window.location.search).get('team') || 'U13';
+let socket;
 let last = null;
   let nextLiveLoaded = false;
   let nextTypeSelected = 'Friendly';
@@ -273,6 +276,9 @@ function selectTeam(team) {
   history.replaceState(null, '', url);
   const link = $('publicLiveLink');
   if (link) link.href = '/live.html?team=' + encodeURIComponent(team);
+  const controlLink = $('matchControlLink');
+  if (controlLink) controlLink.href = '/match-control.html?team=' + encodeURIComponent(team);
+  nextLiveLoaded = false;
   if (socket) socket.emit('selectTeam', team);
   fetch('/api/state?team=' + encodeURIComponent(team)).then(r=>r.json()).then(render);
 }
@@ -310,6 +316,9 @@ function saveNames(){
 
 $('homeName').addEventListener('input',saveNames);
 $('awayName').addEventListener('input',saveNames);
+
+$('publicLiveLink').href = '/live.html?team=' + encodeURIComponent(selectedTeam);
+$('matchControlLink').href = '/match-control.html?team=' + encodeURIComponent(selectedTeam);
 
 fetch('/api/state?team=' + encodeURIComponent(selectedTeam))
   .then(r=>r.json())
