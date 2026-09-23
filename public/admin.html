@@ -41,12 +41,23 @@
 }
       h1{font-size:28px;}
       input{width:100%; font-size:22px; padding:16px;}
-      .pin{width:45%;max-width:45%;}
+      .pin{
+  width:100%;
+  max-width:none;
+  flex:0 0 100%;
+  min-width:0;
+}
       .top-controls{
   display:flex;
-  flex-wrap:nowrap;
+  flex-wrap:wrap;
   align-items:center;
   gap:8px;
+}
+      .top-controls .public-live-btn{
+  flex:1 1 calc(50% - 4px);
+  min-width:0;
+  justify-content:center;
+  text-align:center;
 }
       #startLive,#endMatch, #copyLiveLink {
   min-height:40px;
