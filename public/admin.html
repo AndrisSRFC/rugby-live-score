@@ -43,17 +43,24 @@
       input{width:100%; font-size:22px; padding:16px;}
       .pin{width:45%;max-width:45%;}
       .top-controls{
-  display:grid;
-  grid-template-columns:45% 1fr;
+  display:flex;
+  flex-wrap:nowrap;
   align-items:center;
   gap:8px;
 }
-      .top-controls .pin{grid-row:1 / span 2;width:100%;max-width:none;}
+      .top-controls .pin{width:45%;max-width:45%;}
       .top-controls .public-live-btn{
-  width:100%;
+  flex:1;
+  width:auto;
   min-width:0;
   min-height:44px;
   align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+      .match-control-row{margin-top:8px;}
+      .match-control-row .public-live-btn{
+  width:100%;
   justify-content:center;
   text-align:center;
 }
@@ -96,8 +103,10 @@ white-space:nowrap;
     <div class="row top-controls">
       <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
       <a id="publicLiveLink" href="/live.html?team=U13" target="_blank" class="public-live-btn">Open selected LIVE page ↗</a>
-      <a id="matchControlLink" href="/match-control.html?team=U13" target="_blank" class="public-live-btn">Open Match Control ↗</a>
       </div>
+    <div class="row match-control-row">
+      <a id="matchControlLink" href="/match-control.html?team=U13" target="_blank" class="public-live-btn">Open Match Control ↗</a>
+    </div>
 <div id="adminProtected">
 <div class="row live-actions">
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
