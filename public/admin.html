@@ -86,6 +86,10 @@
   text-decoration:none;
 white-space:nowrap;
 }
+      .admin-top-panel{display:block;}
+      #adminProtected{position:static; display:block; width:100%; margin-top:10px;}
+      #adminProtected .live-actions{position:static;}
+      #adminProtected .preview{position:static;}
     }
   </style>
 </head>
@@ -93,12 +97,12 @@ white-space:nowrap;
 <div class="admin">
   <h1>Rugby LIVE — Control Panel</h1>
 
-  <div class="panel" style="margin-bottom:18px">
+  <div class="panel admin-top-panel" style="margin-bottom:18px">
     <div class="row top-controls">
       <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
       <a id="publicLiveLink" href="/live.html?team=U13" target="_blank" class="public-live-btn">Open selected LIVE page ↗</a>
-      </div>
-<div id="adminProtected">
+    </div>
+    <div id="adminProtected">
     <div class="row live-actions">
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
       <button id="endMatch" class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
