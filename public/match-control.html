@@ -5,49 +5,187 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
   <title>Rugby LIVE — Match Control</title>
+
   <style>
-    *{box-sizing:border-box}
-    body{margin:0;background:#050505;color:#fff;font-family:Arial,sans-serif}
-    .control{width:min(760px,100%);margin:30px auto 0;padding:14px}
-    h1{margin:0 0 14px;font-size:26px}
-    .panel{background:#111;border:1px solid #262626;border-radius:18px;padding:14px;margin-bottom:10px}
-    .info,.actions,.score-buttons,.clock-controls,.half-controls,.team-select{display:flex;gap:7px}
-    .badge{flex:1;text-align:center;background:#1b1b1b;border:1px solid #333;border-radius:12px;padding:9px;font-weight:800}
-    button{flex:1;border:0;border-radius:10px;padding:10px 7px;font-size:16px;font-weight:800;cursor:pointer}
-    button.green{background:#35ff25;color:#001b00}
-    button.red{background:#ff453a;color:#fff}
-    button.active{background:#35ff25;color:#001b00}
-    .teams{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    label{display:block;color:#aaa;font-size:14px;margin-bottom:5px}
-    .team-name{background:#080808;border:1px solid #333;border-radius:10px;padding:9px;font-size:17px;font-weight:700;text-align:center}
-    .score{text-align:center;color:#35ff25;font-size:56px;font-weight:900;line-height:1;margin:10px 0}
-    .score-buttons{flex-wrap:wrap}.score-buttons button{width:calc(50% - 4px);flex:none}
-    .score-row{display:flex;align-items:center;justify-content:center;gap:12px}
-    .score-row .score{margin:10px 0}
-    .minus-btn{flex:none;width:64px;height:54px;padding:0;font-size:20px}
-    .clock{font-size:34px;font-weight:900;text-align:center;min-width:90px}
-    .clock-controls{align-items:center}.clock-controls button,.half-controls button{background:white;color:black}
-    .team-select{flex-wrap:wrap}.team-select button{min-width:90px}
-    @media(max-width:500px){.control{padding:10px}h1{font-size:22px}.panel{padding:11px}button{font-size:14px;padding:9px 5px}.score{font-size:42px}.team-name{font-size:15px}}
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      background:#050505;
+      color:#fff;
+      font-family:Arial,sans-serif;
+    }
+
+    .control {
+      width:min(760px,100%);
+      margin:60px auto 0;
+      padding:14px;
+    }
+
+    h1 {
+      margin:0 0 14px;
+      font-size:26px;
+    }
+
+    .panel {
+      background:#111;
+      border:1px solid #262626;
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:10px;
+    }
+
+    .info {
+      display:flex;
+      gap:8px;
+      margin-bottom:10px;
+    }
+
+    .badge {
+      flex:1;
+      text-align:center;
+      background:#1b1b1b;
+      border:1px solid #333;
+      border-radius:12px;
+      padding:9px;
+      font-weight:800;
+    }
+
+    .actions,
+    .score-buttons,
+    .clock-controls,
+    .half-controls {
+      display:flex;
+      gap:7px;
+    }
+
+    button {
+      flex:1;
+      border:0;
+      border-radius:10px;
+      padding:10px 7px;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .green {
+      background:#35ff25;
+      color:#001b00;
+    }
+
+    .red {
+      background:#ff453a;
+      color:white;
+    }
+
+    .teams {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    label {
+      display:block;
+      color:#aaa;
+      font-size:14px;
+      margin-bottom:5px;
+    }
+
+    .team-name {
+      background:#080808;
+      border:1px solid #333;
+      border-radius:10px;
+      padding:9px;
+      font-size:17px;
+      font-weight:700;
+      text-align:center;
+    }
+
+    .score {
+      text-align:center;
+      color:#35ff25;
+      font-size:56px;
+      font-weight:900;
+      line-height:1;
+      margin:10px 0;
+    }
+
+    .score-buttons {
+      flex-wrap:wrap;
+    }
+    .score-buttons button {
+  width:calc(50% - 4px);
+  flex:none;
+  font-size:18px;
+  padding:11px 8px;
+}
+    .score-row {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+}
+
+.score-row .score {
+  margin:10px 0;
+}
+
+.minus-btn {
+  flex:none;
+  width:64px;
+  height:54px;
+  padding:0;
+  font-size:20px;
+}
+
+    .score-buttons button {
+      min-width:28%;
+    }
+
+    .clock {
+      font-size:34px;
+      font-weight:900;
+      text-align:center;
+      min-width:90px;
+    }
+
+    .clock-controls {
+      align-items:center;
+    }
+
+    .clock-controls button {
+      background:white;
+      color:black;
+    }
+
+    .half-controls button {
+      background:white;
+      color:black;
+    }
+
+    .half-controls button.active {
+      background:#35ff25;
+      color:#001b00;
+    }
+
+    @media(max-width:500px) {
+      .control { padding:10px; }
+      h1 { font-size:22px; }
+      .panel { padding:11px; }
+      button { font-size:14px; padding:9px 5px; }
+      .score { font-size:42px; }
+      .team-name { font-size:15px; }
+    }
   </style>
 </head>
-<body>
-<div class="control">
-  <h1>Rugby LIVE — Match Control</h1>
-  <input id="matchPin" type="password" inputmode="numeric" placeholder="PIN" maxlength="4" style="width:100%;padding:12px;border-radius:10px;background:#080808;color:#fff;border:1px solid #333;margin-bottom:10px">
 
-  <section class="panel">
-    <label>Match / Age Group</label>
-    <div class="team-select">
-      <button id="teamU13" onclick="selectTeam('U13')">U13</button>
-      <button id="teamU14" onclick="selectTeam('U14')">U14</button>
-      <button id="teamU15" onclick="selectTeam('U15')">U15</button>
-      <button id="teamU16" onclick="selectTeam('U16')">U16</button>
-      <button id="teamColts" onclick="selectTeam('Colts')">Colts</button>
-      <button id="team1st" onclick="selectTeam('1st XV')">1st XV</button>
-      <button id="team2nd" onclick="selectTeam('2nd XV')">2nd XV</button>
-    </div>
-  </section>
+<body>
+
+<div class="control">
+
+  <h1>Rugby LIVE — Match Control</h1>
+  <input id="matchPin" type="password" inputmode="numeric" placeholder="PIN" maxlength="4">
 
   <div class="info">
     <div class="badge" id="ageGroup">U16</div>
@@ -55,31 +193,51 @@
   </div>
 
   <div class="panel actions">
-    <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
+   <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
     <button id="endMatch" class="red" onclick="act('endMatch')">End Match</button>
   </div>
 
   <div class="teams">
+
     <section class="panel">
-      <label>Home Team</label><div class="team-name" id="homeName">Team 1</div>
-      <div class="score-row"><div class="score" id="homeScore">0</div><button class="minus-btn" onclick="changeScore('home',-1)">−1</button></div>
+      <label>Home Team</label>
+      <div class="team-name" id="homeName">Southwell</div>
+
+      <div class="score-row">
+  <div class="score" id="homeScore">0</div>
+  <button class="minus-btn" onclick="changeScore('homeScore', -1)">−1</button>
+</div>
+
       <div class="score-buttons">
-        <button onclick="changeScore('home',1)">+1</button><button onclick="changeScore('home',2)">+2</button>
-        <button onclick="changeScore('home',3)">+3</button><button onclick="changeScore('home',5)">+5</button>
+        <button onclick="changeScore('homeScore', 1)">+1</button>
+        <button onclick="changeScore('homeScore', 2)">+2</button>
+        <button onclick="changeScore('homeScore', 3)">+3</button>
+        <button onclick="changeScore('homeScore', 5)">+5</button>
       </div>
     </section>
+
     <section class="panel">
-      <label>Away Team</label><div class="team-name" id="awayName">Team 2</div>
-      <div class="score-row"><div class="score" id="awayScore">0</div><button class="minus-btn" onclick="changeScore('away',-1)">−1</button></div>
+      <label>Away Team</label>
+      <div class="team-name" id="awayName">Sleaford</div>
+
+      <div class="score-row">
+  <div class="score" id="awayScore">0</div>
+  <button class="minus-btn" onclick="changeScore('awayScore', -1)">−1</button>
+</div>
+
       <div class="score-buttons">
-        <button onclick="changeScore('away',1)">+1</button><button onclick="changeScore('away',2)">+2</button>
-        <button onclick="changeScore('away',3)">+3</button><button onclick="changeScore('away',5)">+5</button>
+        <button onclick="changeScore('awayScore', 1)">+1</button>
+        <button onclick="changeScore('awayScore', 2)">+2</button>
+        <button onclick="changeScore('awayScore', 3)">+3</button>
+        <button onclick="changeScore('awayScore', 5)">+5</button>
       </div>
     </section>
+
   </div>
 
   <section class="panel">
     <label>Match Clock</label>
+
     <div class="clock-controls">
       <button id="clockBtn" onclick="act('toggleClock')">Start Clock</button>
       <div class="clock" id="clock">00:00</div>
@@ -89,68 +247,62 @@
 
   <section class="panel">
     <label>Half</label>
+
     <div class="half-controls">
       <button id="half1Btn" onclick="act('setHalf',{half:1})">1st Half</button>
       <button id="half2Btn" onclick="act('setHalf',{half:2})">2nd Half</button>
     </div>
   </section>
+
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-const $=id=>document.getElementById(id);
-const aliases={"1st XV":"team1st","2nd XV":"team2nd"};
-let selectedTeam=new URLSearchParams(location.search).get('team')||'U16';
-let socket;
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+const $ = id => document.getElementById(id);
+const selectedTeam = new URLSearchParams(location.search).get('team') || 'U13';
 
-function fmt(sec){
-  sec=Math.max(0,Math.floor(sec||0));
-  return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+function fmt(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
 }
-function teamButtonId(team){
-  return aliases[team] || 'team'+team;
-}
-function highlightTeam(){
-  ['U13','U14','U15','U16','Colts','1st XV','2nd XV'].forEach(t=>{
-    const el=$(teamButtonId(t));
-    if(el) el.className=t===selectedTeam?'active':'';
-  });
-}
-function render(s){
-  $('ageGroup').textContent=s.ageGroup||selectedTeam;
-  $('matchType').textContent=(s.matchType||'Friendly').toUpperCase();
-  $('homeName').textContent=s.homeName;
-  $('awayName').textContent=s.awayName;
-  $('homeScore').textContent=s.homeScore;
-  $('awayScore').textContent=s.awayScore;
-  $('clock').textContent=fmt(s.remainingSeconds);
-  $('clockBtn').textContent=s.running?'Stop Clock':'Start Clock';
-  $('startLiveBtn').className=s.matchLive?'green':'';
-  $('half1Btn').className=s.half===1?'active':'';
-  $('half2Btn').className=s.half===2?'active':'';
-  highlightTeam();
-}
-function selectTeam(team){
-  selectedTeam=team;
-  const url=new URL(location.href); url.searchParams.set('team',team); history.replaceState(null,'',url);
-  if(socket) socket.emit('selectTeam',team);
-  fetch('/api/state?team='+encodeURIComponent(team)).then(r=>r.json()).then(render);
-}
-async function act(action,payload={}){
-  const r=await fetch('/api/admin',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({pin:$('matchPin').value,action,payload,team:selectedTeam})
-  });
-  const data=await r.json();
-  if(!r.ok) alert(data.error||'Error');
-}
-function changeScore(team,amount){act('score',{team,delta:amount});}
 
-fetch('/api/state?team='+encodeURIComponent(selectedTeam)).then(r=>r.json()).then(render);
-socket=io({query:{team:selectedTeam}});
-socket.on('state',render);
-highlightTeam();
+function render(s) {
+  $('ageGroup').textContent = s.ageGroup || selectedTeam;
+  $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase();
+  $('homeName').textContent = s.homeName;
+  $('awayName').textContent = s.awayName;
+  $('homeScore').textContent = s.homeScore;
+  $('awayScore').textContent = s.awayScore;
+  $('clock').textContent = fmt(s.remainingSeconds);
+  $('clockBtn').textContent = s.running ? 'Stop Clock' : 'Start Clock';
+  $('startLiveBtn').className = s.matchLive ? 'green' : '';
+  $('half1Btn').className = s.half === 1 ? 'active' : '';
+  $('half2Btn').className = s.half === 2 ? 'active' : '';
+}
+
+async function act(action, payload = {}) {
+  const r = await fetch('/api/admin', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      pin: $('matchPin').value,
+      action,
+      payload,
+      team: selectedTeam
+    })
+  });
+  const data = await r.json();
+  if (!r.ok) alert(data.error || 'Error');
+}
+
+function changeScore(id, amount) {
+  const team = id === 'homeScore' ? 'home' : 'away';
+  act('score', { team, delta: amount });
+}
+
+fetch('/api/state?team=' + encodeURIComponent(selectedTeam)).then(r => r.json()).then(render);
+const socket = io({query:{team:selectedTeam}});
+socket.on('state', render);
 </script>
 </body>
 </html>
