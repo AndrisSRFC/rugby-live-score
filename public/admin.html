@@ -99,11 +99,13 @@ white-space:nowrap;
       <a id="publicLiveLink" href="/live.html?team=U13" target="_blank" class="public-live-btn">Open selected LIVE page ↗</a>
       </div>
 <div id="adminProtected">
-<div class="row live-actions">
+    <div class="row live-actions">
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
       <button id="endMatch" class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
       <button id="copyLiveLink" type="button" onclick="copyLiveLink()">📋 Copy LIVE Link</button>
-      <a id="matchControlLink" href="/match-control.html?team=U13" target="_blank" class="public-live-btn">Match Control ↗</a>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <a id="matchControlLink" href="/match-control.html?team=U13" target="_blank" class="public-live-btn">Open Match Control ↗</a>
     </div>
     <div class="preview">The public link is always the main server address.</div>
   </div>
