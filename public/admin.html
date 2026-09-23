@@ -39,23 +39,17 @@
   font-size:16px;
   padding:8px 10px;      
 }
-      h1{font-size:24px; line-height:1.15; margin-bottom:14px;}
+      h1{font-size:28px;}
       input{width:100%; font-size:22px; padding:16px;}
-      .pin{
-  width:100%;
-  max-width:none;
-  flex:0 0 100%;
-  min-width:0;
-}
+      .pin{width:45%;max-width:45%;}
       .top-controls{
-  display:flex;
-  flex-wrap:wrap;
+  display:grid;
+  grid-template-columns:45% 1fr;
   align-items:center;
   gap:8px;
 }
-      .top-controls .pin{flex:0 0 100%;}
+      .top-controls .pin{grid-row:1 / span 2;width:100%;max-width:none;}
       .top-controls .public-live-btn{
-  flex:1 1 100%;
   width:100%;
   min-width:0;
   min-height:44px;
