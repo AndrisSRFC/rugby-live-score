@@ -69,6 +69,11 @@ function createDefaultState(teamKey) {
 let matchStates = Object.fromEntries(
   TEAM_KEYS.map(teamKey => [teamKey, createDefaultState(teamKey)])
 );
+const viewerCounts = Object.fromEntries(TEAM_KEYS.map(teamKey => [teamKey, 0]));
+
+function emitViewerCounts() {
+  io.emit("viewerCounts", { ...viewerCounts });
+}
 
 function getState(teamKey) {
   return matchStates[normalizeTeamKey(teamKey)];
@@ -198,7 +203,8 @@ app.get("/api/teams", (req, res) => {
     TEAM_CONFIG.map(team => ({
       key: team.key,
       label: team.label,
-      matchLive: getState(team.key).matchLive
+      matchLive: getState(team.key).matchLive,
+      viewers: viewerCounts[team.key] || 0
     }))
   );
 });
@@ -385,9 +391,22 @@ app.post("/api/history", async (req, res) => {
 
 io.on("connection", socket => {
   let teamKey = normalizeTeamKey(socket.handshake.query?.team);
+  const role = String(socket.handshake.query?.role || "control");
+  const isViewer = role === "viewer";
+
+  if (role === "landing") {
+    socket.emit("viewerCounts", { ...viewerCounts });
+    return;
+  }
 
   socket.join(teamKey);
   socket.emit("state", currentState(teamKey));
+
+  if (isViewer) {
+    viewerCounts[teamKey] = (viewerCounts[teamKey] || 0) + 1;
+    io.to(teamKey).emit("viewerCount", viewerCounts[teamKey]);
+    emitViewerCounts();
+  }
 
   socket.on("selectTeam", requestedTeam => {
     const nextTeam = normalizeTeamKey(requestedTeam);
@@ -396,10 +415,26 @@ io.on("connection", socket => {
       return;
     }
 
+    if (isViewer) {
+      viewerCounts[teamKey] = Math.max(0, (viewerCounts[teamKey] || 0) - 1);
+      io.to(teamKey).emit("viewerCount", viewerCounts[teamKey]);
+    }
     socket.leave(teamKey);
     teamKey = nextTeam;
     socket.join(teamKey);
+    if (isViewer) {
+      viewerCounts[teamKey] = (viewerCounts[teamKey] || 0) + 1;
+      io.to(teamKey).emit("viewerCount", viewerCounts[teamKey]);
+      emitViewerCounts();
+    }
     socket.emit("state", currentState(teamKey));
+  });
+
+  socket.on("disconnect", () => {
+    if (!isViewer) return;
+    viewerCounts[teamKey] = Math.max(0, (viewerCounts[teamKey] || 0) - 1);
+    io.to(teamKey).emit("viewerCount", viewerCounts[teamKey]);
+    emitViewerCounts();
   });
 });
 

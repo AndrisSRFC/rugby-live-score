@@ -39,7 +39,7 @@
   font-size:16px;
   padding:8px 10px;      
 }
-      h1{font-size:28px;}
+      h1{font-size:24px; line-height:1.15; margin-bottom:14px;}
       input{width:100%; font-size:22px; padding:16px;}
       .pin{
   width:100%;
@@ -48,13 +48,14 @@
   min-width:0;
 }
       .top-controls{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:stretch;
   gap:8px;
 }
+      .top-controls .pin{grid-column:1 / -1;}
+      .top-controls .public-live-btn{width:100%; min-height:44px; align-items:center;}
       .top-controls .public-live-btn{
-  flex:1 1 calc(50% - 4px);
   min-width:0;
   justify-content:center;
   text-align:center;
@@ -79,7 +80,7 @@
 }
       .public-live-btn{
   display:flex;
-  font-size:14px;
+  font-size:13px;
   font-weight:800;
   padding:10px 8px;
   border:2px solid #35ff25;
