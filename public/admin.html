@@ -100,6 +100,7 @@ white-space:nowrap;
       <a id="publicLiveLink" href="/live.html?team=U13" target="_blank" class="public-live-btn">Open selected LIVE page ↗</a>
       <a id="matchControlLink" href="/match-control.html?team=U13" target="_blank" class="public-live-btn">Open Match Control ↗</a>
       </div>
+<div id="adminProtected">
 <div class="row live-actions">
       <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
       <button id="endMatch" class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
@@ -199,6 +200,7 @@ white-space:nowrap;
     <button type="button" onclick="addHistory()">Add NLD History</button>
   </div>
 </section>
+</div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
   async function copyLiveLink() {
@@ -237,6 +239,11 @@ white-space:nowrap;
   alert('NLD history saved');
 }
 const $ = id => document.getElementById(id);
+const adminProtected = $('adminProtected');
+adminProtected.style.display = 'none';
+$('pin').addEventListener('input', () => {
+  adminProtected.style.display = $('pin').value.trim() ? '' : 'none';
+});
 let selectedTeam = new URLSearchParams(window.location.search).get('team') || 'U13';
 let socket;
 let last = null;
