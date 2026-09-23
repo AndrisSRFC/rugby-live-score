@@ -61,14 +61,34 @@
     }
 
     .live-badge {
-      background: #ff1616;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 76px;
+      height: 42px;
       color: white;
       font-weight: 900;
-      font-size: 18px;
-      padding: 9px 17px;
-      border-radius: 7px;
-      box-shadow: 0 0 20px rgba(255,0,0,.45);
+      font-size: 16px;
+      font-style: italic;
+      border: 3px solid white;
+      border-radius: 50%;
+      background: #e9151d;
+      box-shadow: 0 0 18px rgba(255,0,0,.55);
+      transform: rotate(-8deg);
     }
+
+    .live-badge::after {
+      content: "";
+      position: absolute;
+      width: 58px;
+      height: 2px;
+      background: white;
+      opacity: .85;
+      transform: rotate(-22deg);
+    }
+
+    .live-badge span { position: relative; z-index: 1; }
 
     .watching {
       font-size: 15px;
@@ -175,24 +195,101 @@
     }
 
     .install-wrap {
-      width: 100%;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      margin: 0 auto 12px;
     }
-    .bottom-space {
-  height: 90px;
-}
 
     #installApp {
-      width: 100%;
-      border: 1px solid #39ff14;
-      border-radius: 25px;
-      padding: 11px 25px;
-      background: rgba(0,0,0,.48);
-      color: #39ff14;
+      width: auto;
+      min-width: 290px;
+      border: 2px solid #39ff14;
+      border-radius: 12px;
+      padding: 12px 24px;
+      background: rgba(0,0,0,.72);
+      color: white;
       font-size: 16px;
       font-weight: 900;
-      box-shadow: 0 0 10px rgba(57,255,20,.35);
+      box-shadow: 0 0 12px rgba(57,255,20,.42);
       cursor: pointer;
+    }
+
+    .social-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 26px;
+      margin: 6px auto 10px;
+    }
+
+    .reaction-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      font-size: 25px;
+      border: 2px solid #39ff14;
+      background: rgba(0,0,0,.72);
+      cursor: pointer;
+    }
+
+    .reaction-btn.dislike { border-color: #ff3038; }
+    .reaction-btn.selected { transform: scale(1.08); box-shadow: 0 0 15px currentColor; }
+
+    .score-help {
+      max-width: 560px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid #39ff14;
+      border-radius: 12px;
+      background: rgba(0,0,0,.72);
+      box-shadow: 0 0 10px rgba(57,255,20,.25);
+    }
+
+    .score-help strong { display:block; }
+    .score-help small { color:#ddd; }
+
+    .score-help button {
+      border: 0;
+      border-radius: 9px;
+      padding: 10px 14px;
+      background: #39ff14;
+      color: #050505;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .signup-modal {
+      display:none;
+      position:fixed;
+      inset:0;
+      z-index:20;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:rgba(0,0,0,.82);
+    }
+    .signup-modal.open { display:flex; }
+    .signup-card {
+      width:min(420px,100%);
+      padding:24px;
+      text-align:center;
+      border:2px solid #39ff14;
+      border-radius:16px;
+      background:#101010;
+      box-shadow:0 0 25px rgba(57,255,20,.35);
+    }
+    .signup-card button {
+      margin-top:14px;
+      border:0;
+      border-radius:9px;
+      padding:11px 18px;
+      font-weight:900;
+      cursor:pointer;
     }
 
     @media (max-width: 700px) {
@@ -210,8 +307,9 @@
       }
 
       .live-badge {
+        width: 66px;
+        height: 38px;
         font-size: 14px;
-        padding: 7px 11px;
       }
 
       .watching {
@@ -251,19 +349,31 @@
       }
 
       .age-groups {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(12, 1fr);
         gap: 6px;
       }
+
+      .age-btn { grid-column: span 3; }
+      .age-btn:nth-child(5) { grid-column: 3 / span 3; }
+      .age-btn:nth-child(6),
+      .age-btn:nth-child(7) { grid-column: span 3; }
 
       .age-btn {
         min-height: 44px;
         font-size: 14px;
       }
       #installApp {
-  width: 100%;
-  margin-top: 8px;
-  padding: 14px 20px;
-}
+        min-width: 250px;
+        margin-top: 4px;
+        padding: 12px 18px;
+      }
+
+      .bottom { transform: translateY(-6px); }
+      .age-groups { margin-bottom: 10px; }
+      .social-actions { gap: 20px; margin: 3px auto 8px; }
+      .reaction-btn { width:46px; height:46px; font-size:22px; }
+      .score-help { padding:9px 11px; font-size:13px; }
+      .score-help button { padding:9px 11px; }
     }
   </style>
 </head>
@@ -276,7 +386,7 @@
 
       <div class="live-area">
         <div class="menu">☰</div>
-        <div class="live-badge">LIVE</div>
+        <div class="live-badge"><span>LIVE</span></div>
 
         <div class="watching">
           <span class="eye">👁</span>
@@ -312,13 +422,30 @@
       </div>
 
       <div class="install-wrap">
-  <button id="installApp">Install Rugby LIVE</button>
-</div>
-      <div class="bottom-space"></div>
+        <button id="installApp">⬇ &nbsp; Install Rugby LIVE</button>
+      </div>
+
+      <div class="social-actions" aria-label="Project feedback">
+        <button class="reaction-btn" id="likeBtn" aria-label="Like">👍</button>
+        <button class="reaction-btn dislike" id="dislikeBtn" aria-label="Dislike">👎</button>
+      </div>
+
+      <div class="score-help">
+        <div><strong>Help with score keeping!</strong><small>Join Match Control and be part of the game.</small></div>
+        <button id="scoreHelpBtn">Find out more →</button>
+      </div>
 
     </div>
 
   </main>
+
+  <div class="signup-modal" id="signupModal">
+    <div class="signup-card">
+      <h2>Help with Match Control</h2>
+      <p>Want to help keep the LIVE score? Contact the broadcast administrator to get access to Match Control.</p>
+      <button id="closeSignup">Close</button>
+    </div>
+  </div>
 
 <script>
 async function refreshLiveButtons() {
@@ -336,6 +463,22 @@ async function refreshLiveButtons() {
 }
 refreshLiveButtons();
 setInterval(refreshLiveButtons, 5000);
+
+const likeBtn = document.getElementById('likeBtn');
+const dislikeBtn = document.getElementById('dislikeBtn');
+likeBtn.addEventListener('click', () => {
+  likeBtn.classList.toggle('selected');
+  dislikeBtn.classList.remove('selected');
+});
+dislikeBtn.addEventListener('click', () => {
+  dislikeBtn.classList.toggle('selected');
+  likeBtn.classList.remove('selected');
+});
+
+const signupModal = document.getElementById('signupModal');
+document.getElementById('scoreHelpBtn').addEventListener('click', () => signupModal.classList.add('open'));
+document.getElementById('closeSignup').addEventListener('click', () => signupModal.classList.remove('open'));
+signupModal.addEventListener('click', e => { if (e.target === signupModal) signupModal.classList.remove('open'); });
 </script>
 </body>
 </html>
