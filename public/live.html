@@ -22,7 +22,6 @@
 </div>
   <div class="live-corner" id="liveCorner">LIVE</div>
   <div id="matchViewers" style="position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:20;font-weight:800;font-size:14px;text-shadow:0 2px 8px #000;">👁 <span id="viewerCount">0</span> WATCHING</div>
-  <button id="installApp" style="display:none;">📱 Install Rugby LIVE</button>
 <div class="wrap">
   <main class="card">
     
@@ -98,29 +97,6 @@ fetch('/api/state?team=' + encodeURIComponent(selectedTeam))
 
 const socket = io({ query: { team: selectedTeam, role: 'viewer' } });
 socket.on('viewerCount', count => { $('viewerCount').textContent = Number(count || 0); });
-  navigator.serviceWorker.register('/sw.js');
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile && /SamsungBrowser/i.test(navigator.userAgent)) {
-  $('installApp').textContent = '📱 Install Rugby LIVE with Chrome';
-  $('installApp').style.display = 'block';
-} else {
-  $('installApp').style.display = 'block';
-}
-    });
-  $('installApp').addEventListener('click', async () => {
-    if (/SamsungBrowser/i.test(navigator.userAgent)) {
-  window.location.href = 'intent://rugby-live-score.onrender.com/#Intent;scheme=https;package=com.android.chrome;end';
-  return;
-}
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    deferredPrompt = null;
-    $('installApp').style.display = 'none';
-    });
 socket.on('state', render);
 </script>
 </body>
