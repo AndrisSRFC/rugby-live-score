@@ -371,7 +371,7 @@
       }
 
       .age-btn { grid-column: span 3; }
-      .age-btn:nth-child(5) { grid-column: 3 / span 3; }
+      .age-btn:nth-child(5) { grid-column: 2 / span 3; }
       .age-btn:nth-child(6),
       .age-btn:nth-child(7) { grid-column: span 3; }
 
@@ -393,8 +393,9 @@
          away from the team buttons and Install button. */
       .social-actions {
         position:fixed;
-        left:14px;
-        top:51vh;
+        left:50%;
+        top:19vh;
+        transform:translateX(-50%);
         z-index:5;
         gap:8px;
         margin:0;
@@ -403,11 +404,12 @@
 
       .score-help {
         position:fixed;
-        left:50%;
-        top:33vh;
-        transform:translateX(-50%);
+        right:14px;
+        left:auto;
+        top:19vh;
+        transform:none;
         z-index:5;
-        width:min(280px, calc(100vw - 120px));
+        width:205px;
         margin:0;
         padding:7px 8px;
         font-size:10px;
@@ -417,8 +419,9 @@
 
       .subscribe-wrap {
         position:fixed;
-        right:14px;
-        top:46vh;
+        left:14px;
+        right:auto;
+        top:19vh;
         z-index:5;
         margin:0;
       }
