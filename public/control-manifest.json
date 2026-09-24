@@ -1,0 +1,18 @@
+{
+  "id": "/match-control.html",
+  "name": "Rugby Control",
+  "short_name": "Rugby Control",
+  "start_url": "/match-control.html?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/RUGBY%20CONTROL.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
