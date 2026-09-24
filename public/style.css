@@ -311,3 +311,9 @@ transform: translate(25px, -22px);
   }
 }
 
+
+/* New Rugby LIVE symbol */
+.live-corner { background:transparent; padding:0; border-radius:0; }
+.live-corner::before { content:none; }
+.live-corner img { display:block; width:150px; height:auto; }
+@media (max-width:700px) { .live-corner img { width:125px; } }
