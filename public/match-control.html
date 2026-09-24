@@ -307,7 +307,7 @@ socket.on('state', render);
 </script>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/control-sw.js', { scope: '/match-control/' }).catch(() => {});
+  navigator.serviceWorker.register('/control-sw.js').catch(() => {});
 }
 </script>
 </body>
