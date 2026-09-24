@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rugby LIVE Score</title>
+  <meta name="theme-color" content="#050505">
+  <link rel="manifest" href="/live-manifest.json">
 
   <style>
     * {
@@ -502,6 +504,35 @@
   </div>
 
 <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(console.error);
+  });
+}
+
+let deferredInstallPrompt = null;
+const installAppBtn = document.getElementById('installApp');
+
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+});
+
+installAppBtn.addEventListener('click', async () => {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    return;
+  }
+  alert('Chrome is not offering app installation yet. Refresh the page once and try again.');
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  installAppBtn.textContent = '✓ Rugby LIVE Installed';
+});
+
 async function refreshLiveButtons() {
   try {
     const states = await fetch('/api/teams').then(r => r.json());
