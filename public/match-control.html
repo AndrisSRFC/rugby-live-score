@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <link rel="manifest" href="/control-manifest.json">
+  <link rel="manifest" href="/control-manifest.json?v=2">
   <title>Rugby LIVE — Match Control</title>
 
   <style>
@@ -304,6 +304,11 @@ function changeScore(id, amount) {
 fetch('/api/state?team=' + encodeURIComponent(selectedTeam)).then(r => r.json()).then(render);
 const socket = io({query:{team:selectedTeam}});
 socket.on('state', render);
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/control-sw.js', { scope: '/match-control/' }).catch(() => {});
+}
 </script>
 </body>
 </html>

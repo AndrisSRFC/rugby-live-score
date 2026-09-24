@@ -1,8 +1,8 @@
 {
-  "id": "/match-control.html",
+  "id": "/rugby-control",
   "name": "Rugby Control",
   "short_name": "Rugby Control",
-  "start_url": "/match-control.html?source=pwa",
+  "start_url": "/match-control.html?app=control",
   "scope": "/",
   "display": "standalone",
   "background_color": "#050505",
