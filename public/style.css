@@ -316,19 +316,18 @@ transform: translate(25px, -22px);
 .live-corner { background:transparent; padding:0; border-radius:0; }
 .live-corner::before { content:none; }
 .live-corner {
-  width:150px;
-  height:70px;
-  overflow:hidden;
+  width:170px;
+  height:68px;
+  overflow:visible;
 }
 .live-corner img {
   display:block;
   width:100%;
   height:100%;
-  object-fit:cover;
+  object-fit:contain;
   object-position:center;
-  clip-path:ellipse(48% 42% at 50% 50%);
   filter:drop-shadow(0 0 8px rgba(255,0,0,.7));
 }
 @media (max-width:700px) {
-  .live-corner { width:125px; height:58px; }
+  .live-corner { width:145px; height:58px; }
 }
