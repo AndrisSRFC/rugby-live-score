@@ -64,9 +64,8 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      width:92px;
-      height:48px;
-      overflow:hidden;
+      width:120px;
+      height:52px;
       background:transparent;
       border:0;
       box-shadow:none;
@@ -76,9 +75,8 @@
       display:block;
       width:100%;
       height:100%;
-      object-fit:cover;
+      object-fit:contain;
       object-position:center;
-      clip-path:ellipse(48% 42% at 50% 50%);
       filter:drop-shadow(0 0 7px rgba(255,0,0,.7));
     }
     .live-badge::after { content:none; }
@@ -314,7 +312,7 @@
         gap: 8px;
       }
 
-      .live-badge { width:86px; height:44px; }
+      .live-badge { width:110px; height:48px; }
 
       .watching {
         font-size: 11px;
