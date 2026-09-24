@@ -374,6 +374,7 @@
       .age-btn:nth-child(5) { grid-column: 2 / span 3; }
       .age-btn:nth-child(6),
       .age-btn:nth-child(7) { grid-column: span 3; }
+      .age-btn:nth-child(n+5) { transform: translateX(12.5%); }
 
       .age-btn {
         min-height: 44px;
@@ -392,9 +393,9 @@
       /* Keep secondary controls in the free space on the ball,
          away from the team buttons and Install button. */
       .social-actions {
-        position:fixed;
+        position:absolute;
         left:50%;
-        top:19vh;
+        top:92px;
         transform:translateX(-50%);
         z-index:5;
         gap:8px;
@@ -403,10 +404,10 @@
       .reaction-btn { width:38px; height:38px; font-size:18px; }
 
       .score-help {
-        position:fixed;
+        position:absolute;
         right:14px;
         left:auto;
-        top:19vh;
+        top:92px;
         transform:none;
         z-index:5;
         width:205px;
@@ -418,10 +419,10 @@
       .score-help button { padding:6px 7px; font-size:9px; }
 
       .subscribe-wrap {
-        position:fixed;
+        position:absolute;
         left:14px;
         right:auto;
-        top:19vh;
+        top:92px;
         z-index:5;
         margin:0;
       }
