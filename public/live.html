@@ -138,7 +138,8 @@ function render(s) {
   $('awayName').textContent = s.awayName;
   $('homeScore').textContent = s.homeScore;
   $('awayScore').textContent = s.awayScore;
-  $('half').textContent = s.matchLive ? s.half : 'Full Time';
+  const isFullTime = !s.matchLive && s.message === 'Full Time';
+  $('half').textContent = s.matchLive ? s.half : (isFullTime ? 'Full Time' : 'Match Not Started');
   $('halfSuffix').textContent = s.matchLive ? (s.half === 1 ? 'st' : 'nd') : '';
   $('halfWord').textContent = s.matchLive ? ' Half' : '';
   $('clock').textContent = fmt(s.remainingSeconds);
