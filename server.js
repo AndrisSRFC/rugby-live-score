@@ -502,6 +502,13 @@ app.get("/api/pending-results", async (req,res) => {
   res.json(result.rows);
 });
 
+app.post("/api/results/discard", async (req,res) => {
+  if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const result=await pool.query("DELETE FROM season_matches WHERE id=$1 AND status='pending' RETURNING *",[Number(req.body?.id)]);
+  if(!result.rowCount) return res.status(404).json({error:"Pending result not found"});
+  res.json({ok:true,deleted:result.rows[0]});
+});
+
 app.post("/api/results/confirm", async (req,res) => {
   if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
   const id=Number(req.body?.id);
