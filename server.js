@@ -465,6 +465,20 @@ app.get("/api/season-stats", async (req, res) => {
   } catch(error) { console.error("Season stats error:",error); res.status(500).json({error:"Database error"}); }
 });
 
+app.post("/api/results/add", async (req,res) => {
+  if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const {team,homeName,awayName,homeScore,awayScore,matchType}=req.body||{};
+  const teamKey=normalizeTeamKey(team);
+  const hn=String(homeName||'').trim(), an=String(awayName||'').trim();
+  if(!hn || !an) return res.status(400).json({error:"Enter both team names"});
+  const result=await pool.query(
+    `INSERT INTO season_matches (team_key,home_name,away_name,home_score,away_score,match_type,status)
+     VALUES ($1,$2,$3,$4,$5,$6,'pending') RETURNING *`,
+    [teamKey,hn,an,Math.max(0,Number(homeScore)||0),Math.max(0,Number(awayScore)||0),String(matchType||'Friendly')]
+  );
+  res.json(result.rows[0]);
+});
+
 app.get("/api/pending-results", async (req,res) => {
   if (String(req.query.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
   const teamKey=normalizeTeamKey(req.query.team);
