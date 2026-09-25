@@ -15,7 +15,10 @@
 </head>
 <body>
   <div class="broadcast">Broadcast<br><strong>Andris Sudmalis</strong></div>
-  <div class="live-corner" id="liveCorner">LIVE</div>
+  <div class="live-status-wrap" id="liveStatus">
+    <div class="live-corner" id="liveCorner"><img src="/age-group-live-icon.png" alt="LIVE"></div>
+    <div class="live-social"><span>👁 <strong id="viewerCount">0</strong></span><button id="likeBtn" type="button">👍 <strong id="likeCount">0</strong></button><button id="dislikeBtn" type="button">👎 <strong id="dislikeCount">0</strong></button></div>
+  </div>
   <button id="installApp" style="display:none;">📱 Install Rugby LIVE</button>
 <div class="wrap">
   <main class="card">
@@ -85,6 +88,19 @@ $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME'
 
 fetch('/api/state').then(r=>r.json()).then(render);
 const socket = io();
+socket.on('viewerCount', count => { $('viewerCount').textContent = Number(count || 0); });
+function renderReactions(r) {
+  $('likeCount').textContent = Number(r.likes || 0);
+  $('dislikeCount').textContent = Number(r.dislikes || 0);
+}
+fetch('/api/reactions').then(r=>r.json()).then(renderReactions).catch(()=>{});
+socket.on('reactions', renderReactions);
+async function react(reaction) {
+  const r = await fetch('/api/reactions', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({reaction})});
+  if (r.ok) renderReactions(await r.json());
+}
+$('likeBtn').addEventListener('click', () => react('like'));
+$('dislikeBtn').addEventListener('click', () => react('dislike'));
   navigator.serviceWorker.register('/sw.js');
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
