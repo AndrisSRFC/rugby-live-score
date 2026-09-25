@@ -179,18 +179,12 @@
     }
 
     .age-btn.live {
-      position: relative;
-    }
-
-    .age-btn.live::after {
-      content: "";
-      position: absolute;
-      top: 3px;
-      right: 3px;
-      width: 30px;
-      height: 30px;
-      background: url("/age-group-live-icon.png") center / contain no-repeat;
-      pointer-events: none;
+      color: #39ff14;
+      border: 2px solid #39ff14;
+      background: rgba(20,70,15,.28);
+      box-shadow:
+        0 0 8px #39ff14,
+        inset 0 0 10px rgba(57,255,20,.18);
     }
 
     .install-wrap {
@@ -474,7 +468,7 @@
         <a class="age-btn" href="/live.html?team=U13">U13's</a>
         <a class="age-btn" href="/live.html?team=U14">U14's</a>
         <a class="age-btn" href="/live.html?team=U15">U15's</a>
-        <a class="age-btn" href="/live.html?team=U16">U16's</a>
+        <a class="age-btn live" href="/live.html?team=U16">U16's</a>
         <a class="age-btn" href="/live.html?team=Colts">Colts</a>
         <a class="age-btn" href="/live.html?team=1stXV">1st XV</a>
         <a class="age-btn" href="/live.html?team=2ndXV">2nd XV</a>
