@@ -12,6 +12,27 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rugby LIVE</title>
   <link rel="stylesheet" href="/style.css" />
+<style>
+/* Compact season W/D/L preview. Data connection comes in the next step. */
+.season-mini{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin-top:10px;
+  white-space:nowrap;
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.5px;
+}
+.season-label{color:#aaa;font-size:11px;letter-spacing:1px;}
+.season-stat strong{font-size:16px;}
+@media(max-width:700px){
+  .season-mini{gap:7px;margin-top:7px;font-size:11px;}
+  .season-label{font-size:9px;}
+  .season-stat strong{font-size:13px;}
+}
+</style>
 </head>
 <body>
   <div class="broadcast">
@@ -37,6 +58,12 @@
   <div class="clock" id="clock">40:00</div>
   <div class="half"><span id="half">1</span><span id="halfSuffix">st</span><span id="halfWord"> Half</span></div>
           <div class="center-line"></div>
+          <div class="season-mini" aria-label="Sleaford season record">
+            <span class="season-label">SEASON</span>
+            <span class="season-stat season-win">W <strong id="seasonWins">0</strong></span>
+            <span class="season-stat season-draw">D <strong id="seasonDraws">0</strong></span>
+            <span class="season-stat season-loss">L <strong id="seasonLosses">0</strong></span>
+          </div>
 </div>
         </div>
       <div class="team">
