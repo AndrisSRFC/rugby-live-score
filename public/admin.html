@@ -24,6 +24,10 @@
     label { display:block; color:#aaa; margin-bottom:6px; }
     .pin { max-width:150px; }
     .preview { color:#aaa; font-size:14px; margin-top:8px; }
+    .pending-card{padding:14px 0;border-bottom:1px solid #333;}
+    .pending-meta{font-size:13px;color:#aaa;margin-bottom:5px;}
+    .pending-result{font-size:17px;color:#fff;font-weight:900;margin-bottom:9px;}
+    .pending-badge{display:inline-block;padding:3px 7px;border:1px solid #555;border-radius:999px;font-size:11px;font-weight:900;color:#ffd84d;margin-left:6px;}
     a { color:white; }
     @media(max-width:720px){
       .grid{grid-template-columns:1fr;}
@@ -307,7 +311,7 @@ async function loadPendingResults(){
   const r=await fetch('/api/pending-results?team='+encodeURIComponent(selectedTeam)+'&pin='+encodeURIComponent($('pin').value));
   const rows=await r.json();
   if(!r.ok) return alert(rows.error||'Could not load pending results');
-  $('pendingResults').innerHTML=rows.length?rows.map(m=>'<div style="padding:10px 0;border-bottom:1px solid #333"><b>'+m.home_name+' '+m.home_score+'–'+m.away_score+' '+m.away_name+'</b> · '+m.match_type+'<br><button onclick="editPending('+m.id+',\''+String(m.home_name).replace(/'/g,"\\'")+'\',\''+String(m.away_name).replace(/'/g,"\\'")+'\','+m.home_score+','+m.away_score+',\''+String(m.match_type).replace(/'/g,"\\'")+'\')">Edit</button> <button class="red" onclick="discardPending('+m.id+')">Discard</button> <button class="green" onclick="confirmPending('+m.id+')">Confirm Result</button></div>').join(''):'No pending results';
+  $('pendingResults').innerHTML=rows.length?rows.map(m=>'<div class="pending-card"><div class="pending-meta"><b>'+selectedTeam+'</b> · '+m.match_type+' <span class="pending-badge">PENDING</span></div><div class="pending-result">'+m.home_name+' '+m.home_score+'–'+m.away_score+' '+m.away_name+'</div><button onclick="editPending('+m.id+',\''+String(m.home_name).replace(/'/g,"\\'")+'\',\''+String(m.away_name).replace(/'/g,"\\'")+'\','+m.home_score+','+m.away_score+',\''+String(m.match_type).replace(/'/g,"\\'")+'\')">Edit</button> <button class="red" onclick="discardPending('+m.id+')">Discard</button> <button class="green" onclick="confirmPending('+m.id+')">Confirm Result</button></div>').join(''):'No pending results';
 }
 async function discardPending(id){
   if(!confirm('Discard this pending result? This cannot be undone.')) return;
