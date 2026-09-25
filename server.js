@@ -465,6 +465,22 @@ app.get("/api/season-stats", async (req, res) => {
   } catch(error) { console.error("Season stats error:",error); res.status(500).json({error:"Database error"}); }
 });
 
+app.get("/api/opponents", async (req,res) => {
+  try {
+    const result=await pool.query(`
+      SELECT DISTINCT name FROM (
+        SELECT home_name AS name FROM season_matches
+        UNION
+        SELECT away_name AS name FROM season_matches
+      ) teams
+      WHERE name IS NOT NULL AND BTRIM(name) <> ''
+      ORDER BY name
+    `);
+    const names=result.rows.map(r=>r.name).filter(n=>String(n).toLowerCase()!=='sleaford');
+    res.json(names);
+  } catch(error) { console.error("Opponents error:",error); res.status(500).json({error:"Database error"}); }
+});
+
 app.post("/api/results/add", async (req,res) => {
   if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
   const {team,homeName,awayName,homeScore,awayScore,matchType}=req.body||{};
