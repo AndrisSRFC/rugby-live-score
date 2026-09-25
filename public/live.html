@@ -27,10 +27,35 @@
 }
 .season-label{color:#aaa;font-size:11px;letter-spacing:1px;}
 .season-stat strong{font-size:16px;}
+.full-stats-hint{margin-top:7px;text-align:center;font-size:10px;font-weight:800;letter-spacing:1px;color:#888;cursor:pointer;user-select:none;}
+.stats-screen{
+  position:fixed;inset:0;z-index:30;background:#050505;color:#fff;
+  transform:translateX(100%);transition:transform .32s ease;
+  display:flex;align-items:center;justify-content:center;padding:80px 24px 50px;box-sizing:border-box;
+}
+body.stats-open .stats-screen{transform:translateX(0);}
+.stats-panel{width:min(620px,100%);text-align:center;}
+.stats-age{font-size:58px;font-weight:900;color:#ffd400;line-height:1;}
+.stats-club{font-size:22px;font-weight:900;margin-top:8px;}
+.stats-season{font-size:14px;color:#aaa;font-weight:800;letter-spacing:1px;margin-top:6px;}
+.stats-rule{height:1px;background:#555;width:210px;margin:18px auto;}
+.stats-played-label,.stats-history-title{font-size:12px;color:#aaa;font-weight:800;letter-spacing:1px;}
+.stats-played{font-size:42px;font-weight:900;margin:2px 0 14px;}
+.stats-wdl{display:flex;justify-content:center;gap:28px;font-size:24px;font-weight:900;}
+.stats-points{margin-top:22px;font-size:16px;font-weight:800;}
+.stats-history{margin-top:28px;}
+.stats-empty{margin-top:10px;color:#888;font-size:14px;}
+.live-score-hint{margin-top:34px;font-size:11px;font-weight:800;letter-spacing:1px;color:#888;cursor:pointer;user-select:none;}
 @media(max-width:700px){
   .season-mini{gap:7px;margin-top:7px;font-size:11px;}
   .season-label{font-size:9px;}
   .season-stat strong{font-size:13px;}
+  .full-stats-hint{font-size:9px;margin-top:6px;}
+  .stats-screen{padding:90px 22px 40px;}
+  .stats-age{font-size:46px;}
+  .stats-club{font-size:20px;}
+  .stats-played{font-size:36px;}
+  .stats-wdl{font-size:21px;gap:22px;}
 }
 </style>
 </head>
@@ -45,6 +70,23 @@
     <div class="live-corner" id="liveCorner"><img src="/age-group-live-icon.png" alt="LIVE"></div>
     <div id="matchViewers">👁 <span id="viewerCount">0</span> WATCHING</div>
   </div>
+<div class="stats-screen" id="statsScreen">
+  <div class="stats-panel">
+    <div class="stats-age" id="statsAge">U13's</div>
+    <div class="stats-club">SLEAFORD RUGBY</div>
+    <div class="stats-season">SEASON <span id="statsSeason">2026/27</span></div>
+    <div class="stats-rule"></div>
+    <div class="stats-played-label">PLAYED</div>
+    <div class="stats-played">0</div>
+    <div class="stats-wdl"><span>W 0</span><span>D 0</span><span>L 0</span></div>
+    <div class="stats-points">POINTS&nbsp;&nbsp; FOR 0 &nbsp;·&nbsp; AGAINST 0</div>
+    <div class="stats-history">
+      <div class="stats-history-title">MATCH HISTORY</div>
+      <div class="stats-empty">No matches played yet</div>
+    </div>
+    <div class="live-score-hint" id="closeStats">LIVE SCORE ›</div>
+  </div>
+</div>
 <div class="wrap">
   <main class="card">
     
@@ -64,6 +106,7 @@
             <span class="season-stat season-draw">D <strong id="seasonDraws">0</strong></span>
             <span class="season-stat season-loss">L <strong id="seasonLosses">0</strong></span>
           </div>
+          <div class="full-stats-hint" id="openStats">‹ FULL STATS</div>
 </div>
         </div>
       <div class="team">
@@ -101,6 +144,7 @@ function render(s) {
   $('clock').textContent = fmt(s.remainingSeconds);
   const age = s.ageGroup || 'U13';
 $('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
+$('statsAge').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
 $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME';
   $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
  $('nextLiveBox').innerHTML = (s.nextLive)
@@ -116,6 +160,27 @@ $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME'
     '</div>'
   : '';
 }
+
+function openStats(){ document.body.classList.add('stats-open'); }
+function closeStats(){ document.body.classList.remove('stats-open'); }
+$('openStats').addEventListener('click', openStats);
+$('closeStats').addEventListener('click', closeStats);
+
+let touchStartX = 0;
+let touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  if (!e.touches.length) return;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive:true});
+document.addEventListener('touchend', e => {
+  if (!e.changedTouches.length) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy)) return;
+  if (dx < 0) openStats();
+  if (dx > 0) closeStats();
+}, {passive:true});
 
 const params = new URLSearchParams(location.search);
 const selectedTeam = params.get('team') || 'U13';
