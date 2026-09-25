@@ -331,3 +331,40 @@ transform: translate(25px, -22px);
 @media (max-width:700px) {
   .live-corner { width:145px; height:58px; }
 }
+
+
+/* Age-group LIVE status: keep icon close to the edge and viewers beside it */
+.live-status-wrap {
+  position: fixed;
+  top: 10px;
+  left: 6px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.live-status-wrap .live-corner {
+  position: static;
+  width: 170px;
+  height: 68px;
+}
+#matchViewers {
+  font-weight: 800;
+  font-size: 14px;
+  white-space: nowrap;
+  text-shadow: 0 2px 8px #000;
+}
+@media (max-width:700px) {
+  .live-status-wrap {
+    top: 6px;
+    left: 2px;
+    gap: 5px;
+  }
+  .live-status-wrap .live-corner {
+    width: 145px;
+    height: 58px;
+  }
+  #matchViewers {
+    font-size: 12px;
+  }
+}
