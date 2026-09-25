@@ -199,6 +199,11 @@ white-space:nowrap;
   </div>
 </div>
 <section class="panel">
+  <label>Current Season — Pending Results</label>
+  <div class="row"><button type="button" onclick="loadPendingResults()">Refresh Pending Results</button></div>
+  <div id="pendingResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
+</section>
+<section class="panel">
   <label>NLD Match History</label>
   <div class="row">
     <input id="historyGeneration" placeholder="Generation, e.g. 2013">
@@ -259,6 +264,27 @@ async function revokeMatchControl() {
       btn.textContent = '📋 Copy LIVE Link';
       }, 2000);
     }
+
+async function loadPendingResults(){
+  const r=await fetch('/api/pending-results?team='+encodeURIComponent(selectedTeam)+'&pin='+encodeURIComponent($('pin').value));
+  const rows=await r.json();
+  if(!r.ok) return alert(rows.error||'Could not load pending results');
+  $('pendingResults').innerHTML=rows.length?rows.map(m=>'<div style="padding:10px 0;border-bottom:1px solid #333"><b>'+m.home_name+' '+m.home_score+'–'+m.away_score+' '+m.away_name+'</b> · '+m.match_type+'<br><button onclick="editPending('+m.id+',\''+String(m.home_name).replace(/'/g,"\\'")+'\',\''+String(m.away_name).replace(/'/g,"\\'")+'\','+m.home_score+','+m.away_score+',\''+String(m.match_type).replace(/'/g,"\\'")+'\')">Edit</button> <button class="green" onclick="confirmPending('+m.id+')">Confirm Result</button></div>').join(''):'No pending results';
+}
+async function confirmPending(id){
+  if(!confirm('Confirm this result and add it to season statistics?')) return;
+  const r=await fetch('/api/results/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value,id})});
+  const d=await r.json(); if(!r.ok)return alert(d.error||'Could not confirm'); loadPendingResults();
+}
+async function editPending(id,homeName,awayName,homeScore,awayScore,matchType){
+  const hs=prompt('Home score',homeScore); if(hs===null)return;
+  const as=prompt('Away score',awayScore); if(as===null)return;
+  const hn=prompt('Home team',homeName); if(hn===null)return;
+  const an=prompt('Away team',awayName); if(an===null)return;
+  const mt=prompt('Match type',matchType); if(mt===null)return;
+  const r=await fetch('/api/results/edit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value,id,homeName:hn,awayName:an,homeScore:Number(hs),awayScore:Number(as),matchType:mt})});
+  const d=await r.json(); if(!r.ok)return alert(d.error||'Could not edit'); loadPendingResults();
+}
 
   async function addHistory() {
   const generation = $('historyGeneration').value.trim();
