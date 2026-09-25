@@ -51,7 +51,7 @@ body {
 .broadcast strong::after { content:""; display:block; height:2px; background:#ff3b30; margin-top:4px; }
 .live-status-wrap { position:fixed; top:24px; left:24px; z-index:10; display:flex; align-items:center; gap:12px; }
 .live-corner { display:none; position:static; background:transparent; padding:0; }
-.live-corner img { display:none; }
+.live-corner img { display:block; width:58px; height:58px; object-fit:contain; }
 .live-corner::before { content:none; }
 .live-corner { flex-direction:column; align-items:center; justify-content:center; line-height:1; }
 .live-ball { font-size:42px; filter:drop-shadow(0 0 8px #ff2020); }
