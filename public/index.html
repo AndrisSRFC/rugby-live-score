@@ -428,6 +428,7 @@
       }
       .subscribe-btn { padding:6px 13px; font-size:11px; }
     }
+      .age-btn.live::before { content:"LIVE"; margin-right:6px; font-size:9px; color:#ff3038; font-weight:1000; }
   </style>
 </head>
 
@@ -465,7 +466,7 @@
         <a class="age-btn" href="/live.html?team=U13">U13's</a>
         <a class="age-btn" href="/live.html?team=U14">U14's</a>
         <a class="age-btn" href="/live.html?team=U15">U15's</a>
-        <a class="age-btn live" href="/live.html?team=U16">U16's</a>
+        <a class="age-btn" href="/live.html?team=U16">U16's</a>
         <a class="age-btn" href="/live.html?team=Colts">Colts</a>
         <a class="age-btn" href="/live.html?team=1stXV">1st XV</a>
         <a class="age-btn" href="/live.html?team=2ndXV">2nd XV</a>
@@ -500,6 +501,7 @@
     </div>
   </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -569,6 +571,5 @@ document.getElementById('scoreHelpBtn').addEventListener('click', () => signupMo
 document.getElementById('closeSignup').addEventListener('click', () => signupModal.classList.remove('open'));
 signupModal.addEventListener('click', e => { if (e.target === signupModal) signupModal.classList.remove('open'); });
 </script>
-<script src="/socket.io/socket.io.js"></script>
 </body>
 </html>
