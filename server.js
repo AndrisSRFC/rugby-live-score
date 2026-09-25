@@ -165,6 +165,21 @@ async function initDatabase() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS season_matches (
+      id SERIAL PRIMARY KEY,
+      team_key TEXT NOT NULL,
+      home_name TEXT NOT NULL,
+      away_name TEXT NOT NULL,
+      home_score INTEGER NOT NULL DEFAULT 0,
+      away_score INTEGER NOT NULL DEFAULT 0,
+      match_type TEXT NOT NULL DEFAULT 'Friendly',
+      status TEXT NOT NULL DEFAULT 'pending',
+      played_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      confirmed_at TIMESTAMPTZ
+    )
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS match_control_access (
       team_key TEXT PRIMARY KEY,
       pin_hash TEXT,
@@ -336,6 +351,11 @@ app.post("/api/admin", async (req, res) => {
         break;
 
       case "endMatch":
+        await pool.query(
+          `INSERT INTO season_matches (team_key,home_name,away_name,home_score,away_score,match_type,status)
+           VALUES ($1,$2,$3,$4,$5,$6,'pending')`,
+          [teamKey, selectedState.homeName, selectedState.awayName, selectedState.homeScore, selectedState.awayScore, selectedState.matchType]
+        );
         selectedState.matchLive = false;
         selectedState.running = false;
         selectedState.startedAt = null;
@@ -421,6 +441,59 @@ app.post("/api/match-control/revoke", async (req, res) => {
   const teamKey = normalizeTeamKey(team);
   await pool.query("UPDATE match_control_access SET revoked=TRUE, session_hash=NULL WHERE team_key=$1", [teamKey]);
   res.json({ ok:true, team:teamKey });
+});
+
+app.get("/api/season-stats", async (req, res) => {
+  try {
+    const teamKey = normalizeTeamKey(req.query.team);
+    const result = await pool.query(
+      "SELECT * FROM season_matches WHERE team_key=$1 AND status='confirmed' ORDER BY played_at DESC, id DESC",
+      [teamKey]
+    );
+    let wins=0, draws=0, losses=0, pointsFor=0, pointsAgainst=0;
+    const matches=result.rows.map(m => {
+      const sleafordHome = String(m.home_name).toLowerCase().includes('sleaford');
+      const pf = sleafordHome ? m.home_score : m.away_score;
+      const pa = sleafordHome ? m.away_score : m.home_score;
+      const opponent = sleafordHome ? m.away_name : m.home_name;
+      pointsFor += pf; pointsAgainst += pa;
+      const outcome = pf > pa ? 'W' : pf < pa ? 'L' : 'D';
+      if(outcome==='W') wins++; else if(outcome==='D') draws++; else losses++;
+      return {...m, opponent, pointsFor:pf, pointsAgainst:pa, outcome};
+    });
+    res.json({team:teamKey, played:matches.length, wins, draws, losses, pointsFor, pointsAgainst, matches});
+  } catch(error) { console.error("Season stats error:",error); res.status(500).json({error:"Database error"}); }
+});
+
+app.get("/api/pending-results", async (req,res) => {
+  if (String(req.query.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const teamKey=normalizeTeamKey(req.query.team);
+  const result=await pool.query("SELECT * FROM season_matches WHERE team_key=$1 AND status='pending' ORDER BY played_at DESC,id DESC",[teamKey]);
+  res.json(result.rows);
+});
+
+app.post("/api/results/confirm", async (req,res) => {
+  if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const id=Number(req.body?.id);
+  const result=await pool.query("UPDATE season_matches SET status='confirmed', confirmed_at=NOW() WHERE id=$1 AND status='pending' RETURNING *",[id]);
+  if(!result.rowCount) return res.status(404).json({error:"Pending result not found"});
+  res.json(result.rows[0]);
+});
+
+app.post("/api/results/edit", async (req,res) => {
+  if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const {id,homeName,awayName,homeScore,awayScore,matchType}=req.body||{};
+  const result=await pool.query(`UPDATE season_matches SET home_name=$2,away_name=$3,home_score=$4,away_score=$5,match_type=$6 WHERE id=$1 RETURNING *`,
+    [Number(id),String(homeName||'').trim(),String(awayName||'').trim(),Math.max(0,Number(homeScore)||0),Math.max(0,Number(awayScore)||0),String(matchType||'Friendly')]);
+  if(!result.rowCount) return res.status(404).json({error:"Result not found"});
+  res.json(result.rows[0]);
+});
+
+app.post("/api/results/undo", async (req,res) => {
+  if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const result=await pool.query("UPDATE season_matches SET status='pending',confirmed_at=NULL WHERE id=$1 RETURNING *",[Number(req.body?.id)]);
+  if(!result.rowCount) return res.status(404).json({error:"Result not found"});
+  res.json(result.rows[0]);
 });
 
 app.get("/api/history", async (req, res) => {
