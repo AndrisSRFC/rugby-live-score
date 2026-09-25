@@ -104,7 +104,7 @@ white-space:nowrap;
     </div>
     <div id="adminProtected">
     <div class="row live-actions">
-      <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
+      <button id="startLiveBtn" class="green" onclick="toggleLive()">Start LIVE</button>
       <button id="endMatch" class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
       <button id="copyLiveLink" type="button" onclick="copyLiveLink()">📋 Copy LIVE Link</button>
     </div>
@@ -316,7 +316,8 @@ function render(s) {
     nextLiveLoaded = true;
     }
   last = s;
-  $('startLiveBtn').className = s.matchLive ? 'green' : '';
+  $('startLiveBtn').className = s.matchLive ? 'red' : 'green';
+  $('startLiveBtn').textContent = s.matchLive ? 'Stop LIVE' : 'Start LIVE';
   $('homeScore').textContent = s.homeScore;
   $('awayScore').textContent = s.awayScore;
   $('clock').textContent = fmt(s.remainingSeconds);
@@ -348,6 +349,10 @@ function selectTeam(team) {
   nextLiveLoaded = false;
   if (socket) socket.emit('selectTeam', team);
   fetch('/api/state?team=' + encodeURIComponent(team)).then(r=>r.json()).then(render);
+}
+
+function toggleLive() {
+  act(last?.matchLive ? 'stopLive' : 'startMatch');
 }
 
 async function act(action,payload={}) {
