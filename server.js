@@ -2,9 +2,11 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
+const crypto = require("crypto");
 const { Pool } = require("pg");
 
 const app = express();
+app.set("trust proxy", 1);
 const server = http.createServer(app);
 const io = new Server(server);
 
@@ -33,13 +35,21 @@ const defaultState = {
   message: "No match in progress",
   ageGroup: "U13",
   matchType: "Friendly",
-  nextLive: null
+  nextLive: null,
+  reactionMatchId: null
 };
 
 let state = { ...defaultState };
 
 async function initDatabase() {
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS rugby_reactions (
+      match_id TEXT NOT NULL,
+      ip_hash TEXT NOT NULL,
+      reaction TEXT NOT NULL CHECK (reaction IN ('like', 'dislike')),
+      PRIMARY KEY (match_id, ip_hash)
+    );
+
     CREATE TABLE IF NOT EXISTS rugby_state (
       id INTEGER PRIMARY KEY,
       data JSONB NOT NULL
@@ -60,6 +70,22 @@ async function initDatabase() {
     await saveState();
     console.log("New match state created in database");
   }
+}
+
+function ensureReactionMatchId() {
+  if (!state.reactionMatchId) state.reactionMatchId = crypto.randomUUID();
+  return state.reactionMatchId;
+}
+
+async function reactionCounts() {
+  const matchId = ensureReactionMatchId();
+  const r = await pool.query("SELECT reaction, COUNT(*)::int AS count FROM rugby_reactions WHERE match_id = $1 GROUP BY reaction", [matchId]);
+  const counts = { likes: 0, dislikes: 0 };
+  for (const row of r.rows) {
+    if (row.reaction === "like") counts.likes = Number(row.count);
+    if (row.reaction === "dislike") counts.dislikes = Number(row.count);
+  }
+  return counts;
 }
 
 async function saveState() {
@@ -105,6 +131,26 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/api/state", (req, res) => {
   res.json(currentState());
+});
+
+app.get("/api/reactions", async (req, res) => {
+  try { res.json(await reactionCounts()); }
+  catch (error) { console.error("Reaction count error:", error); res.status(500).json({ error: "Database error" }); }
+});
+
+app.post("/api/reactions", async (req, res) => {
+  const reaction = req.body?.reaction;
+  if (!["like", "dislike"].includes(reaction)) return res.status(400).json({ error: "Invalid reaction" });
+  try {
+    const matchId = ensureReactionMatchId();
+    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    const ipHash = crypto.createHash("sha256").update(String(ip)).digest("hex");
+    await pool.query("INSERT INTO rugby_reactions (match_id, ip_hash, reaction) VALUES ($1,$2,$3) ON CONFLICT (match_id, ip_hash) DO UPDATE SET reaction = EXCLUDED.reaction", [matchId, ipHash, reaction]);
+    await saveState();
+    const counts = await reactionCounts();
+    io.emit("reactions", counts);
+    res.json({ ok: true, ...counts, reaction });
+  } catch (error) { console.error("Reaction error:", error); res.status(500).json({ error: "Database error" }); }
 });
 
 app.post("/api/admin", async (req, res) => {
@@ -213,7 +259,8 @@ app.post("/api/admin", async (req, res) => {
           awayName:
             payload.awayName?.trim() || "Team 2",
           matchLive: true,
-          message: ""
+          message: "",
+          reactionMatchId: crypto.randomUUID()
         };
         break;
 case "setNextLive":
@@ -245,8 +292,11 @@ case "setNextLive":
   }
 });
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   socket.emit("state", currentState());
+  try { socket.emit("reactions", await reactionCounts()); } catch (e) {}
+  io.emit("viewerCount", io.engine.clientsCount);
+  socket.on("disconnect", () => { io.emit("viewerCount", io.engine.clientsCount); });
 });
 
 setInterval(() => {
