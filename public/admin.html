@@ -94,6 +94,7 @@ white-space:nowrap;
   </style>
 </head>
 <body>
+<datalist id="teamSuggestions"><option value="Sleaford"></option></datalist>
 <div class="admin">
   <h1>Rugby LIVE — Control Panel</h1>
 
@@ -122,7 +123,7 @@ white-space:nowrap;
   <div class="grid">
     <section class="panel">
       <label>Home Team</label>
-      <input id="homeName" value="Team 1" />
+      <input id="homeName" value="Team 1" list="teamSuggestions" />
       <div class="bigscore" id="homeScore">0</div>
       <div class="row">
         <button onclick="score('home',1)">+1</button>
@@ -135,7 +136,7 @@ white-space:nowrap;
 
     <section class="panel">
       <label>Away Team</label>
-      <input id="awayName" value="Team 2" />
+      <input id="awayName" value="Team 2" list="teamSuggestions" />
       <div class="bigscore" id="awayScore">0</div>
       <div class="row">
         <button onclick="score('away',1)">+1</button>
@@ -201,10 +202,10 @@ white-space:nowrap;
 <section class="panel">
   <label>Add Current Season Result</label>
   <div class="row">
-    <input id="seasonHome" placeholder="Home Team">
+    <input id="seasonHome" placeholder="Home Team" list="teamSuggestions">
     <input id="seasonHomeScore" type="number" min="0" placeholder="Home Score">
     <input id="seasonAwayScore" type="number" min="0" placeholder="Away Score">
-    <input id="seasonAway" placeholder="Away Team">
+    <input id="seasonAway" placeholder="Away Team" list="teamSuggestions">
     <button id="seasonFriendly" type="button" class="green" onclick="setSeasonType('Friendly')">FRIENDLY</button>
     <button id="seasonNLD" type="button" onclick="setSeasonType('NLD')">NLD</button>
     <button type="button" onclick="addSeasonResult()">Add for Review</button>
@@ -231,6 +232,15 @@ white-space:nowrap;
 <script src="/socket.io/socket.io.js"></script>
 <script>
 let generatedControlPin = '';
+async function loadTeamSuggestions(){
+  try{
+    const r=await fetch('/api/opponents');
+    const names=await r.json();
+    if(!r.ok)return;
+    const all=['Sleaford',...names.filter(n=>String(n).toLowerCase()!=='sleaford')];
+    $('teamSuggestions').innerHTML=all.map(n=>'<option value="'+String(n).replace(/"/g,'&quot;')+'"></option>').join('');
+  }catch(e){}
+}
 
 async function generateMatchControlPin() {
   const r = await fetch('/api/match-control/generate', {
@@ -340,6 +350,7 @@ async function editPending(id,homeName,awayName,homeScore,awayScore,matchType){
   alert('NLD history saved');
 }
 const $ = id => document.getElementById(id);
+loadTeamSuggestions();
 const adminProtected = $('adminProtected');
 adminProtected.style.display = 'none';
 $('pin').addEventListener('input', () => {
