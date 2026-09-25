@@ -170,6 +170,22 @@
       color:#001b00;
     }
 
+    .help-btn{position:fixed;right:12px;top:12px;z-index:50;flex:none;width:auto;padding:8px 12px;background:#1b1b1b;color:#fff;border:1px solid #444;}
+    .tutorial{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:18px;}
+    .tutorial.open{display:flex;}
+    .tutorial-card{width:min(430px,100%);background:#111;border:1px solid #333;border-radius:20px;padding:22px;text-align:center;box-shadow:0 0 28px rgba(53,255,37,.15);}
+    .tutorial-step{display:none;min-height:210px;align-items:center;justify-content:center;flex-direction:column;}
+    .tutorial-step.active{display:flex;animation:tutorialIn .28s ease;}
+    .tutorial-icon{font-size:48px;margin-bottom:12px;}
+    .tutorial-step h2{margin:0 0 10px;font-size:24px;}
+    .tutorial-step p{margin:0;color:#bbb;line-height:1.45;font-size:15px;}
+    .tutorial-demo{margin-top:16px;padding:10px 16px;border:2px solid #35ff25;border-radius:12px;font-weight:900;animation:tutorialPulse 1.1s infinite;}
+    .tutorial-nav{display:flex;gap:8px;margin-top:16px;}
+    .tutorial-nav button{background:#fff;color:#000;}
+    .tutorial-nav .tutorial-next{background:#35ff25;color:#001b00;}
+    .tutorial-progress{font-size:12px;color:#777;margin-top:8px;}
+    @keyframes tutorialPulse{50%{transform:scale(1.06);box-shadow:0 0 18px rgba(53,255,37,.55);}}
+    @keyframes tutorialIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
     @media(max-width:500px) {
       .control { padding:10px; }
       h1 { font-size:22px; }
@@ -182,6 +198,21 @@
 </head>
 
 <body>
+
+<button class="help-btn" type="button" onclick="openTutorial()">? HOW TO USE</button>
+
+<div class="tutorial" id="tutorial">
+  <div class="tutorial-card">
+    <div class="tutorial-step active"><div class="tutorial-icon">🔐</div><h2>Enter your one-time PIN</h2><p>Enter the PIN provided for this match. It opens control for the correct team only.</p><div class="tutorial-demo">PIN → MATCH CONTROL</div></div>
+    <div class="tutorial-step"><div class="tutorial-icon">🏉</div><h2>Update the score</h2><p>Tap +5 for a try, +2 for a conversion, +3 for a penalty or drop goal, and −1 to correct a mistake.</p><div class="tutorial-demo">+1 &nbsp; +2 &nbsp; +3 &nbsp; +5 &nbsp; −1</div></div>
+    <div class="tutorial-step"><div class="tutorial-icon">⏱️</div><h2>Control the clock</h2><p>Start or pause the match clock. Use Reset Time only when you need to reset it.</p><div class="tutorial-demo">START CLOCK</div></div>
+    <div class="tutorial-step"><div class="tutorial-icon">1️⃣</div><h2>Choose the half</h2><p>Switch between 1st Half and 2nd Half when the match moves into the next period.</p><div class="tutorial-demo">1st HALF → 2nd HALF</div></div>
+    <div class="tutorial-step"><div class="tutorial-icon">📡</div><h2>Updates appear LIVE</h2><p>Score, clock and half changes are sent to the Rugby LIVE screen immediately.</p><div class="tutorial-demo">CONTROL → LIVE SCORE</div></div>
+    <div class="tutorial-step"><div class="tutorial-icon">🏁</div><h2>End the match</h2><p>Use End Match only when the game is finished. The final score is shown and this one-time Match Control access is closed.</p><div class="tutorial-demo">END MATCH → FULL TIME</div></div>
+    <div class="tutorial-nav"><button type="button" onclick="closeTutorial()">Close</button><button class="tutorial-next" id="tutorialNext" type="button" onclick="nextTutorial()">Next</button></div>
+    <div class="tutorial-progress" id="tutorialProgress">1 / 6</div>
+  </div>
+</div>
 
 <div class="control">
 
@@ -260,6 +291,20 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
 const $ = id => document.getElementById(id);
+let tutorialStep = 0;
+function showTutorialStep(){
+  const steps = document.querySelectorAll('.tutorial-step');
+  steps.forEach((el,i)=>el.classList.toggle('active',i===tutorialStep));
+  $('tutorialProgress').textContent = (tutorialStep + 1) + ' / ' + steps.length;
+  $('tutorialNext').textContent = tutorialStep === steps.length - 1 ? 'Done' : 'Next';
+}
+function openTutorial(){ tutorialStep=0; $('tutorial').classList.add('open'); showTutorialStep(); }
+function closeTutorial(){ $('tutorial').classList.remove('open'); }
+function nextTutorial(){
+  const steps=document.querySelectorAll('.tutorial-step');
+  if(tutorialStep >= steps.length-1){ closeTutorial(); return; }
+  tutorialStep++; showTutorialStep();
+}
 let selectedTeam = null;
 let controlToken = sessionStorage.getItem('matchControlToken') || '';
 let savedTeam = sessionStorage.getItem('matchControlTeam') || '';
