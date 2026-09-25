@@ -97,7 +97,7 @@ function halfStartSeconds(teamKey) {
     U14: 25,
     U15: 30,
     U16: 35,
-    Colts: 40,
+    Colts: 35,
     "1st XV": 40,
     "2nd XV": 40
   };
