@@ -109,8 +109,12 @@ white-space:nowrap;
       <button id="copyLiveLink" type="button" onclick="copyLiveLink()">📋 Copy LIVE Link</button>
     </div>
     <div class="row" style="margin-top:8px">
-      <a id="matchControlLink" href="/match-control.html?team=U13" target="_blank" class="public-live-btn">Open Match Control ↗</a>
+      <button id="generateControlPin" type="button" onclick="generateMatchControlPin()">Generate Match Control PIN</button>
+      <button id="copyControlAccess" type="button" onclick="copyMatchControlAccess()" style="display:none">📋 Copy PIN + Link</button>
+      <button id="revokeControl" type="button" class="red" onclick="revokeMatchControl()">Revoke Access</button>
+      <a id="matchControlLink" href="/match-control.html" target="_blank" class="public-live-btn">Open Match Control ↗</a>
     </div>
+    <div id="controlPinPreview" class="preview"></div>
     <div class="preview">The public link is always the main server address.</div>
   </div>
   </div>
@@ -208,6 +212,44 @@ white-space:nowrap;
 </div>
 <script src="/socket.io/socket.io.js"></script>
 <script>
+let generatedControlPin = '';
+
+async function generateMatchControlPin() {
+  const r = await fetch('/api/match-control/generate', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pin:$('pin').value, team:selectedTeam})
+  });
+  const data = await r.json();
+  if (!r.ok) return alert(data.error || 'Could not generate PIN');
+  generatedControlPin = data.controlPin;
+  $('controlPinPreview').textContent = selectedTeam + ' Match Control PIN: ' + generatedControlPin + ' (one-time)';
+  $('copyControlAccess').style.display = '';
+}
+
+async function copyMatchControlAccess() {
+  if (!generatedControlPin) return;
+  const text = 'Rugby LIVE — ' + selectedTeam + '\n' +
+    window.location.origin + '/match-control.html\nPIN: ' + generatedControlPin;
+  await navigator.clipboard.writeText(text);
+  $('copyControlAccess').textContent = '✓ Copied!';
+  setTimeout(() => $('copyControlAccess').textContent = '📋 Copy PIN + Link', 2000);
+}
+
+async function revokeMatchControl() {
+  if (!confirm('Revoke Match Control access for ' + selectedTeam + '?')) return;
+  const r = await fetch('/api/match-control/revoke', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pin:$('pin').value, team:selectedTeam})
+  });
+  const data = await r.json();
+  if (!r.ok) return alert(data.error || 'Could not revoke access');
+  generatedControlPin = '';
+  $('controlPinPreview').textContent = selectedTeam + ' Match Control access revoked';
+  $('copyControlAccess').style.display = 'none';
+}
+
   async function copyLiveLink() {
       const liveUrl = window.location.origin + '/live.html?team=' + encodeURIComponent(selectedTeam);
       await navigator.clipboard.writeText(liveUrl);
@@ -300,7 +342,9 @@ function selectTeam(team) {
   const link = $('publicLiveLink');
   if (link) link.href = '/live.html?team=' + encodeURIComponent(team);
   const controlLink = $('matchControlLink');
-  if (controlLink) controlLink.href = '/match-control.html?team=' + encodeURIComponent(team);
+  if (controlLink) controlLink.href = '/match-control.html';
+  $('controlPinPreview').textContent = '';
+  $('copyControlAccess').style.display = 'none';
   nextLiveLoaded = false;
   if (socket) socket.emit('selectTeam', team);
   fetch('/api/state?team=' + encodeURIComponent(team)).then(r=>r.json()).then(render);
@@ -341,7 +385,7 @@ $('homeName').addEventListener('input',saveNames);
 $('awayName').addEventListener('input',saveNames);
 
 $('publicLiveLink').href = '/live.html?team=' + encodeURIComponent(selectedTeam);
-$('matchControlLink').href = '/match-control.html?team=' + encodeURIComponent(selectedTeam);
+$('matchControlLink').href = '/match-control.html';
 
 fetch('/api/state?team=' + encodeURIComponent(selectedTeam))
   .then(r=>r.json())
