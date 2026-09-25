@@ -331,6 +331,10 @@ app.post("/api/admin", async (req, res) => {
         selectedState.message = "";
         break;
 
+      case "stopLive":
+        selectedState.matchLive = false;
+        break;
+
       case "endMatch":
         selectedState.matchLive = false;
         selectedState.running = false;
@@ -343,8 +347,8 @@ app.post("/api/admin", async (req, res) => {
           ...createDefaultState(teamKey),
           homeName: payload.homeName?.trim() || "Team 1",
           awayName: payload.awayName?.trim() || "Team 2",
-          matchLive: true,
-          message: ""
+          matchLive: false,
+          message: "No match in progress"
         };
         selectedState = matchStates[teamKey];
         break;
