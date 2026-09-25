@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
+const crypto = require("crypto");
 const { Pool } = require("pg");
 
 const app = express();
@@ -10,7 +11,6 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_PIN = process.env.ADMIN_PIN || "1234";
-const MATCH_CONTROL_PIN = process.env.MATCH_CONTROL_PIN || "5678";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL
@@ -28,6 +28,18 @@ const TEAM_CONFIG = [
 
 const TEAM_IDS = Object.fromEntries(TEAM_CONFIG.map(team => [team.key, team.id]));
 const TEAM_KEYS = TEAM_CONFIG.map(team => team.key);
+
+function secretHash(value) {
+  return crypto.createHash("sha256").update(String(value)).digest("hex");
+}
+
+function makeControlPin() {
+  return String(crypto.randomInt(100000, 1000000));
+}
+
+function makeSessionToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
 
 const TEAM_ALIASES = {
   "1stXV": "1st XV",
@@ -152,6 +164,17 @@ async function initDatabase() {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS match_control_access (
+      team_key TEXT PRIMARY KEY,
+      pin_hash TEXT,
+      session_hash TEXT,
+      pin_used BOOLEAN NOT NULL DEFAULT FALSE,
+      revoked BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
   const result = await pool.query(
     "SELECT id, data FROM rugby_state ORDER BY id"
   );
@@ -214,16 +237,18 @@ app.get("/api/state", (req, res) => {
 });
 
 app.post("/api/admin", async (req, res) => {
-  const { pin, action, payload = {}, team } = req.body || {};
-
-  if (
-    String(pin) !== String(ADMIN_PIN) &&
-    String(pin) !== String(MATCH_CONTROL_PIN)
-  ) {
-    return res.status(401).json({ error: "Incorrect PIN" });
-  }
-
+  const { pin, controlToken, action, payload = {}, team } = req.body || {};
   const teamKey = normalizeTeamKey(team);
+
+  let authorized = String(pin) === String(ADMIN_PIN);
+  if (!authorized && controlToken) {
+    const access = await pool.query(
+      "SELECT 1 FROM match_control_access WHERE team_key = $1 AND session_hash = $2 AND pin_used = TRUE AND revoked = FALSE",
+      [teamKey, secretHash(controlToken)]
+    );
+    authorized = access.rowCount === 1;
+  }
+  if (!authorized) return res.status(401).json({ error: "Access expired or incorrect PIN" });
 
   try {
     commitClock(teamKey);
@@ -338,6 +363,9 @@ app.post("/api/admin", async (req, res) => {
 
     selectedState.ageGroup = teamKey;
     await saveState(teamKey);
+    if (action === "endMatch" && controlToken) {
+      await pool.query("UPDATE match_control_access SET revoked=TRUE, session_hash=NULL WHERE team_key=$1", [teamKey]);
+    }
     broadcast(teamKey);
 
     res.json({
@@ -349,6 +377,46 @@ app.post("/api/admin", async (req, res) => {
     console.error("Admin action error:", error);
     res.status(500).json({ error: "Database error" });
   }
+});
+
+app.post("/api/match-control/generate", async (req, res) => {
+  const { pin, team } = req.body || {};
+  if (String(pin) !== String(ADMIN_PIN)) return res.status(401).json({ error: "Incorrect Admin PIN" });
+  const teamKey = normalizeTeamKey(team);
+  const controlPin = makeControlPin();
+  await pool.query(
+    `INSERT INTO match_control_access (team_key, pin_hash, session_hash, pin_used, revoked, created_at)
+     VALUES ($1,$2,NULL,FALSE,FALSE,NOW())
+     ON CONFLICT (team_key) DO UPDATE SET pin_hash=EXCLUDED.pin_hash, session_hash=NULL, pin_used=FALSE, revoked=FALSE, created_at=NOW()`,
+    [teamKey, secretHash(controlPin)]
+  );
+  res.json({ ok:true, team:teamKey, controlPin });
+});
+
+app.post("/api/match-control/verify", async (req, res) => {
+  const { controlPin } = req.body || {};
+  const pinHash = secretHash(controlPin || "");
+  const found = await pool.query(
+    "SELECT team_key FROM match_control_access WHERE pin_hash=$1 AND pin_used=FALSE AND revoked=FALSE",
+    [pinHash]
+  );
+  if (found.rowCount !== 1) return res.status(401).json({ error:"PIN is incorrect, expired or already used" });
+  const teamKey = found.rows[0].team_key;
+  const token = makeSessionToken();
+  const used = await pool.query(
+    "UPDATE match_control_access SET pin_used=TRUE, session_hash=$1 WHERE team_key=$2 AND pin_hash=$3 AND pin_used=FALSE AND revoked=FALSE RETURNING team_key",
+    [secretHash(token), teamKey, pinHash]
+  );
+  if (used.rowCount !== 1) return res.status(401).json({ error:"PIN already used" });
+  res.json({ ok:true, team:teamKey, controlToken:token });
+});
+
+app.post("/api/match-control/revoke", async (req, res) => {
+  const { pin, team } = req.body || {};
+  if (String(pin) !== String(ADMIN_PIN)) return res.status(401).json({ error:"Incorrect Admin PIN" });
+  const teamKey = normalizeTeamKey(team);
+  await pool.query("UPDATE match_control_access SET revoked=TRUE, session_hash=NULL WHERE team_key=$1", [teamKey]);
+  res.json({ ok:true, team:teamKey });
 });
 
 app.get("/api/history", async (req, res) => {
