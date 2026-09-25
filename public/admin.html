@@ -307,7 +307,12 @@ async function loadPendingResults(){
   const r=await fetch('/api/pending-results?team='+encodeURIComponent(selectedTeam)+'&pin='+encodeURIComponent($('pin').value));
   const rows=await r.json();
   if(!r.ok) return alert(rows.error||'Could not load pending results');
-  $('pendingResults').innerHTML=rows.length?rows.map(m=>'<div style="padding:10px 0;border-bottom:1px solid #333"><b>'+m.home_name+' '+m.home_score+'–'+m.away_score+' '+m.away_name+'</b> · '+m.match_type+'<br><button onclick="editPending('+m.id+',\''+String(m.home_name).replace(/'/g,"\\'")+'\',\''+String(m.away_name).replace(/'/g,"\\'")+'\','+m.home_score+','+m.away_score+',\''+String(m.match_type).replace(/'/g,"\\'")+'\')">Edit</button> <button class="green" onclick="confirmPending('+m.id+')">Confirm Result</button></div>').join(''):'No pending results';
+  $('pendingResults').innerHTML=rows.length?rows.map(m=>'<div style="padding:10px 0;border-bottom:1px solid #333"><b>'+m.home_name+' '+m.home_score+'–'+m.away_score+' '+m.away_name+'</b> · '+m.match_type+'<br><button onclick="editPending('+m.id+',\''+String(m.home_name).replace(/'/g,"\\'")+'\',\''+String(m.away_name).replace(/'/g,"\\'")+'\','+m.home_score+','+m.away_score+',\''+String(m.match_type).replace(/'/g,"\\'")+'\')">Edit</button> <button class="red" onclick="discardPending('+m.id+')">Discard</button> <button class="green" onclick="confirmPending('+m.id+')">Confirm Result</button></div>').join(''):'No pending results';
+}
+async function discardPending(id){
+  if(!confirm('Discard this pending result? This cannot be undone.')) return;
+  const r=await fetch('/api/results/discard',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value,id})});
+  const d=await r.json(); if(!r.ok)return alert(d.error||'Could not discard'); loadPendingResults();
 }
 async function confirmPending(id){
   if(!confirm('Confirm this result and add it to season statistics?')) return;
