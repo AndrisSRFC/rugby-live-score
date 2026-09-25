@@ -186,7 +186,7 @@
 <div class="control">
 
   <h1>Rugby LIVE — Match Control</h1>
-  <input id="matchPin" type="password" inputmode="numeric" placeholder="PIN" maxlength="4">
+  <input id="matchPin" type="password" inputmode="numeric" placeholder="PIN" maxlength="6">
 
   <div class="info">
     <div class="badge" id="ageGroup">U16</div>
@@ -260,7 +260,10 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
 const $ = id => document.getElementById(id);
-const selectedTeam = new URLSearchParams(location.search).get('team') || 'U13';
+let selectedTeam = null;
+let controlToken = sessionStorage.getItem('matchControlToken') || '';
+let savedTeam = sessionStorage.getItem('matchControlTeam') || '';
+if (controlToken && savedTeam) selectedTeam = savedTeam;
 
 function fmt(sec) {
   sec = Math.max(0, Math.floor(sec || 0));
@@ -275,25 +278,65 @@ function render(s) {
   $('homeScore').textContent = s.homeScore;
   $('awayScore').textContent = s.awayScore;
   $('clock').textContent = fmt(s.remainingSeconds);
-  $('clockBtn').textContent = s.running ? 'Stop Clock' : 'Start Clock';
+  $('clockBtn').textContent = s.running ? 'Pause Clock' : 'Start Clock';
   $('startLiveBtn').className = s.matchLive ? 'green' : '';
   $('half1Btn').className = s.half === 1 ? 'active' : '';
   $('half2Btn').className = s.half === 2 ? 'active' : '';
 }
 
+async function unlockControl() {
+  const enteredPin = $('matchPin').value.trim();
+  if (!enteredPin) return false;
+  const r = await fetch('/api/match-control/verify', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({controlPin:enteredPin})
+  });
+  const data = await r.json();
+  if (!r.ok) {
+    alert(data.error || 'Incorrect PIN');
+    return false;
+  }
+  controlToken = data.controlToken;
+  selectedTeam = data.team;
+  sessionStorage.setItem('matchControlToken', controlToken);
+  sessionStorage.setItem('matchControlTeam', selectedTeam);
+  $('matchPin').value = '';
+  $('matchPin').style.display = 'none';
+  connectControl();
+  return true;
+}
+
 async function act(action, payload = {}) {
+  if (!controlToken || !selectedTeam) {
+    if (!(await unlockControl())) return;
+  }
+  if (action === 'endMatch' && !confirm('End ' + selectedTeam + ' match? Final score ' + $('homeScore').textContent + '–' + $('awayScore').textContent)) return;
+  if (action === 'resetClock' && !confirm('Reset match time?')) return;
+
   const r = await fetch('/api/admin', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      pin: $('matchPin').value,
-      action,
-      payload,
-      team: selectedTeam
-    })
+    body: JSON.stringify({ controlToken, action, payload, team: selectedTeam })
   });
   const data = await r.json();
-  if (!r.ok) alert(data.error || 'Error');
+  if (!r.ok) {
+    if (r.status === 401) {
+      sessionStorage.removeItem('matchControlToken');
+      sessionStorage.removeItem('matchControlTeam');
+      controlToken = '';
+      selectedTeam = null;
+      $('matchPin').style.display = '';
+    }
+    alert(data.error || 'Error');
+    return;
+  }
+  if (action === 'endMatch') {
+    sessionStorage.removeItem('matchControlToken');
+    sessionStorage.removeItem('matchControlTeam');
+    controlToken = '';
+    $('matchPin').style.display = '';
+  }
 }
 
 function changeScore(id, amount) {
@@ -301,9 +344,23 @@ function changeScore(id, amount) {
   act('score', { team, delta: amount });
 }
 
-fetch('/api/state?team=' + encodeURIComponent(selectedTeam)).then(r => r.json()).then(render);
-const socket = io({query:{team:selectedTeam}});
-socket.on('state', render);
+let socket;
+function connectControl() {
+  if (!selectedTeam) return;
+  fetch('/api/state?team=' + encodeURIComponent(selectedTeam)).then(r => r.json()).then(render);
+  if (socket) socket.disconnect();
+  socket = io({query:{team:selectedTeam}});
+  socket.on('state', render);
+}
+$('matchPin').addEventListener('keydown', e => {
+  if (e.key === 'Enter') unlockControl();
+});
+if (controlToken && selectedTeam) {
+  $('matchPin').style.display = 'none';
+  connectControl();
+} else {
+  $('ageGroup').textContent = '—';
+}
 </script>
 <script>
 if ('serviceWorker' in navigator) {
