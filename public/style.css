@@ -336,8 +336,8 @@ transform: translate(25px, -22px);
 /* Age-group LIVE status: keep icon close to the edge and viewers beside it */
 .live-status-wrap {
   position: fixed;
-  top: 10px;
-  left: 6px;
+  top: 4px;
+  left: 0;
   z-index: 20;
   display: flex;
   align-items: center;
@@ -356,8 +356,8 @@ transform: translate(25px, -22px);
 }
 @media (max-width:700px) {
   .live-status-wrap {
-    top: 6px;
-    left: 2px;
+    top: 2px;
+    left: 0;
     gap: 5px;
   }
   .live-status-wrap .live-corner {
