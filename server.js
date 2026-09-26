@@ -502,6 +502,13 @@ app.get("/api/pending-results", async (req,res) => {
   res.json(result.rows);
 });
 
+app.get("/api/confirmed-results", async (req,res) => {
+  if (String(req.query.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const teamKey=normalizeTeamKey(req.query.team);
+  const result=await pool.query("SELECT * FROM season_matches WHERE team_key=$1 AND status='confirmed' ORDER BY played_at DESC,id DESC",[teamKey]);
+  res.json(result.rows);
+});
+
 app.post("/api/results/discard", async (req,res) => {
   if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
   const result=await pool.query("DELETE FROM season_matches WHERE id=$1 AND status='pending' RETURNING *",[Number(req.body?.id)]);
