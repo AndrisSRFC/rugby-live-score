@@ -457,7 +457,11 @@
 
       .subscribe-wrap { display:none; }
     }
-    </style>
+    
+    .trial-badge{display:none;margin:8px auto 0;width:max-content;max-width:90%;padding:6px 12px;border:1px solid rgba(0,180,0,.7);border-radius:999px;background:rgba(0,0,0,.72);font-size:11px;font-weight:800;letter-spacing:.4px;color:#ddd;text-align:center}
+    .trial-badge strong{color:#6cff55}
+    .trial-badge.expired{border-color:#ff3038}.trial-badge.expired strong{color:#ff5b61}
+</style>
 </head>
 
 <body>
@@ -504,6 +508,8 @@
         <button id="installApp">⬇ &nbsp; Install Rugby LIVE</button>
       </div>
       <div class="install-lift" aria-hidden="true">&nbsp;</div>
+      <div id="appTrialBadge" class="trial-badge" aria-live="polite"></div>
+
 
       <div class="subscribe-wrap" aria-hidden="true"></div>
 
@@ -566,6 +572,38 @@ if ('serviceWorker' in navigator) {
 
 let deferredInstallPrompt = null;
 const installAppBtn = document.getElementById('installApp');
+const appTrialBadge = document.getElementById('appTrialBadge');
+const TRIAL_DAYS = 30;
+const trialStartKey = 'rugbyLiveTrialStartedAt';
+
+function isInstalledApp(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function getTrialDay(){
+  if(!isInstalledApp()) return null;
+  let started = Number(localStorage.getItem(trialStartKey));
+  if(!started){
+    started = Date.now();
+    localStorage.setItem(trialStartKey,String(started));
+  }
+  // TEST-only override: ?trialDay=1, ?trialDay=29 or ?trialDay=31.
+  const requested = Number(new URLSearchParams(location.search).get('trialDay'));
+  if([1,29,31].includes(requested)) return requested;
+  return Math.max(1,Math.floor((Date.now()-started)/86400000)+1);
+}
+function renderTrialStatus(){
+  const day=getTrialDay();
+  if(day===null){ appTrialBadge.style.display='none'; return; }
+  installAppBtn.style.display='none';
+  appTrialBadge.style.display='block';
+  const remaining=Math.max(0,TRIAL_DAYS-day+1);
+  const expired=day>TRIAL_DAYS;
+  appTrialBadge.classList.toggle('expired',expired);
+  appTrialBadge.innerHTML=expired
+    ? '<strong>APP TRIAL ENDED</strong> · Day '+day+' · Support/Subscribe coming next'
+    : '<strong>APP TRIAL</strong> · Day '+day+' of '+TRIAL_DAYS+' · '+remaining+' day'+(remaining===1?'':'s')+' remaining';
+}
+renderTrialStatus();
 
 window.addEventListener('beforeinstallprompt', event => {
   event.preventDefault();
@@ -585,6 +623,7 @@ installAppBtn.addEventListener('click', async () => {
 window.addEventListener('appinstalled', () => {
   deferredInstallPrompt = null;
   installAppBtn.textContent = '✓ Rugby LIVE Installed';
+  // The standalone app starts its trial the first time it is opened.
 });
 
 async function refreshLiveButtons() {
