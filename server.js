@@ -180,6 +180,18 @@ async function initDatabase() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS nld_other_results (
+      id SERIAL PRIMARY KEY,
+      team_key TEXT NOT NULL,
+      home_name TEXT NOT NULL,
+      away_name TEXT NOT NULL,
+      home_score INTEGER NOT NULL DEFAULT 0,
+      away_score INTEGER NOT NULL DEFAULT 0,
+      played_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS match_control_access (
       team_key TEXT PRIMARY KEY,
       pin_hash TEXT,
@@ -538,6 +550,42 @@ app.post("/api/results/undo", async (req,res) => {
   const result=await pool.query("UPDATE season_matches SET status='pending',confirmed_at=NULL WHERE id=$1 RETURNING *",[Number(req.body?.id)]);
   if(!result.rowCount) return res.status(404).json({error:"Result not found"});
   res.json(result.rows[0]);
+});
+
+app.post("/api/nld-results/add", async (req,res) => {
+  if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const {team,homeName,awayName,homeScore,awayScore}=req.body||{};
+  const teamKey=normalizeTeamKey(team);
+  const hn=String(homeName||'').trim(), an=String(awayName||'').trim();
+  if(!hn || !an) return res.status(400).json({error:"Enter both team names"});
+  if(hn.toLowerCase().includes('sleaford') || an.toLowerCase().includes('sleaford')) return res.status(400).json({error:"Sleaford results come from confirmed LIVE NLD matches"});
+  const result=await pool.query(
+    `INSERT INTO nld_other_results (team_key,home_name,away_name,home_score,away_score)
+     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+    [teamKey,hn,an,Math.max(0,Number(homeScore)||0),Math.max(0,Number(awayScore)||0)]
+  );
+  res.json(result.rows[0]);
+});
+
+app.get("/api/nld-table", async (req,res) => {
+  try{
+    const teamKey=normalizeTeamKey(req.query.team);
+    const sleaford=await pool.query("SELECT home_name,away_name,home_score,away_score FROM season_matches WHERE team_key=$1 AND status='confirmed' AND LOWER(match_type)='nld'",[teamKey]);
+    const other=await pool.query("SELECT home_name,away_name,home_score,away_score FROM nld_other_results WHERE team_key=$1",[teamKey]);
+    const rows=[...sleaford.rows,...other.rows], teams={};
+    const get=name=>{
+      const key=String(name).trim().toLowerCase();
+      if(!teams[key]) teams[key]={team:String(name).trim(),played:0,wins:0,draws:0,losses:0,pf:0,pa:0,diff:0};
+      return teams[key];
+    };
+    rows.forEach(m=>{
+      const h=get(m.home_name), a=get(m.away_name), hs=Number(m.home_score), as=Number(m.away_score);
+      h.played++; a.played++; h.pf+=hs; h.pa+=as; a.pf+=as; a.pa+=hs;
+      if(hs>as){h.wins++;a.losses++;} else if(hs<as){a.wins++;h.losses++;} else {h.draws++;a.draws++;}
+    });
+    const table=Object.values(teams).map(t=>({...t,diff:t.pf-t.pa})).sort((a,b)=>b.wins-a.wins||b.diff-a.diff||b.pf-a.pf||a.team.localeCompare(b.team));
+    res.json({team:teamKey,matches:rows.length,table});
+  }catch(error){console.error("NLD table error:",error);res.status(500).json({error:"Database error"});}
 });
 
 app.get("/api/history", async (req, res) => {
