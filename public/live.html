@@ -174,7 +174,7 @@ function render(s) {
   $('half').textContent = s.matchLive ? s.half : (isFullTime ? 'Full Time' : 'Match Not Started');
   $('halfSuffix').textContent = s.matchLive ? (s.half === 1 ? 'st' : 'nd') : '';
   $('halfWord').textContent = s.matchLive ? ' Half' : '';
-  $('clock').textContent = fmt(s.remainingSeconds);
+  $('clock').textContent = (s.matchLive && s.clockMode === 'liveOnly') ? 'LIVE' : fmt(s.remainingSeconds);
   const age = s.ageGroup || 'U13';
 $('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
 $('statsAge').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
