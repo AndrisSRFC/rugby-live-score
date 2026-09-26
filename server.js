@@ -215,6 +215,14 @@ async function initDatabase() {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS landing_reactions (
+      device_id TEXT PRIMARY KEY,
+      reaction TEXT NOT NULL CHECK (reaction IN ('like','dislike')),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
   const result = await pool.query(
     "SELECT id, data FROM rugby_state ORDER BY id"
   );
@@ -274,6 +282,48 @@ app.get("/api/teams", (req, res) => {
 
 app.get("/api/state", (req, res) => {
   res.json(currentState(req.query.team));
+});
+
+app.get("/api/reactions", async (req, res) => {
+  try {
+    const counts = await pool.query(
+      "SELECT reaction, COUNT(*)::int AS count FROM landing_reactions GROUP BY reaction"
+    );
+    const result = { like: 0, dislike: 0 };
+    for (const row of counts.rows) result[row.reaction] = Number(row.count || 0);
+    res.json(result);
+  } catch (error) {
+    console.error("Reaction count error:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+app.post("/api/reactions", async (req, res) => {
+  const deviceId = String(req.body?.deviceId || "").trim();
+  const reaction = String(req.body?.reaction || "").trim();
+  if (!deviceId || deviceId.length > 100) return res.status(400).json({ error: "Invalid device" });
+  if (!["like","dislike",""].includes(reaction)) return res.status(400).json({ error: "Invalid reaction" });
+  try {
+    if (!reaction) {
+      await pool.query("DELETE FROM landing_reactions WHERE device_id=$1", [deviceId]);
+    } else {
+      await pool.query(
+        `INSERT INTO landing_reactions (device_id,reaction) VALUES ($1,$2)
+         ON CONFLICT (device_id) DO UPDATE SET reaction=EXCLUDED.reaction, updated_at=NOW()`,
+        [deviceId,reaction]
+      );
+    }
+    const counts = await pool.query(
+      "SELECT reaction, COUNT(*)::int AS count FROM landing_reactions GROUP BY reaction"
+    );
+    const result = { like: 0, dislike: 0 };
+    for (const row of counts.rows) result[row.reaction] = Number(row.count || 0);
+    io.emit("reactions", result);
+    res.json(result);
+  } catch (error) {
+    console.error("Reaction update error:", error);
+    res.status(500).json({ error: "Database error" });
+  }
 });
 
 app.post("/api/admin", async (req, res) => {
