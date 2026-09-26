@@ -29,7 +29,7 @@
     .pending-result{font-size:17px;color:#fff;font-weight:900;margin-bottom:9px;}
     .pending-badge{display:inline-block;padding:3px 7px;border:1px solid #555;border-radius:999px;font-size:11px;font-weight:900;color:#ffd84d;margin-left:6px;}
     @keyframes requestAlertPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,69,58,.25)}50%{box-shadow:0 0 18px 5px rgba(255,69,58,.75)}}
-    #refreshAccessRequests.request-alert{background:#ff453a;color:#fff;border-color:#ff453a;animation:requestAlertPulse .8s infinite;font-weight:1000;}
+    #refreshAccessRequests.request-alert,#refreshPendingResults.pending-alert{background:#ff453a;color:#fff;border-color:#ff453a;animation:requestAlertPulse .8s infinite;font-weight:1000;}
     a { color:white; }
     @media(max-width:720px){
       .grid{grid-template-columns:1fr;}
@@ -220,7 +220,7 @@ white-space:nowrap;
 </section>
 <section class="panel">
   <label>Current Season — Pending Results</label>
-  <div class="row"><button type="button" onclick="loadPendingResults()">Refresh Pending Results</button></div>
+  <div class="row"><button id="refreshPendingResults" type="button" onclick="loadPendingResults()">Refresh Pending Results</button></div>
   <div id="pendingResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
 </section>
 <section class="panel">
@@ -315,11 +315,37 @@ async function addOtherNldResult(){
   $('nldOtherHome').value=''; $('nldOtherAway').value=''; $('nldOtherHomeScore').value=''; $('nldOtherAwayScore').value='';
   loadTeamSuggestions(); alert('NLD result added to the league table');
 }
+let knownPendingResultIds = new Set();
+let pendingWatchReady = false;
+function setPendingAlert(on){
+  const btn=$('refreshPendingResults');
+  if(!btn)return;
+  btn.classList.toggle('pending-alert',on);
+  btn.textContent=on?'NEW RESULT — REFRESH':'Refresh Pending Results';
+}
+async function watchPendingResults(){
+  const pin=$('pin').value.trim();
+  if(!pin)return;
+  try{
+    const r=await fetch('/api/pending-results?team='+encodeURIComponent(selectedTeam)+'&pin='+encodeURIComponent(pin));
+    const rows=await r.json(); if(!r.ok||!Array.isArray(rows))return;
+    if(!pendingWatchReady){
+      if(rows.length)setPendingAlert(true);
+    }else if(rows.some(m=>!knownPendingResultIds.has(String(m.id)))){
+      setPendingAlert(true);
+    }
+    knownPendingResultIds=new Set(rows.map(m=>String(m.id)));
+    pendingWatchReady=true;
+  }catch(e){}
+}
 async function loadPendingResults(){
   const r=await fetch('/api/pending-results?team='+encodeURIComponent(selectedTeam)+'&pin='+encodeURIComponent($('pin').value));
   const rows=await r.json();
   if(!r.ok) return alert(rows.error||'Could not load pending results');
   $('pendingResults').innerHTML=rows.length?rows.map(m=>'<div class="pending-card"><div class="pending-meta"><b>'+selectedTeam+'</b> · '+m.match_type+' <span class="pending-badge">PENDING</span></div><div class="pending-result">'+m.home_name+' '+m.home_score+'–'+m.away_score+' '+m.away_name+'</div><button onclick="editPending('+m.id+',\''+String(m.home_name).replace(/'/g,"\\'")+'\',\''+String(m.away_name).replace(/'/g,"\\'")+'\','+m.home_score+','+m.away_score+',\''+String(m.match_type).replace(/'/g,"\\'")+'\')">Edit</button> <button class="red" onclick="discardPending('+m.id+')">Discard</button> <button class="green" onclick="confirmPending('+m.id+')">Confirm Result</button></div>').join(''):'No pending results';
+  knownPendingResultIds=new Set(rows.map(m=>String(m.id)));
+  pendingWatchReady=true;
+  setPendingAlert(false);
 }
 async function loadConfirmedResults(){
   const r=await fetch('/api/confirmed-results?team='+encodeURIComponent(selectedTeam)+'&pin='+encodeURIComponent($('pin').value));
@@ -547,6 +573,7 @@ async function decideControlRequest(id,decision){
   loadControlRequests();
 }
 setInterval(watchControlRequests,3000);
+setInterval(watchPendingResults,3000);
 </script>
 </body>
 </html>
