@@ -58,6 +58,7 @@ const defaultState = {
   running: false,
   startedAt: null,
   matchLive: false,
+  clockMode: "clock",
   message: "No match in progress",
   ageGroup: "U13",
   matchType: "Friendly",
@@ -188,6 +189,18 @@ async function initDatabase() {
       home_score INTEGER NOT NULL DEFAULT 0,
       away_score INTEGER NOT NULL DEFAULT 0,
       played_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS match_control_requests (
+      id SERIAL PRIMARY KEY,
+      team_key TEXT NOT NULL,
+      mode TEXT NOT NULL DEFAULT 'new',
+      request_hash TEXT NOT NULL UNIQUE,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      decided_at TIMESTAMPTZ
     )
   `);
 
@@ -413,6 +426,53 @@ app.post("/api/admin", async (req, res) => {
     console.error("Admin action error:", error);
     res.status(500).json({ error: "Database error" });
   }
+});
+
+app.post("/api/match-control/request", async (req,res) => {
+  const teamKey=normalizeTeamKey(req.body?.team);
+  const mode=req.body?.mode === "in_progress" ? "in_progress" : "new";
+  const requestToken=makeSessionToken();
+  const result=await pool.query(
+    "INSERT INTO match_control_requests (team_key,mode,request_hash) VALUES ($1,$2,$3) RETURNING id,team_key,mode,status,created_at",
+    [teamKey,mode,secretHash(requestToken)]
+  );
+  res.json({...result.rows[0],requestToken});
+});
+
+app.get("/api/match-control/request-status", async (req,res) => {
+  const token=String(req.query.token||"");
+  if(!token) return res.status(400).json({error:"Missing request token"});
+  const result=await pool.query("SELECT id,team_key,mode,status FROM match_control_requests WHERE request_hash=$1",[secretHash(token)]);
+  if(!result.rowCount) return res.status(404).json({error:"Request not found"});
+  const row=result.rows[0];
+  res.json({...row, controlToken: row.status==="approved" ? token : undefined});
+});
+
+app.get("/api/match-control/requests", async (req,res) => {
+  if(String(req.query.pin)!==String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const result=await pool.query("SELECT id,team_key,mode,status,created_at FROM match_control_requests WHERE status='pending' ORDER BY created_at ASC");
+  res.json(result.rows);
+});
+
+app.post("/api/match-control/request-decision", async (req,res) => {
+  if(String(req.body?.pin)!==String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const id=Number(req.body?.id), decision=req.body?.decision==="approve"?"approved":"declined";
+  const found=await pool.query("SELECT * FROM match_control_requests WHERE id=$1 AND status='pending'",[id]);
+  if(!found.rowCount) return res.status(404).json({error:"Pending request not found"});
+  const row=found.rows[0];
+  if(decision==="approved"){
+    await pool.query(`INSERT INTO match_control_access (team_key,pin_hash,session_hash,pin_used,revoked,created_at)
+      VALUES ($1,NULL,$2,TRUE,FALSE,NOW())
+      ON CONFLICT (team_key) DO UPDATE SET pin_hash=NULL,session_hash=EXCLUDED.session_hash,pin_used=TRUE,revoked=FALSE,created_at=NOW()`,
+      [row.team_key,row.request_hash]);
+    if(row.mode==="in_progress"){
+      const st=getState(row.team_key);
+      st.clockMode="liveOnly"; st.running=false; st.startedAt=null; st.matchLive=true; st.message="";
+      await saveState(row.team_key); broadcast(row.team_key);
+    }
+  }
+  await pool.query("UPDATE match_control_requests SET status=$2,decided_at=NOW() WHERE id=$1",[id,decision]);
+  res.json({ok:true,status:decision,team:row.team_key,mode:row.mode});
 });
 
 app.post("/api/match-control/generate", async (req, res) => {
