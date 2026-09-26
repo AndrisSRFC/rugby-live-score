@@ -34,6 +34,19 @@
   display:flex;align-items:center;justify-content:center;padding:80px 24px 50px;box-sizing:border-box;
 }
 body.stats-open .stats-screen{transform:translateX(0);}
+.table-screen{
+  position:fixed;inset:0;z-index:31;background:#050505;color:#fff;
+  transform:translateX(100%);transition:transform .32s ease;
+  display:flex;align-items:center;justify-content:center;padding:80px 24px 50px;box-sizing:border-box;
+}
+body.table-open .table-screen{transform:translateX(0);}
+.table-card{margin:28px auto 0;width:min(520px,100%);min-height:360px;border:1px solid #333;border-radius:24px;background:linear-gradient(145deg,#121212,#0a0a0a);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;box-sizing:border-box;}
+.table-trophy{font-size:64px;filter:grayscale(1);opacity:.75;}
+.table-title{font-size:34px;font-weight:1000;color:#ffd400;margin-top:18px;}
+.table-coming{font-size:25px;font-weight:1000;margin-top:2px;}
+.table-copy{font-size:16px;line-height:1.45;color:#aaa;margin-top:24px;max-width:390px;}
+.table-hint{margin-top:28px;font-size:11px;font-weight:800;letter-spacing:1px;color:#888;cursor:pointer;user-select:none;}
+.stats-next-hint{margin-top:18px;font-size:11px;font-weight:800;letter-spacing:1px;color:#888;cursor:pointer;user-select:none;}
 .stats-panel{width:min(620px,100%);text-align:center;}
 .stats-age{font-size:58px;font-weight:900;color:#ffd400;line-height:1;}
 .stats-club{font-size:22px;font-weight:900;margin-top:8px;}
@@ -80,7 +93,21 @@ body.stats-open .stats-screen{transform:translateX(0);}
       <div class="stats-history-title">MATCH HISTORY</div>
       <div class="stats-empty">No matches played yet</div>
     </div>
+    <div class="stats-next-hint" id="openTable">‹ SWIPE FOR NLD TABLE</div>
     <div class="live-score-hint" id="closeStats">LIVE SCORE ›</div>
+  </div>
+</div>
+<div class="table-screen" id="tableScreen">
+  <div class="stats-panel">
+    <div class="stats-age" id="tableAge">U13's</div>
+    <div class="stats-club">NLD LEAGUE TABLE</div>
+    <div class="table-card">
+      <div class="table-trophy">🏆</div>
+      <div class="table-title">NLD TABLE</div>
+      <div class="table-coming">COMING SOON</div>
+      <div class="table-copy">Full league table with all NLD teams.<br>Results from Sleaford LIVE and manually added NLD games will be shown here.</div>
+    </div>
+    <div class="table-hint" id="closeTable">SWIPE BACK FOR MATCH HISTORY ›</div>
   </div>
 </div>
 <div class="wrap">
@@ -142,6 +169,7 @@ function render(s) {
   const age = s.ageGroup || 'U13';
 $('ageGroup').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
 $('statsAge').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
+$('tableAge').textContent = ['U13','U14','U15','U16'].includes(age) ? age + "'s" : age;
 $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME';
   $('liveCorner').style.display = s.matchLive ? 'block' : 'none';
  $('nextLiveBox').innerHTML = (s.nextLive)
@@ -169,8 +197,12 @@ async function loadSeasonStats(){
 }
 function openStats(){ loadSeasonStats(); document.body.classList.add('stats-open'); }
 function closeStats(){ document.body.classList.remove('stats-open'); }
+function openTable(){ document.body.classList.add('stats-open'); document.body.classList.add('table-open'); }
+function closeTable(){ document.body.classList.remove('table-open'); }
 $('openStats').addEventListener('click', openStats);
 $('closeStats').addEventListener('click', closeStats);
+$('openTable').addEventListener('click', openTable);
+$('closeTable').addEventListener('click', closeTable);
 
 let touchStartX = 0;
 let touchStartY = 0;
@@ -184,8 +216,14 @@ document.addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
   if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy)) return;
-  if (dx < 0) openStats();
-  if (dx > 0) closeStats();
+  if (dx < 0) {
+    if (document.body.classList.contains('stats-open')) openTable();
+    else openStats();
+  }
+  if (dx > 0) {
+    if (document.body.classList.contains('table-open')) closeTable();
+    else closeStats();
+  }
 }, {passive:true});
 
 const params = new URLSearchParams(location.search);
