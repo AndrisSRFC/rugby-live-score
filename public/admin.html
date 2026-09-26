@@ -100,7 +100,7 @@ white-space:nowrap;
   </style>
 </head>
 <body>
-<datalist id="teamSuggestions"><option value="Sleaford"></option></datalist>
+<datalist id="teamSuggestions"></datalist>
 <div class="admin">
   <h1>Rugby LIVE — Control Panel</h1>
 
@@ -244,14 +244,20 @@ white-space:nowrap;
 <script src="/socket.io/socket.io.js"></script>
 <script>
 let generatedControlPin = '';
+let allTeamSuggestions=[];
 async function loadTeamSuggestions(){
   try{
     const r=await fetch('/api/opponents');
     const names=await r.json();
     if(!r.ok)return;
-    const all=['Sleaford',...names.filter(n=>String(n).toLowerCase()!=='sleaford')];
-    $('teamSuggestions').innerHTML=all.map(n=>'<option value="'+String(n).replace(/"/g,'&quot;')+'"></option>').join('');
+    allTeamSuggestions=['Sleaford',...names.filter(n=>String(n).toLowerCase()!=='sleaford')];
+    filterTeamSuggestions('');
   }catch(e){}
+}
+function filterTeamSuggestions(value){
+  const q=String(value||'').trim().toLowerCase();
+  const matches=allTeamSuggestions.filter(n=>!q||String(n).toLowerCase().startsWith(q));
+  $('teamSuggestions').innerHTML=matches.map(n=>'<option value="'+String(n).replace(/"/g,'&quot;')+'"></option>').join('');
 }
 
 async function generateMatchControlPin() {
@@ -477,8 +483,10 @@ function saveNames(){
   }),400);
 }
 
-$('homeName').addEventListener('input',saveNames);
-$('awayName').addEventListener('input',saveNames);
+$('homeName').addEventListener('input',e=>{filterTeamSuggestions(e.currentTarget.value);saveNames();});
+$('awayName').addEventListener('input',e=>{filterTeamSuggestions(e.currentTarget.value);saveNames();});
+$('homeName').addEventListener('focus',e=>filterTeamSuggestions(e.currentTarget.value==='Team 1'?'':e.currentTarget.value));
+$('awayName').addEventListener('focus',e=>filterTeamSuggestions(e.currentTarget.value==='Team 2'?'':e.currentTarget.value));
 
 function selectDefaultTeamName(e){
   const el=e.currentTarget;
