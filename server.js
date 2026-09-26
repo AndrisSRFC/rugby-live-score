@@ -259,6 +259,18 @@ async function initDatabase() {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS app_access (
+      install_id TEXT PRIMARY KEY,
+      access_status TEXT NOT NULL DEFAULT 'trial'
+        CHECK (access_status IN ('trial','subscriber','owner','expired')),
+      trial_started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      subscription_until TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
   const result = await pool.query(
     "SELECT id, data FROM rugby_state ORDER BY id"
   );
@@ -304,6 +316,39 @@ async function initDatabase() {
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+
+app.post("/api/app-access/register", async (req,res) => {
+  try {
+    const installId=String(req.body?.installId||"").trim();
+    if(!/^[a-zA-Z0-9_-]{16,100}$/.test(installId)) return res.status(400).json({error:"Invalid install ID"});
+    await pool.query("INSERT INTO app_access (install_id) VALUES ($1) ON CONFLICT (install_id) DO NOTHING",[installId]);
+    const row=(await pool.query("SELECT access_status,trial_started_at,subscription_until FROM app_access WHERE install_id=$1",[installId])).rows[0];
+    const trialDay=Math.max(1,Math.floor((Date.now()-new Date(row.trial_started_at).getTime())/86400000)+1);
+    const subscriptionActive=row.access_status==="subscriber" && row.subscription_until && new Date(row.subscription_until)>new Date();
+    const effectiveStatus=row.access_status==="owner"?"owner":subscriptionActive?"subscriber":trialDay<=30?"trial":"expired";
+    res.json({status:effectiveStatus,trialDay,trialDays:30,subscriptionUntil:row.subscription_until});
+  } catch(error) {
+    console.error("App access register error:",error);
+    res.status(500).json({error:"Database error"});
+  }
+});
+
+app.get("/api/app-access", async (req,res) => {
+  try {
+    const installId=String(req.query.installId||"").trim();
+    if(!installId) return res.status(400).json({error:"Missing install ID"});
+    const result=await pool.query("SELECT access_status,trial_started_at,subscription_until FROM app_access WHERE install_id=$1",[installId]);
+    if(!result.rowCount) return res.status(404).json({error:"App installation not registered"});
+    const row=result.rows[0];
+    const trialDay=Math.max(1,Math.floor((Date.now()-new Date(row.trial_started_at).getTime())/86400000)+1);
+    const subscriptionActive=row.access_status==="subscriber" && row.subscription_until && new Date(row.subscription_until)>new Date();
+    const effectiveStatus=row.access_status==="owner"?"owner":subscriptionActive?"subscriber":trialDay<=30?"trial":"expired";
+    res.json({status:effectiveStatus,trialDay,trialDays:30,subscriptionUntil:row.subscription_until});
+  } catch(error) {
+    console.error("App access status error:",error);
+    res.status(500).json({error:"Database error"});
+  }
+});
 
 app.get("/api/teams", (req, res) => {
   res.json(
