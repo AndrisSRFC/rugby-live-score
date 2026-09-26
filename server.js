@@ -426,6 +426,14 @@ app.post("/api/admin", async (req, res) => {
         break;
 
       case "endMatch":
+        // Idempotency guard: once this match is Full Time, repeated End Match
+        // requests must not create duplicate Pending Results.
+        if (selectedState.message === "Full Time") {
+          selectedState.matchLive = false;
+          selectedState.running = false;
+          selectedState.startedAt = null;
+          break;
+        }
         await pool.query(
           `INSERT INTO season_matches (team_key,home_name,away_name,home_score,away_score,match_type,status)
            VALUES ($1,$2,$3,$4,$5,$6,'pending')`,
