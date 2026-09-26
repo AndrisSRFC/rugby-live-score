@@ -520,7 +520,11 @@ async function watchControlRequests(){
     const r=await fetch('/api/match-control/requests?pin='+encodeURIComponent(pin));
     const d=await r.json(); if(!r.ok||!Array.isArray(d))return;
     const ids=new Set(d.map(x=>String(x.id)));
-    if(requestWatchReady){
+    if(!requestWatchReady){
+      // Admin may have been closed when the request arrived.
+      // Any pending request on the first successful check must be highlighted.
+      if(d.length)setRequestAlert(true);
+    }else{
       const hasNew=d.some(x=>!knownPendingRequestIds.has(String(x.id)));
       if(hasNew)setRequestAlert(true);
     }
