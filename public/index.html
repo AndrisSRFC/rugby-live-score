@@ -658,6 +658,24 @@ async function renderTrialStatus(){
 }
 renderTrialStatus();
 
+const ownerParams=new URLSearchParams(location.search);
+if(isInstalledApp() && ownerParams.get('ownerSetup')==='1'){
+  const pin=prompt('Owner setup: enter Admin PIN');
+  if(pin){
+    fetch('/api/app-access/owner',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pin,installId:getInstallId()})
+    }).then(async r=>{
+      const d=await r.json();
+      if(!r.ok) throw new Error(d.error||'Owner setup failed');
+      history.replaceState({},'',location.pathname);
+      await renderTrialStatus();
+      alert('OWNER APP activated on this installation.');
+    }).catch(e=>alert(e.message));
+  }
+}
+
 document.getElementById('trialSupportBtn')?.addEventListener('click',()=>{
   alert('TEST: Subscribe / Support payment will be connected after this screen is approved.');
 });
