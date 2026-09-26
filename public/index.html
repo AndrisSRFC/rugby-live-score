@@ -644,7 +644,7 @@ async function requestMatchControl(){
       clearInterval(requestPoll);
       sessionStorage.setItem('matchControlToken',d.requestToken);
       sessionStorage.setItem('matchControlTeam',sd.team);
-      document.getElementById('requestStatus').innerHTML='Access approved ✓ <a href="/match-control.html" style="color:#39ff14;font-weight:900">OPEN MATCH CONTROL →</a>';
+      document.getElementById('requestStatus').innerHTML='Access approved ✓ <a href="/match-control.html?team='+encodeURIComponent(sd.team)+'" style="color:#39ff14;font-weight:900">OPEN MATCH CONTROL →</a>';
     }
   },2000);
 }
