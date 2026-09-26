@@ -480,6 +480,13 @@ function saveNames(){
 $('homeName').addEventListener('input',saveNames);
 $('awayName').addEventListener('input',saveNames);
 
+function selectDefaultTeamName(e){
+  const el=e.currentTarget;
+  if(el.value==='Team 1'||el.value==='Team 2') el.select();
+}
+$('homeName').addEventListener('focus',selectDefaultTeamName);
+$('awayName').addEventListener('focus',selectDefaultTeamName);
+
 $('publicLiveLink').href = '/live.html?team=' + encodeURIComponent(selectedTeam);
 $('matchControlLink').href = '/match-control.html';
 
