@@ -422,9 +422,9 @@
          away from the team buttons and Install button. */
       .social-actions {
         position:absolute;
-        left:40%;
-        top: 82px;
-        transform:translateX(-50%);
+        left:14px;
+        top:82px;
+        transform:none;
         z-index:6;
         gap:8px;
         margin:0;
@@ -455,15 +455,7 @@
       .score-help small { display:none; }
       .score-help button { padding:5px 6px; font-size:8px; }
 
-      .subscribe-wrap {
-        position:absolute;
-        left:14px;
-        right:auto;
-        top: 82px;
-        z-index:5;
-        margin:0;
-      }
-      .subscribe-btn { padding:6px 13px; font-size:11px; }
+      .subscribe-wrap { display:none; }
     }
     </style>
 </head>
@@ -513,7 +505,7 @@
       </div>
       <div class="install-lift" aria-hidden="true">&nbsp;</div>
 
-      <div class="subscribe-wrap"><button class="subscribe-btn" type="button" aria-disabled="true">Subscribe</button></div>
+      <div class="subscribe-wrap" aria-hidden="true"></div>
 
       <div class="social-actions" aria-label="Project feedback">
         <button class="reaction-btn" id="likeBtn" aria-label="Like">👍 <span id="likeCount">0</span></button>
