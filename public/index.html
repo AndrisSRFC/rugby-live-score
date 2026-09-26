@@ -605,6 +605,23 @@ function renderTrialStatus(){
 }
 renderTrialStatus();
 
+// TEST-only controls for checking installed-app trial states without an address bar.
+if(isInstalledApp() && location.hostname.includes('test')){
+  const trialTestControls=document.createElement('div');
+  trialTestControls.id='trialTestControls';
+  trialTestControls.style.cssText='position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:9999;display:flex;gap:6px;padding:6px;background:rgba(0,0,0,.82);border:1px solid #444;border-radius:10px';
+  trialTestControls.innerHTML='<button type="button" data-day="1">Day 1</button><button type="button" data-day="29">Day 29</button><button type="button" data-day="31">Day 31</button>';
+  trialTestControls.querySelectorAll('button').forEach(btn=>{
+    btn.style.cssText='padding:7px 9px;border:1px solid #666;border-radius:8px;background:#151515;color:#fff;font-weight:900;cursor:pointer';
+    btn.addEventListener('click',()=>{
+      const url=new URL(location.href);
+      url.searchParams.set('trialDay',btn.dataset.day);
+      location.href=url.toString();
+    });
+  });
+  document.body.appendChild(trialTestControls);
+}
+
 window.addEventListener('beforeinstallprompt', event => {
   event.preventDefault();
   deferredInstallPrompt = event;
