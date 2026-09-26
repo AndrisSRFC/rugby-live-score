@@ -31,6 +31,9 @@
     @keyframes requestAlertPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,69,58,.25)}50%{box-shadow:0 0 18px 5px rgba(255,69,58,.75)}}
     #refreshAccessRequests.request-alert,#refreshPendingResults.pending-alert{background:#ff453a;color:#fff;border-color:#ff453a;animation:requestAlertPulse .8s infinite;font-weight:1000;}
     a { color:white; }
+    @media(min-width:721px){
+      .top-controls{transform:translateY(-6px);}
+    }
     .admin-top-panel{position:relative;}
     .pending-top-shortcut{position:absolute;right:20px;top:20px;}
     .pending-top-shortcut button{min-width:180px;}
