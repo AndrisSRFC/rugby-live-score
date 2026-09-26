@@ -74,12 +74,8 @@ body.stats-open .stats-screen{transform:translateX(0);}
   <div class="stats-panel">
     <div class="stats-age" id="statsAge">U13's</div>
     <div class="stats-club">SLEAFORD RUGBY</div>
-    <div class="stats-season">FULL STATS</div>
+    <div class="stats-season">MATCH HISTORY</div>
     <div class="stats-rule"></div>
-    <div class="stats-played-label">PLAYED</div>
-    <div class="stats-played">0</div>
-    <div class="stats-wdl"><span>W 0</span><span>D 0</span><span>L 0</span></div>
-    <div class="stats-points">POINTS&nbsp;&nbsp; FOR 0 &nbsp;·&nbsp; AGAINST 0</div>
     <div class="stats-history">
       <div class="stats-history-title">MATCH HISTORY</div>
       <div class="stats-empty">No matches played yet</div>
@@ -167,11 +163,8 @@ async function loadSeasonStats(){
     const r=await fetch('/api/season-stats?team='+encodeURIComponent(selectedTeam));
     const s=await r.json();
     $('seasonWins').textContent=s.wins||0; $('seasonDraws').textContent=s.draws||0; $('seasonLosses').textContent=s.losses||0;
-    document.querySelector('.stats-played').textContent=s.played||0;
-    document.querySelector('.stats-wdl').innerHTML='<span>W '+(s.wins||0)+'</span><span>D '+(s.draws||0)+'</span><span>L '+(s.losses||0)+'</span>';
-    document.querySelector('.stats-points').innerHTML='POINTS&nbsp;&nbsp; FOR '+(s.pointsFor||0)+' &nbsp;·&nbsp; AGAINST '+(s.pointsAgainst||0);
     const box=document.querySelector('.stats-history');
-    box.innerHTML='<div class="stats-history-title">MATCH HISTORY</div>'+(s.matches?.length?s.matches.map(m=>'<div class="stats-empty">'+m.outcome+' &nbsp; '+m.opponent+' &nbsp; '+m.pointsFor+'–'+m.pointsAgainst+'</div>').join(''):'<div class="stats-empty">No confirmed matches yet</div>');
+    box.innerHTML=s.matches?.length?s.matches.map(m=>'<div class="stats-empty" style="margin-top:16px"><div style="font-size:17px;font-weight:900;color:#fff">'+m.home_name+' '+m.home_score+' – '+m.away_score+' '+m.away_name+'</div><div style="margin-top:5px;font-size:11px;font-weight:900;letter-spacing:1px">'+(m.outcome==='W'?'WIN':m.outcome==='L'?'LOSS':'DRAW')+'</div></div>').join(''):'<div class="stats-empty">No confirmed matches yet</div>';
   }catch(e){}
 }
 function openStats(){ loadSeasonStats(); document.body.classList.add('stats-open'); }
