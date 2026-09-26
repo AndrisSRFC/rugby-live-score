@@ -307,6 +307,21 @@
       font-weight:900;
       cursor:pointer;
     }
+    .signup-card h2{margin:0 0 8px;font-size:26px;}
+    .signup-lead{margin:0;color:#39ff14;font-weight:900;font-size:15px;}
+    .control-preview{margin:16px auto 4px;padding:14px;border:1px solid #333;border-radius:14px;background:#090909;text-align:left;}
+    .control-preview-title{text-align:center;color:#ffd400;font-weight:1000;font-size:12px;letter-spacing:1px;margin-bottom:10px;}
+    .control-demo{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center;}
+    .control-team{padding:9px 5px;border:1px solid #333;border-radius:9px;font-weight:900;}
+    .control-score{font-size:28px;font-weight:1000;}
+    .control-clock{text-align:center;margin:10px 0;font-size:20px;font-weight:1000;}
+    .control-actions{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;}
+    .control-pill{padding:6px 9px;border:1px solid #39ff14;border-radius:7px;font-size:10px;font-weight:900;}
+    .how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px;}
+    .how-step{padding:8px 3px;border-radius:8px;background:#191919;font-size:10px;font-weight:800;}
+    .how-step b{display:block;color:#39ff14;font-size:14px;margin-bottom:3px;}
+    .signup-note{font-size:12px;color:#aaa;margin:14px 0 0;}
+    @media(max-width:480px){.signup-card{padding:18px}.how-steps{grid-template-columns:repeat(2,1fr)}}
 
     @media (max-width: 700px) {
       .topbar {
@@ -492,8 +507,8 @@
       </div>
 
       <div class="score-help">
-        <div><strong>Help with score keeping!</strong><small>Join Match Control and be part of the game.</small></div>
-        <button id="scoreHelpBtn">Find out more →</button>
+        <div><strong>JOIN THE TOUCHLINE TEAM</strong><small>Help us keep Rugby LIVE from the sideline.</small></div>
+        <button id="scoreHelpBtn">See how →</button>
       </div>
 
     </div>
@@ -502,9 +517,27 @@
 
   <div class="signup-modal" id="signupModal">
     <div class="signup-card">
-      <h2>Help with Match Control</h2>
-      <p>Want to help keep the LIVE score? Contact the broadcast administrator to get access to Match Control.</p>
-      <button id="closeSignup">Close</button>
+      <h2>HELP BRING RUGBY LIVE 🏉</h2>
+      <p class="signup-lead">Be part of match day from the touchline.</p>
+      <p>Help supporters follow the game by keeping the LIVE score updated. No experience needed — Match Control is quick and simple to use.</p>
+      <div class="control-preview">
+        <div class="control-preview-title">MATCH CONTROL</div>
+        <div class="control-demo">
+          <div class="control-team">HOME<div class="control-score">12</div></div>
+          <strong>–</strong>
+          <div class="control-team">AWAY<div class="control-score">10</div></div>
+        </div>
+        <div class="control-clock">24:18 · 1st Half</div>
+        <div class="control-actions"><span class="control-pill">+ SCORE</span><span class="control-pill">CLOCK</span><span class="control-pill">HALF</span><span class="control-pill">END MATCH</span></div>
+      </div>
+      <div class="how-steps">
+        <div class="how-step"><b>1</b>Get your one-time PIN</div>
+        <div class="how-step"><b>2</b>Update the score</div>
+        <div class="how-step"><b>3</b>Control clock & half</div>
+        <div class="how-step"><b>4</b>End the match</div>
+      </div>
+      <p class="signup-note">Contact the broadcast administrator for Match Control access.</p>
+      <button id="closeSignup">Got it</button>
     </div>
   </div>
 
