@@ -181,6 +181,42 @@ async function initDatabase() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS season_config (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      current_season TEXT NOT NULL
+    )
+  `);
+  await pool.query("INSERT INTO season_config (id,current_season) VALUES (1,'2026-27') ON CONFLICT (id) DO NOTHING");
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS season_squads (
+      season_id TEXT NOT NULL,
+      age_group TEXT NOT NULL,
+      squad_id TEXT NOT NULL,
+      PRIMARY KEY (season_id, age_group)
+    )
+  `);
+  const initialSquads = {
+    U13:'squad-u13-2026-27', U14:'squad-u14-2026-27', U15:'squad-u15-2026-27', U16:'squad-u16-2026-27',
+    Colts:'colts', '1st XV':'1st-xv', '2nd XV':'2nd-xv'
+  };
+  for (const [ageGroup,squadId] of Object.entries(initialSquads)) {
+    await pool.query(
+      "INSERT INTO season_squads (season_id,age_group,squad_id) VALUES ('2026-27',$1,$2) ON CONFLICT DO NOTHING",
+      [ageGroup,squadId]
+    );
+  }
+
+  await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS season_id TEXT");
+  await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS squad_id TEXT");
+  await pool.query("UPDATE season_matches SET season_id='2026-27' WHERE season_id IS NULL");
+  await pool.query(`
+    UPDATE season_matches m SET squad_id=s.squad_id
+    FROM season_squads s
+    WHERE m.squad_id IS NULL AND s.season_id=m.season_id AND s.age_group=m.team_key
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS nld_other_results (
       id SERIAL PRIMARY KEY,
       team_key TEXT NOT NULL,
@@ -282,6 +318,51 @@ app.get("/api/teams", (req, res) => {
 
 app.get("/api/state", (req, res) => {
   res.json(currentState(req.query.team));
+});
+
+async function getCurrentSeasonMeta(teamKey) {
+  const season = await pool.query("SELECT current_season FROM season_config WHERE id=1");
+  const seasonId = season.rows[0]?.current_season || '2026-27';
+  const squad = await pool.query("SELECT squad_id FROM season_squads WHERE season_id=$1 AND age_group=$2",[seasonId,teamKey]);
+  return { seasonId, squadId: squad.rows[0]?.squad_id || ('squad-'+teamKey.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+seasonId) };
+}
+
+app.get("/api/season-config", async (req,res) => {
+  if (String(req.query.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const season = await pool.query("SELECT current_season FROM season_config WHERE id=1");
+  const squads = await pool.query("SELECT age_group,squad_id FROM season_squads WHERE season_id=$1 ORDER BY age_group",[season.rows[0].current_season]);
+  res.json({currentSeason:season.rows[0].current_season,squads:squads.rows});
+});
+
+app.post("/api/season/start", async (req,res) => {
+  if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  const nextSeason=String(req.body?.season||'').trim();
+  if(!/^\d{4}-\d{2}$/.test(nextSeason)) return res.status(400).json({error:"Use season format YYYY-YY, e.g. 2027-28"});
+  const current=(await pool.query("SELECT current_season FROM season_config WHERE id=1")).rows[0].current_season;
+  if(nextSeason===current) return res.status(400).json({error:"That season is already active"});
+  const existing=await pool.query("SELECT 1 FROM season_squads WHERE season_id=$1 LIMIT 1",[nextSeason]);
+  if(existing.rowCount) return res.status(409).json({error:"That season has already been created"});
+  const oldRows=await pool.query("SELECT age_group,squad_id FROM season_squads WHERE season_id=$1",[current]);
+  const old=Object.fromEntries(oldRows.rows.map(r=>[r.age_group,r.squad_id]));
+  const next={
+    U13:'squad-u13-'+nextSeason,
+    U14:old.U13||('squad-u14-'+nextSeason),
+    U15:old.U14||('squad-u15-'+nextSeason),
+    U16:old.U15||('squad-u16-'+nextSeason),
+    Colts:old.Colts||'colts',
+    '1st XV':old['1st XV']||'1st-xv',
+    '2nd XV':old['2nd XV']||'2nd-xv'
+  };
+  const client=await pool.connect();
+  try{
+    await client.query('BEGIN');
+    for(const [ageGroup,squadId] of Object.entries(next)){
+      await client.query("INSERT INTO season_squads (season_id,age_group,squad_id) VALUES ($1,$2,$3)",[nextSeason,ageGroup,squadId]);
+    }
+    await client.query("UPDATE season_config SET current_season=$1 WHERE id=1",[nextSeason]);
+    await client.query('COMMIT');
+  }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
+  res.json({ok:true,currentSeason:nextSeason,squads:next});
 });
 
 app.get("/api/reactions", async (req, res) => {
@@ -434,10 +515,11 @@ app.post("/api/admin", async (req, res) => {
           selectedState.startedAt = null;
           break;
         }
+        const seasonMeta = await getCurrentSeasonMeta(teamKey);
         await pool.query(
-          `INSERT INTO season_matches (team_key,home_name,away_name,home_score,away_score,match_type,status)
-           VALUES ($1,$2,$3,$4,$5,$6,'pending')`,
-          [teamKey, selectedState.homeName, selectedState.awayName, selectedState.homeScore, selectedState.awayScore, selectedState.matchType]
+          `INSERT INTO season_matches (team_key,home_name,away_name,home_score,away_score,match_type,status,season_id,squad_id)
+           VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8)`,
+          [teamKey, selectedState.homeName, selectedState.awayName, selectedState.homeScore, selectedState.awayScore, selectedState.matchType, seasonMeta.seasonId, seasonMeta.squadId]
         );
         selectedState.matchLive = false;
         selectedState.running = false;
@@ -617,10 +699,11 @@ app.post("/api/results/add", async (req,res) => {
   const teamKey=normalizeTeamKey(team);
   const hn=String(homeName||'').trim(), an=String(awayName||'').trim();
   if(!hn || !an) return res.status(400).json({error:"Enter both team names"});
+  const seasonMeta=await getCurrentSeasonMeta(teamKey);
   const result=await pool.query(
-    `INSERT INTO season_matches (team_key,home_name,away_name,home_score,away_score,match_type,status)
-     VALUES ($1,$2,$3,$4,$5,$6,'pending') RETURNING *`,
-    [teamKey,hn,an,Math.max(0,Number(homeScore)||0),Math.max(0,Number(awayScore)||0),String(matchType||'Friendly')]
+    `INSERT INTO season_matches (team_key,home_name,away_name,home_score,away_score,match_type,status,season_id,squad_id)
+     VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8) RETURNING *`,
+    [teamKey,hn,an,Math.max(0,Number(homeScore)||0),Math.max(0,Number(awayScore)||0),String(matchType||'Friendly'),seasonMeta.seasonId,seasonMeta.squadId]
   );
   res.json(result.rows[0]);
 });
