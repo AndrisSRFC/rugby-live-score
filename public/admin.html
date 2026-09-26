@@ -204,19 +204,6 @@ white-space:nowrap;
   </div>
 </div>
 <section class="panel">
-  <label>Add Current Season Result</label>
-  <div class="row">
-    <input id="seasonHome" placeholder="Home Team" list="teamSuggestions">
-    <input id="seasonHomeScore" type="number" min="0" placeholder="Home Score">
-    <input id="seasonAwayScore" type="number" min="0" placeholder="Away Score">
-    <input id="seasonAway" placeholder="Away Team" list="teamSuggestions">
-    <button id="seasonFriendly" type="button" class="green" onclick="setSeasonType('Friendly')">FRIENDLY</button>
-    <button id="seasonNLD" type="button" onclick="setSeasonType('NLD')">NLD</button>
-    <button type="button" onclick="addSeasonResult()">Add for Review</button>
-  </div>
-  <div class="preview">Adds to Pending Results first. It will not affect W/D/L until confirmed.</div>
-</section>
-<section class="panel">
   <label>Other NLD Results</label>
   <div class="row">
     <input id="nldOtherHome" placeholder="Home Team" list="teamSuggestions">
@@ -309,21 +296,6 @@ async function revokeMatchControl() {
       }, 2000);
     }
 
-let seasonTypeSelected='Friendly';
-function setSeasonType(type){
-  seasonTypeSelected=type;
-  $('seasonFriendly').className=type==='Friendly'?'green':'';
-  $('seasonNLD').className=type==='NLD'?'green':'';
-}
-async function addSeasonResult(){
-  const payload={pin:$('pin').value,team:selectedTeam,homeName:$('seasonHome').value,awayName:$('seasonAway').value,homeScore:Number($('seasonHomeScore').value),awayScore:Number($('seasonAwayScore').value),matchType:seasonTypeSelected};
-  if(!payload.homeName.trim()||!payload.awayName.trim()) return alert('Enter both team names');
-  if(!confirm('Add '+payload.homeName+' '+payload.homeScore+'–'+payload.awayScore+' '+payload.awayName+' to Pending Results?')) return;
-  const r=await fetch('/api/results/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  const d=await r.json(); if(!r.ok)return alert(d.error||'Could not add result');
-  $('seasonHome').value=''; $('seasonAway').value=''; $('seasonHomeScore').value=''; $('seasonAwayScore').value='';
-  loadPendingResults();
-}
 async function addOtherNldResult(){
   const payload={pin:$('pin').value,team:selectedTeam,homeName:$('nldOtherHome').value,awayName:$('nldOtherAway').value,homeScore:Number($('nldOtherHomeScore').value),awayScore:Number($('nldOtherAwayScore').value)};
   if(!payload.homeName.trim()||!payload.awayName.trim()) return alert('Enter both team names');
