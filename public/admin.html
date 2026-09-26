@@ -28,6 +28,8 @@
     .pending-meta{font-size:13px;color:#aaa;margin-bottom:5px;}
     .pending-result{font-size:17px;color:#fff;font-weight:900;margin-bottom:9px;}
     .pending-badge{display:inline-block;padding:3px 7px;border:1px solid #555;border-radius:999px;font-size:11px;font-weight:900;color:#ffd84d;margin-left:6px;}
+    @keyframes requestAlertPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,69,58,.25)}50%{box-shadow:0 0 18px 5px rgba(255,69,58,.75)}}
+    #refreshAccessRequests.request-alert{background:#ff453a;color:#fff;border-color:#ff453a;animation:requestAlertPulse .8s infinite;font-weight:1000;}
     a { color:white; }
     @media(max-width:720px){
       .grid{grid-template-columns:1fr;}
@@ -121,7 +123,7 @@ white-space:nowrap;
     </div>
     <div id="controlPinPreview" class="preview"></div>
     <div id="controlRequests" class="preview"><b>Match Control Requests:</b> Enter Admin PIN to check requests.</div>
-    <button type="button" onclick="loadControlRequests()">Refresh Access Requests</button>
+    <button id="refreshAccessRequests" type="button" onclick="loadControlRequests()">Refresh Access Requests</button>
     <div class="preview">The public link is always the main server address.</div>
   </div>
   </div>
@@ -486,17 +488,44 @@ fetch('/api/state?team=' + encodeURIComponent(selectedTeam))
 socket = io({ query: { team: selectedTeam } });
 socket.on('state',render);
 
+let knownPendingRequestIds = new Set();
+let requestWatchReady = false;
+function setRequestAlert(on){
+  const btn=$('refreshAccessRequests');
+  if(!btn)return;
+  btn.classList.toggle('request-alert',on);
+  btn.textContent=on?'NEW REQUEST — REFRESH':'Refresh Access Requests';
+}
+async function watchControlRequests(){
+  const pin=$('pin').value.trim();
+  if(!pin)return;
+  try{
+    const r=await fetch('/api/match-control/requests?pin='+encodeURIComponent(pin));
+    const d=await r.json(); if(!r.ok||!Array.isArray(d))return;
+    const ids=new Set(d.map(x=>String(x.id)));
+    if(requestWatchReady){
+      const hasNew=d.some(x=>!knownPendingRequestIds.has(String(x.id)));
+      if(hasNew)setRequestAlert(true);
+    }
+    knownPendingRequestIds=ids;
+    requestWatchReady=true;
+  }catch(e){}
+}
 async function loadControlRequests(){
   const box=$('controlRequests');
   const r=await fetch('/api/match-control/requests?pin='+encodeURIComponent($('pin').value));
   const d=await r.json(); if(!r.ok){box.textContent=d.error||'Could not load requests';return;}
   box.innerHTML='<b>Match Control Requests</b><br>'+(d.length?d.map(x=>'<div style="margin-top:8px"><b>'+x.team_key+'</b> · '+(x.mode==='in_progress'?'MATCH ALREADY IN PROGRESS':'NEW MATCH')+' <button onclick="decideControlRequest('+x.id+',\'approve\')">Approve</button> <button class="red" onclick="decideControlRequest('+x.id+',\'decline\')">Decline</button></div>').join(''):'No pending requests.');
+  knownPendingRequestIds=new Set(d.map(x=>String(x.id)));
+  requestWatchReady=true;
+  setRequestAlert(false);
 }
 async function decideControlRequest(id,decision){
   const r=await fetch('/api/match-control/request-decision',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value,id,decision})});
   const d=await r.json(); if(!r.ok)return alert(d.error||'Could not update request');
   loadControlRequests();
 }
+setInterval(watchControlRequests,3000);
 </script>
 </body>
 </html>
