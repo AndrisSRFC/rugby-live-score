@@ -460,9 +460,11 @@ async function act(action,payload={}) {
 function score(team,delta){ act('score',{team,delta}); }
 
 function newMatch(){
+  $('homeName').value='Team 1';
+  $('awayName').value='Team 2';
   act('newMatch',{
-    homeName:$('homeName').value,
-    awayName:$('awayName').value
+    homeName:'Team 1',
+    awayName:'Team 2'
   });
 }
 
