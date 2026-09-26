@@ -350,6 +350,23 @@ app.get("/api/app-access", async (req,res) => {
   }
 });
 
+app.post("/api/app-access/owner", async (req,res) => {
+  try {
+    const pin=String(req.body?.pin||"");
+    const installId=String(req.body?.installId||"").trim();
+    if(pin!==String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+    if(!/^[a-zA-Z0-9_-]{16,100}$/.test(installId)) return res.status(400).json({error:"Invalid install ID"});
+    await pool.query(
+      "INSERT INTO app_access (install_id,access_status) VALUES ($1,'owner') ON CONFLICT (install_id) DO UPDATE SET access_status='owner',subscription_until=NULL,updated_at=NOW()",
+      [installId]
+    );
+    res.json({ok:true,status:"owner"});
+  } catch(error) {
+    console.error("Owner app activation error:",error);
+    res.status(500).json({error:"Database error"});
+  }
+});
+
 app.get("/api/teams", (req, res) => {
   res.json(
     TEAM_CONFIG.map(team => ({
