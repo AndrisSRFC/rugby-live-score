@@ -323,6 +323,12 @@
     .signup-note{font-size:12px;color:#aaa;margin:14px 0 0;}
     .join-late{margin:14px 0 0;padding:11px;border:1px solid #ffd400;border-radius:10px;background:#171400;font-size:12px;line-height:1.35;}
     .join-late strong{display:block;color:#ffd400;margin-bottom:4px;font-size:13px;}
+    .join-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+    .join-actions button{margin:0;background:#39ff14;color:#050505;font-size:11px;padding:11px 7px;}
+    .join-actions button:last-child{background:#ffd400;}
+    .team-pick{display:none;margin-top:12px;padding:12px;border:1px solid #444;border-radius:10px;}
+    .team-pick.open{display:block}.team-pick select{width:100%;padding:10px;border-radius:8px;background:#050505;color:#fff;border:1px solid #555;font-weight:800;}
+    .request-status{font-size:12px;margin-top:10px;color:#ddd;min-height:16px;}
     @media(max-width:480px){.signup-card{padding:18px}.how-steps{grid-template-columns:repeat(2,1fr)}}
 
     @media (max-width: 700px) {
@@ -539,8 +545,16 @@
         <div class="how-step"><b>4</b>End the match</div>
       </div>
       <div class="join-late"><strong>MATCH ALREADY STARTED? JOIN ANY TIME.</strong>No match clock? No problem. You can still keep the LIVE score updated. <b>Never guess the match time.</b></div>
-      <p class="signup-note">Contact the broadcast administrator for Match Control access.</p>
-      <button id="closeSignup">Got it</button>
+      <div class="join-actions">
+        <button type="button" onclick="chooseHelpMode('new')">NEW MATCH</button>
+        <button type="button" onclick="chooseHelpMode('in_progress')">MATCH ALREADY IN PROGRESS</button>
+      </div>
+      <div class="team-pick" id="teamPick">
+        <select id="helpTeam"><option>U13</option><option>U14</option><option>U15</option><option>U16</option><option>Colts</option><option>1st XV</option><option>2nd XV</option></select>
+        <button type="button" id="requestAccessBtn" onclick="requestMatchControl()">REQUEST ACCESS</button>
+        <div class="request-status" id="requestStatus"></div>
+      </div>
+      <button id="closeSignup">Not now</button>
     </div>
   </div>
 
@@ -609,6 +623,31 @@ dislikeBtn.addEventListener('click', () => {
   likeBtn.classList.remove('selected');
 });
 
+let helpMode='new', requestPoll=null;
+function chooseHelpMode(mode){
+  helpMode=mode;
+  document.getElementById('teamPick').classList.add('open');
+  document.getElementById('requestStatus').textContent=mode==='in_progress'?'You can join now. The public clock will show LIVE — never guess the match time.':'Choose the team, then request access before kickoff.';
+}
+async function requestMatchControl(){
+  const team=document.getElementById('helpTeam').value;
+  const r=await fetch('/api/match-control/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team,mode:helpMode})});
+  const d=await r.json(); if(!r.ok)return alert(d.error||'Could not request access');
+  document.getElementById('requestAccessBtn').disabled=true;
+  document.getElementById('requestStatus').textContent='Request sent — waiting for administrator approval…';
+  clearInterval(requestPoll);
+  requestPoll=setInterval(async()=>{
+    const sr=await fetch('/api/match-control/request-status?token='+encodeURIComponent(d.requestToken));
+    const sd=await sr.json(); if(!sr.ok)return;
+    if(sd.status==='declined'){clearInterval(requestPoll);document.getElementById('requestStatus').textContent='Request declined.';document.getElementById('requestAccessBtn').disabled=false;}
+    if(sd.status==='approved'){
+      clearInterval(requestPoll);
+      sessionStorage.setItem('matchControlToken',d.requestToken);
+      sessionStorage.setItem('matchControlTeam',sd.team);
+      document.getElementById('requestStatus').innerHTML='Access approved ✓ <a href="/match-control.html" style="color:#39ff14;font-weight:900">OPEN MATCH CONTROL →</a>';
+    }
+  },2000);
+}
 const signupModal = document.getElementById('signupModal');
 document.getElementById('scoreHelpBtn').addEventListener('click', () => signupModal.classList.add('open'));
 document.getElementById('closeSignup').addEventListener('click', () => signupModal.classList.remove('open'));
