@@ -614,14 +614,24 @@ homeSocket.on('viewerCounts', counts => {
 
 const likeBtn = document.getElementById('likeBtn');
 const dislikeBtn = document.getElementById('dislikeBtn');
-likeBtn.addEventListener('click', () => {
-  likeBtn.classList.toggle('selected');
-  dislikeBtn.classList.remove('selected');
-});
-dislikeBtn.addEventListener('click', () => {
-  dislikeBtn.classList.toggle('selected');
-  likeBtn.classList.remove('selected');
-});
+const reactionStorageKey='rugbyLiveLandingReaction';
+let myReaction=localStorage.getItem(reactionStorageKey)||'';
+
+function renderMyReaction(){
+  likeBtn.classList.toggle('selected',myReaction==='like');
+  dislikeBtn.classList.toggle('selected',myReaction==='dislike');
+  likeBtn.setAttribute('aria-pressed',myReaction==='like'?'true':'false');
+  dislikeBtn.setAttribute('aria-pressed',myReaction==='dislike'?'true':'false');
+}
+function chooseReaction(next){
+  myReaction=myReaction===next?'':next;
+  if(myReaction)localStorage.setItem(reactionStorageKey,myReaction);
+  else localStorage.removeItem(reactionStorageKey);
+  renderMyReaction();
+}
+likeBtn.addEventListener('click',()=>chooseReaction('like'));
+dislikeBtn.addEventListener('click',()=>chooseReaction('dislike'));
+renderMyReaction();
 
 let helpMode='new', requestPoll=null;
 function chooseHelpMode(mode){
