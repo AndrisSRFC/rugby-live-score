@@ -222,6 +222,12 @@ white-space:nowrap;
   <div id="pendingResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
 </section>
 <section class="panel">
+  <label>Current Season — Confirmed Results</label>
+  <div class="row"><button type="button" onclick="loadConfirmedResults()">Refresh Confirmed Results</button></div>
+  <div id="confirmedResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
+  <div class="preview">Undo returns a confirmed result to Pending and immediately removes it from season statistics until it is confirmed again.</div>
+</section>
+<section class="panel">
   <label>NLD Match History</label>
   <div class="row">
     <input id="historyGeneration" placeholder="Generation, e.g. 2013">
@@ -312,6 +318,19 @@ async function loadPendingResults(){
   const rows=await r.json();
   if(!r.ok) return alert(rows.error||'Could not load pending results');
   $('pendingResults').innerHTML=rows.length?rows.map(m=>'<div class="pending-card"><div class="pending-meta"><b>'+selectedTeam+'</b> · '+m.match_type+' <span class="pending-badge">PENDING</span></div><div class="pending-result">'+m.home_name+' '+m.home_score+'–'+m.away_score+' '+m.away_name+'</div><button onclick="editPending('+m.id+',\''+String(m.home_name).replace(/'/g,"\\'")+'\',\''+String(m.away_name).replace(/'/g,"\\'")+'\','+m.home_score+','+m.away_score+',\''+String(m.match_type).replace(/'/g,"\\'")+'\')">Edit</button> <button class="red" onclick="discardPending('+m.id+')">Discard</button> <button class="green" onclick="confirmPending('+m.id+')">Confirm Result</button></div>').join(''):'No pending results';
+}
+async function loadConfirmedResults(){
+  const r=await fetch('/api/confirmed-results?team='+encodeURIComponent(selectedTeam)+'&pin='+encodeURIComponent($('pin').value));
+  const rows=await r.json();
+  if(!r.ok) return alert(rows.error||'Could not load confirmed results');
+  $('confirmedResults').innerHTML=rows.length?rows.map(m=>'<div class="pending-card"><div class="pending-meta"><b>'+selectedTeam+'</b> · '+m.match_type+' <span class="pending-badge" style="color:#35ff25">CONFIRMED</span></div><div class="pending-result">'+m.home_name+' '+m.home_score+'–'+m.away_score+' '+m.away_name+'</div><button class="red" onclick="undoConfirmed('+m.id+')">Undo to Pending</button></div>').join(''):'No confirmed results';
+}
+async function undoConfirmed(id){
+  if(!confirm('Undo this confirmed result? It will be removed from season statistics and returned to Pending for correction.')) return;
+  const r=await fetch('/api/results/undo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value,id})});
+  const d=await r.json(); if(!r.ok)return alert(d.error||'Could not undo result');
+  loadConfirmedResults();
+  loadPendingResults();
 }
 async function discardPending(id){
   if(!confirm('Discard this pending result? This cannot be undone.')) return;
