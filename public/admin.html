@@ -31,6 +31,10 @@
     @keyframes requestAlertPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,69,58,.25)}50%{box-shadow:0 0 18px 5px rgba(255,69,58,.75)}}
     #refreshAccessRequests.request-alert,#refreshPendingResults.pending-alert{background:#ff453a;color:#fff;border-color:#ff453a;animation:requestAlertPulse .8s infinite;font-weight:1000;}
     a { color:white; }
+    .admin-top-panel{position:relative;}
+    .pending-top-shortcut{position:absolute;right:20px;top:20px;}
+    .pending-top-shortcut button{min-width:180px;}
+    .pending-top-shortcut .pending-alert{background:#ff453a;color:#fff;border-color:#ff453a;animation:requestAlertPulse .8s infinite;font-weight:1000;}
     @media(max-width:720px){
       .grid{grid-template-columns:1fr;}
       .admin{padding:14px;}
@@ -93,6 +97,7 @@
 white-space:nowrap;
 }
       .admin-top-panel{display:block;}
+      .pending-top-shortcut{display:none!important;}
       #adminProtected{position:static; display:block; width:100%; margin-top:10px;}
       #adminProtected .live-actions{position:static;}
       #adminProtected .preview{position:static;}
@@ -105,6 +110,7 @@ white-space:nowrap;
   <h1>Rugby LIVE — Control Panel</h1>
 
   <div class="panel admin-top-panel" style="margin-bottom:18px">
+    <div class="pending-top-shortcut"><button id="pendingTopBtn" type="button" onclick="jumpToPending()">Pending Results</button></div>
     <div class="row top-controls">
       <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
       <a id="publicLiveLink" href="/live.html?team=U13" target="_blank" class="public-live-btn">Open LIVE page ↗</a>
@@ -218,7 +224,7 @@ white-space:nowrap;
   </div>
   <div class="preview">Other teams' NLD games go directly to the 3rd swipe table and do not affect Sleaford W/D/L.</div>
 </section>
-<section class="panel">
+<section class="panel" id="pendingResultsPanel">
   <label>Current Season — Pending Results</label>
   <div class="row"><button id="refreshPendingResults" type="button" onclick="loadPendingResults()">Refresh Pending Results</button></div>
   <div id="pendingResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
@@ -319,9 +325,20 @@ let knownPendingResultIds = new Set();
 let pendingWatchReady = false;
 function setPendingAlert(on){
   const btn=$('refreshPendingResults');
-  if(!btn)return;
-  btn.classList.toggle('pending-alert',on);
-  btn.textContent=on?'NEW RESULT — REFRESH':'Refresh Pending Results';
+  const topBtn=$('pendingTopBtn');
+  if(btn){
+    btn.classList.toggle('pending-alert',on);
+    btn.textContent=on?'NEW RESULT — REFRESH':'Refresh Pending Results';
+  }
+  if(topBtn){
+    topBtn.classList.toggle('pending-alert',on);
+    topBtn.textContent=on?'NEW RESULT — REFRESH':'Pending Results';
+  }
+}
+function jumpToPending(){
+  const panel=$('pendingResultsPanel');
+  if(panel)panel.scrollIntoView({behavior:'smooth',block:'start'});
+  loadPendingResults();
 }
 async function watchPendingResults(){
   const pin=$('pin').value.trim();
