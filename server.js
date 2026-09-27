@@ -367,15 +367,16 @@ app.post("/api/app-access/owner", async (req,res) => {
   }
 });
 
-app.get("/api/teams", (req, res) => {
-  res.json(
-    TEAM_CONFIG.map(team => ({
-      key: team.key,
-      label: team.label,
-      matchLive: getState(team.key).matchLive,
-      viewers: viewerCounts[team.key] || 0
-    }))
-  );
+app.get("/api/teams", async (req, res) => {
+  const access=await pool.query("SELECT team_key,pin_used,revoked FROM match_control_access WHERE revoked=FALSE");
+  const pending=await pool.query("SELECT team_key,COUNT(*)::int AS count FROM match_control_requests WHERE status='pending' GROUP BY team_key");
+  const accessMap=new Map(access.rows.map(r=>[r.team_key,r]));
+  const pendingMap=new Map(pending.rows.map(r=>[r.team_key,Number(r.count||0)]));
+  res.json(TEAM_CONFIG.map(team => {
+    const a=accessMap.get(team.key);
+    return {key:team.key,label:team.label,matchLive:getState(team.key).matchLive,viewers:viewerCounts[team.key]||0,
+      operatorActive:!!(a&&a.pin_used),accessIssued:!!a,pendingRequests:pendingMap.get(team.key)||0};
+  }));
 });
 
 app.get("/api/state", (req, res) => {
@@ -633,6 +634,8 @@ app.post("/api/admin", async (req, res) => {
 app.post("/api/match-control/request", async (req,res) => {
   const teamKey=normalizeTeamKey(req.body?.team);
   const mode=req.body?.mode === "in_progress" ? "in_progress" : "new";
+  const covered=await pool.query("SELECT pin_used,revoked FROM match_control_access WHERE team_key=$1 AND revoked=FALSE",[teamKey]);
+  if(covered.rowCount && covered.rows[0].pin_used) return res.status(409).json({error:"This match already has a LIVE operator.",code:"OPERATOR_ACTIVE"});
   const requestToken=makeSessionToken();
   const result=await pool.query(
     "INSERT INTO match_control_requests (team_key,mode,request_hash) VALUES ($1,$2,$3) RETURNING id,team_key,mode,status,created_at",
@@ -674,6 +677,9 @@ app.post("/api/match-control/request-decision", async (req,res) => {
     }
   }
   await pool.query("UPDATE match_control_requests SET status=$2,decided_at=NOW() WHERE id=$1",[id,decision]);
+  if(decision==="approved"){
+    await pool.query("UPDATE match_control_requests SET status='covered',decided_at=NOW() WHERE team_key=$1 AND status='pending' AND id<>$2",[row.team_key,id]);
+  }
   res.json({ok:true,status:decision,team:row.team_key,mode:row.mode});
 });
 
@@ -707,6 +713,15 @@ app.post("/api/match-control/verify", async (req, res) => {
   );
   if (used.rowCount !== 1) return res.status(401).json({ error:"PIN already used" });
   res.json({ ok:true, team:teamKey, controlToken:token });
+});
+
+app.post("/api/match-control/stop-coverage", async (req,res) => {
+  const {controlToken,team}=req.body||{}; const teamKey=normalizeTeamKey(team);
+  const found=await pool.query("SELECT 1 FROM match_control_access WHERE team_key=$1 AND session_hash=$2 AND pin_used=TRUE AND revoked=FALSE",[teamKey,secretHash(controlToken||"")]);
+  if(!found.rowCount) return res.status(401).json({error:"Access expired"});
+  await pool.query("UPDATE match_control_access SET revoked=TRUE,session_hash=NULL WHERE team_key=$1",[teamKey]);
+  const st=getState(teamKey); st.running=false; st.startedAt=null; st.message="Live updates paused"; await saveState(teamKey); broadcast(teamKey);
+  res.json({ok:true,team:teamKey});
 });
 
 app.post("/api/match-control/revoke", async (req, res) => {
