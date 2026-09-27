@@ -105,6 +105,14 @@ white-space:nowrap;
       #adminProtected .live-actions{position:static;}
       #adminProtected .preview{position:static;}
     }
+  
+    .team-autocomplete{position:relative;width:100%}
+    .team-autocomplete input{width:100%}
+    .team-autocomplete-menu{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:1000;background:#111;border:1px solid #35ff25;border-radius:12px;max-height:240px;overflow-y:auto;box-shadow:0 10px 28px rgba(0,0,0,.55)}
+    .team-autocomplete-menu.open{display:block}
+    .team-autocomplete-option{display:block;width:100%;min-height:44px;padding:11px 14px;background:#111;color:#fff;border:0;border-bottom:1px solid #333;border-radius:0;text-align:left;font-size:18px}
+    .team-autocomplete-option:last-child{border-bottom:0}
+    .team-autocomplete-option:active,.team-autocomplete-option:hover{background:#222;color:#35ff25}
   </style>
 </head>
 <body>
@@ -267,6 +275,29 @@ function filterTeamSuggestions(value){
   const q=String(value||'').trim().toLowerCase();
   const matches=allTeamSuggestions.filter(n=>!q||String(n).toLowerCase().startsWith(q));
   $('teamSuggestions').innerHTML=matches.map(n=>'<option value="'+String(n).replace(/"/g,'&quot;')+'"></option>').join('');
+}
+function setupTeamAutocomplete(id, onPick){
+  const input=$(id); if(!input || input.dataset.customAutocomplete)return;
+  input.dataset.customAutocomplete='1';
+  input.removeAttribute('list');
+  const wrap=document.createElement('div'); wrap.className='team-autocomplete';
+  input.parentNode.insertBefore(wrap,input); wrap.appendChild(input);
+  const menu=document.createElement('div'); menu.className='team-autocomplete-menu'; wrap.appendChild(menu);
+  function show(){
+    const q=String(input.value||'').trim().toLowerCase();
+    const matches=allTeamSuggestions.filter(n=>!q||String(n).toLowerCase().startsWith(q)).slice(0,12);
+    menu.innerHTML='';
+    matches.forEach(name=>{
+      const b=document.createElement('button'); b.type='button'; b.className='team-autocomplete-option'; b.textContent=name;
+      b.addEventListener('pointerdown',e=>{e.preventDefault(); input.value=name; menu.classList.remove('open'); input.dispatchEvent(new Event('input',{bubbles:true})); if(onPick)onPick(name);});
+      menu.appendChild(b);
+    });
+    menu.classList.toggle('open',matches.length>0);
+  }
+  input.addEventListener('focus',()=>{input.select(); show();});
+  input.addEventListener('input',show);
+  input.addEventListener('keydown',e=>{if(e.key==='Escape')menu.classList.remove('open');});
+  input.addEventListener('blur',()=>setTimeout(()=>menu.classList.remove('open'),180));
 }
 
 async function generateMatchControlPin() {
@@ -553,6 +584,8 @@ function selectDefaultTeamName(e){
 }
 $('homeName').addEventListener('focus',selectDefaultTeamName);
 $('awayName').addEventListener('focus',selectDefaultTeamName);
+['homeName','awayName','nextHome','nextAway','nldOtherHome','nldOtherAway','historyOpponent'].forEach(id=>setupTeamAutocomplete(id));
+
 
 $('publicLiveLink').href = '/live.html?team=' + encodeURIComponent(selectedTeam);
 $('matchControlLink').href = '/match-control.html';
