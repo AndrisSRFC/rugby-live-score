@@ -569,7 +569,7 @@
         <button type="button" onclick="chooseHelpMode('in_progress')">MATCH ALREADY IN PROGRESS</button>
       </div>
       <div class="team-pick" id="teamPick">
-        <select id="helpTeam"><option>U13</option><option>U14</option><option>U15</option><option>U16</option><option>Colts</option><option>1st XV</option><option>2nd XV</option></select>
+        <select id="helpTeam"><option>U13</option><option>U14</option><option>U15</option><option>U16</option><option>Colts</option><option>1st XV</option><option>2nd XV</option></select><div class="request-status" id="teamCoverage"></div>
         <button type="button" id="requestAccessBtn" onclick="requestMatchControl()">REQUEST ACCESS</button>
         <div class="request-status" id="requestStatus"></div>
       </div>
@@ -770,19 +770,27 @@ let helpMode='new', requestPoll=null;
 function chooseHelpMode(mode){
   helpMode=mode;
   document.getElementById('teamPick').classList.add('open');
-  document.getElementById('requestStatus').textContent=mode==='in_progress'?'You can join now. The public clock will show LIVE — never guess the match time.':'Choose the team, then request access before kickoff.';
+  document.getElementById('requestStatus').textContent=mode==='in_progress'?'You can join now. The public clock will show LIVE — never guess the match time.':'Choose the team, then request access before kickoff.'; refreshCoverage();
 }
+async function refreshCoverage(){
+  try{
+    const teams=await fetch('/api/teams',{cache:'no-store'}).then(r=>r.json()), team=document.getElementById('helpTeam').value, t=teams.find(x=>x.key===team), box=document.getElementById('teamCoverage');
+    if(!t)return;
+    box.textContent=t.operatorActive?'🟢 LIVE OPERATOR ACTIVE — this match is currently covered.':t.pendingRequests?'🟡 SOMEONE HAS REQUESTED ACCESS — you can still offer to help.':'⚪ LIVE OPERATOR NEEDED — you can help cover this match.';
+  }catch(e){}
+}
+document.getElementById('helpTeam').addEventListener('change',refreshCoverage);
 async function requestMatchControl(){
   const team=document.getElementById('helpTeam').value;
   const r=await fetch('/api/match-control/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team,mode:helpMode})});
-  const d=await r.json(); if(!r.ok)return alert(d.error||'Could not request access');
+  const d=await r.json(); if(!r.ok){document.getElementById('requestStatus').textContent=d.code==='OPERATOR_ACTIVE'?'Thank you for offering to help! A LIVE operator has already been assigned to this match. Enjoy the game!':(d.error||'Could not request access');refreshCoverage();return;}
   document.getElementById('requestAccessBtn').disabled=true;
   document.getElementById('requestStatus').textContent='Request sent — waiting for administrator approval…';
   clearInterval(requestPoll);
   requestPoll=setInterval(async()=>{
     const sr=await fetch('/api/match-control/request-status?token='+encodeURIComponent(d.requestToken));
     const sd=await sr.json(); if(!sr.ok)return;
-    if(sd.status==='declined'){clearInterval(requestPoll);document.getElementById('requestStatus').textContent='Request declined.';document.getElementById('requestAccessBtn').disabled=false;}
+    if(sd.status==='declined'||sd.status==='covered'){clearInterval(requestPoll);document.getElementById('requestStatus').textContent=sd.status==='covered'?'Thank you for offering to help! A LIVE operator has already been assigned to this match. Enjoy the game!':'Thank you for offering to help. Your request was not needed this time.';document.getElementById('requestAccessBtn').disabled=false;refreshCoverage();}
     if(sd.status==='approved'){
       clearInterval(requestPoll);
       sessionStorage.setItem('matchControlToken',d.requestToken);
