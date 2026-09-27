@@ -127,7 +127,7 @@ white-space:nowrap;
     <div class="row" style="margin-top:8px">
       <button id="generateControlPin" type="button" onclick="generateMatchControlPin()">Generate Match Control PIN</button>
       <button id="copyControlAccess" type="button" onclick="copyMatchControlAccess()" style="display:none">📋 Copy PIN + Link</button>
-      <button id="revokeControl" type="button" class="red" onclick="revokeMatchControl()">Revoke Access</button>
+      <button id="revokeControl" type="button" class="red" onclick="revokeMatchControl()" style="display:none">Remove Operator Access</button>
       <a id="matchControlLink" href="/match-control.html" target="_blank" class="public-live-btn">Open Match Control ↗</a>
     </div>
     <div id="controlPinPreview" class="preview"></div>
@@ -280,6 +280,7 @@ async function generateMatchControlPin() {
   generatedControlPin = data.controlPin;
   $('controlPinPreview').textContent = selectedTeam + ' Match Control PIN: ' + generatedControlPin + ' (one-time)';
   $('copyControlAccess').style.display = '';
+  $('revokeControl').style.display = '';
 }
 
 async function copyMatchControlAccess() {
@@ -289,6 +290,14 @@ async function copyMatchControlAccess() {
   await navigator.clipboard.writeText(text);
   $('copyControlAccess').textContent = '✓ Copied!';
   setTimeout(() => $('copyControlAccess').textContent = '📋 Copy PIN + Link', 2000);
+}
+
+async function refreshControlAccessState(){
+  try{
+    const teams=await fetch('/api/teams',{cache:'no-store'}).then(r=>r.json());
+    const team=teams.find(t=>t.key===selectedTeam);
+    $('revokeControl').style.display=team && (team.operatorActive || team.accessIssued) ? '' : 'none';
+  }catch(e){}
 }
 
 async function revokeMatchControl() {
@@ -303,6 +312,9 @@ async function revokeMatchControl() {
   generatedControlPin = '';
   $('controlPinPreview').textContent = selectedTeam + ' Match Control access revoked';
   $('copyControlAccess').style.display = 'none';
+  $('revokeControl').style.display = 'none';
+  setTimeout(()=>{ if($('controlPinPreview').textContent.includes('access revoked')) $('controlPinPreview').textContent=''; },3500);
+  refreshControlAccessState();
 }
 
   async function copyLiveLink() {
@@ -487,6 +499,7 @@ function selectTeam(team) {
   if (controlLink) controlLink.href = '/match-control.html';
   $('controlPinPreview').textContent = '';
   $('copyControlAccess').style.display = 'none';
+  refreshControlAccessState();
   nextLiveLoaded = false;
   if (socket) socket.emit('selectTeam', team);
   fetch('/api/state?team=' + encodeURIComponent(team)).then(r=>r.json()).then(render);
@@ -547,6 +560,8 @@ $('matchControlLink').href = '/match-control.html';
 fetch('/api/state?team=' + encodeURIComponent(selectedTeam))
   .then(r=>r.json())
   .then(render);
+refreshControlAccessState();
+setInterval(refreshControlAccessState,3000);
 
 socket = io({ query: { team: selectedTeam } });
 socket.on('state',render);
