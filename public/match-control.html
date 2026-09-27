@@ -226,7 +226,7 @@
 
   <div class="panel actions">
    <button id="startLiveBtn" class="green" onclick="act('startMatch')">Start LIVE</button>
-    <button id="endMatch" class="red" onclick="act('endMatch')">End Match</button>
+    <button id="endMatch" class="red" onclick="act('endMatch')">End Match</button><button id="stopCoverage" onclick="stopCoverage()">⚠ Stop LIVE Coverage</button>
   </div>
 
   <div class="teams">
@@ -382,6 +382,16 @@ async function act(action, payload = {}) {
     controlToken = '';
     $('matchPin').style.display = '';
   }
+}
+
+async function stopCoverage(){
+  if(!controlToken||!selectedTeam)return;
+  if(!confirm('Stop LIVE coverage? The current score will stay visible and another operator can take over.'))return;
+  const r=await fetch('/api/match-control/stop-coverage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({controlToken,team:selectedTeam})});
+  const d=await r.json();if(!r.ok)return alert(d.error||'Could not stop coverage');
+  sessionStorage.removeItem('matchControlToken');sessionStorage.removeItem('matchControlTeam');controlToken='';selectedTeam=null;
+  alert('LIVE coverage paused. Thank you for helping — another operator can now take over.');
+  location.href='/';
 }
 
 function changeScore(id, amount) {
