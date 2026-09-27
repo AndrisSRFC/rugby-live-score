@@ -122,7 +122,7 @@ body.table-open .table-screen{transform:translateX(0);}
   </div>
 </div>
 <div class="wrap">
-  <main class="card">
+  <main class="card"><div id="coveragePaused" style="display:none;margin:0 auto 14px;max-width:520px;padding:10px 14px;border:1px solid #ffd400;border-radius:10px;background:#171400;color:#ffd400;text-align:center;font-size:12px;font-weight:900">⚠ LIVE UPDATES PAUSED<br><span style="color:#ddd;font-weight:700">The last known score remains on screen. A new operator can take over.</span></div>
     
 
     <section class="board">
@@ -170,6 +170,7 @@ function fmt(sec) {
 let currentState = null;
 function render(s) {
   currentState = s;
+  $('coveragePaused').style.display = s.message==='Live updates paused' ? 'block' : 'none';
   $('homeName').textContent = s.homeName;
   $('awayName').textContent = s.awayName;
   $('homeScore').textContent = s.homeScore;
