@@ -234,6 +234,8 @@ white-space:nowrap;
     <button type="button" onclick="addOtherNldResult()">Add to NLD Table</button>
   </div>
   <div class="preview">Other teams' NLD games go directly to the 3rd swipe table and do not affect Sleaford W/D/L.</div>
+  <div class="row" style="margin-top:12px"><button type="button" onclick="loadOtherNldResults()">Refresh Other NLD Results</button></div>
+  <div id="otherNldResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
 </section>
 <section class="panel" id="pendingResultsPanel">
   <label>Current Season — Pending Results</label>
@@ -388,7 +390,22 @@ async function addOtherNldResult(){
   const r=await fetch('/api/nld-results/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const d=await r.json(); if(!r.ok)return alert(d.error||'Could not add NLD result');
   $('nldOtherHome').value=''; $('nldOtherAway').value=''; $('nldOtherHomeScore').value=''; $('nldOtherAwayScore').value='';
-  loadTeamSuggestions(); alert('NLD result added to the league table');
+  loadTeamSuggestions();
+  loadOtherNldResults();
+  alert('NLD result added to the league table');
+}
+async function loadOtherNldResults(){
+  const r=await fetch('/api/nld-results?team='+encodeURIComponent(selectedTeam)+'&pin='+encodeURIComponent($('pin').value));
+  const rows=await r.json();
+  if(!r.ok) return alert(rows.error||'Could not load Other NLD results');
+  $('otherNldResults').innerHTML=rows.length?rows.map(m=>'<div class="pending-card"><div class="pending-meta"><b>'+selectedTeam+'</b> · OTHER NLD</div><div class="pending-result">'+m.home_name+' '+m.home_score+'–'+m.away_score+' '+m.away_name+'</div><button class="red" onclick="deleteOtherNldResult('+m.id+',\''+String(m.home_name).replace(/'/g,"\\'")+' '+m.home_score+'–'+m.away_score+' '+String(m.away_name).replace(/'/g,"\\'")+'\')">Delete</button></div>').join(''):'No Other NLD results';
+}
+async function deleteOtherNldResult(id,label){
+  if(!confirm('Delete '+label+' from the NLD table?')) return;
+  const r=await fetch('/api/nld-results/'+id,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value,team:selectedTeam})});
+  const d=await r.json();
+  if(!r.ok) return alert(d.error||'Could not delete NLD result');
+  loadOtherNldResults();
 }
 let knownPendingResultIds = new Set();
 let pendingWatchReady = false;
