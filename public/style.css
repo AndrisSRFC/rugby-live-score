@@ -66,6 +66,7 @@ body {
     width: 100%;
     grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
     gap: 10px;
+    transform: translateX(-8px);
   }
 
   .name {
