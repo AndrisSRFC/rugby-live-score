@@ -69,7 +69,14 @@ body {
   }
 
   .name {
-    font-size: clamp(20px, 6vw, 32px);
+    font-size: clamp(18px, 5.5vw, 30px);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+
+  .team {
+    min-width: 0;
   }
 
   .score {
@@ -164,20 +171,41 @@ bottom: -8px;
 
 @media (max-width: 700px) {
   .next-live {
-    left: 4px;
-    width: max-content;
-max-width: calc(100vw - 18px);
-    .next-teams {
-  white-space: nowrap;
-}
+    left: 14px;
+    right: 14px;
+    width: auto;
+    max-width: none;
+    padding-left: 18px;
+  }
+
+  .next-title {
+    margin-left: 12px;
   }
 
   .next-card {
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
-    width: max-content;
-    max-width: calc(100vw - 50px);
-    box-sizing: border-box;
+    margin-left: 0;
+    padding: 14px 10px;
+    gap: 10px;
   }
+
+  .next-card > div:last-child {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .next-teams {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: clamp(20px, 6vw, 26px);
+    line-height: 1.08;
+  }
+
+  .next-details { font-size: 16px; }
+  .next-time { font-size: 20px; }
+  .next-icon { font-size: 24px; }
 }
 #installApp {
   position: fixed;
