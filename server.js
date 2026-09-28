@@ -894,6 +894,31 @@ app.post("/api/nld-results/add", async (req,res) => {
   res.json(result.rows[0]);
 });
 
+app.get("/api/nld-results", async (req,res) => {
+  try{
+    if (String(req.query?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+    const teamKey=normalizeTeamKey(req.query.team);
+    const result=await pool.query(
+      "SELECT id,team_key,home_name,away_name,home_score,away_score,played_at FROM nld_other_results WHERE team_key=$1 ORDER BY played_at DESC,id DESC",
+      [teamKey]
+    );
+    res.json(result.rows);
+  }catch(error){console.error("Other NLD results error:",error);res.status(500).json({error:"Database error"});}
+});
+
+app.delete("/api/nld-results/:id", async (req,res) => {
+  try{
+    if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+    const teamKey=normalizeTeamKey(req.body?.team);
+    const result=await pool.query(
+      "DELETE FROM nld_other_results WHERE id=$1 AND team_key=$2 RETURNING *",
+      [Number(req.params.id),teamKey]
+    );
+    if(!result.rowCount) return res.status(404).json({error:"NLD result not found"});
+    res.json({ok:true,result:result.rows[0]});
+  }catch(error){console.error("Delete Other NLD result error:",error);res.status(500).json({error:"Database error"});}
+});
+
 app.get("/api/nld-table", async (req,res) => {
   try{
     const teamKey=normalizeTeamKey(req.query.team);
