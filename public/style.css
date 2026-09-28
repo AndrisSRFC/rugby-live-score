@@ -68,20 +68,8 @@ body {
     gap: 10px;
   }
 
-  .team {
-    min-width: 0;
-    overflow: hidden;
-  }
-
   .name {
-    width: 100%;
-    min-width: 0;
-    padding: 0 2px;
-    font-size: clamp(16px, 5vw, 24px);
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: clamp(20px, 6vw, 32px);
   }
 
   .score {
