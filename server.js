@@ -777,14 +777,16 @@ app.post("/api/opponents/remember", async (req,res) => {
 
 app.get("/api/opponents", async (req,res) => {
   try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS team_names (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        name_key TEXT NOT NULL UNIQUE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
     const result=await pool.query(`
-      SELECT DISTINCT name FROM (
-        SELECT home_name AS name FROM season_matches
-        UNION
-        SELECT away_name AS name FROM season_matches
-        UNION
-        SELECT name FROM team_names
-      ) teams
+      SELECT name FROM team_names
       WHERE name IS NOT NULL AND BTRIM(name) <> ''
       ORDER BY name
     `);
