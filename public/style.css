@@ -69,8 +69,28 @@ body {
     transform: translateX(-8px);
   }
 
+  /* Keep the mobile score frame fixed. Long team names must not widen it. */
+  .team {
+    min-width: 0;
+  }
+
+  .team:last-of-type {
+    position: relative;
+  }
+
   .name {
     font-size: clamp(20px, 6vw, 32px);
+  }
+
+  /* Team 2 stays anchored on the right; a longer name grows to the left. */
+  .team:last-of-type .name {
+    position: relative;
+    left: 100%;
+    width: max-content;
+    max-width: 46vw;
+    transform: translateX(-100%);
+    text-align: right;
+    white-space: nowrap;
   }
 
   .score {
