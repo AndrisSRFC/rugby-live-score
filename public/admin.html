@@ -276,6 +276,22 @@ function filterTeamSuggestions(value){
   const matches=allTeamSuggestions.filter(n=>!q||String(n).toLowerCase().startsWith(q));
   $('teamSuggestions').innerHTML=matches.map(n=>'<option value="'+String(n).replace(/"/g,'&quot;')+'"></option>').join('');
 }
+async function rememberTeamName(name){
+  name=String(name||'').trim();
+  if(!name || /^Team\s+[12]$/i.test(name))return;
+  const exists=allTeamSuggestions.some(n=>String(n).toLowerCase()===name.toLowerCase());
+  if(!exists){
+    allTeamSuggestions.push(name);
+    allTeamSuggestions.sort((a,b)=>String(a).localeCompare(String(b)));
+  }
+  try{
+    await fetch('/api/opponents/remember',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pin:$('pin').value,name})
+    });
+  }catch(e){}
+}
 function setupTeamAutocomplete(id, onPick){
   const input=$(id); if(!input || input.dataset.customAutocomplete)return;
   input.dataset.customAutocomplete='1';
@@ -297,7 +313,8 @@ function setupTeamAutocomplete(id, onPick){
   input.addEventListener('focus',()=>{input.select(); show();});
   input.addEventListener('input',show);
   input.addEventListener('keydown',e=>{if(e.key==='Escape')menu.classList.remove('open');});
-  input.addEventListener('blur',()=>setTimeout(()=>menu.classList.remove('open'),180));
+  input.addEventListener('blur',()=>{ rememberTeamName(input.value); setTimeout(()=>menu.classList.remove('open'),180); });
+  input.addEventListener('change',()=>rememberTeamName(input.value));
 }
 
 async function generateMatchControlPin() {
