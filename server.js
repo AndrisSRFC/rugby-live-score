@@ -260,6 +260,30 @@ async function initDatabase() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS team_names (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      name_key TEXT NOT NULL UNIQUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS app_migrations (
+      key TEXT PRIMARY KEY,
+      applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  const teamCleanup = await pool.query(
+    "INSERT INTO app_migrations (key) VALUES ('team_names_enter_only_cleanup_v1') ON CONFLICT DO NOTHING RETURNING key"
+  );
+  if (teamCleanup.rowCount) {
+    await pool.query("DELETE FROM team_names");
+    await pool.query(
+      "INSERT INTO team_names (name,name_key) VALUES ('Sleaford','sleaford') ON CONFLICT (name_key) DO NOTHING"
+    );
+  }
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS app_access (
       install_id TEXT PRIMARY KEY,
       access_status TEXT NOT NULL DEFAULT 'trial'
