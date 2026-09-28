@@ -754,6 +754,27 @@ app.get("/api/season-stats", async (req, res) => {
   } catch(error) { console.error("Season stats error:",error); res.status(500).json({error:"Database error"}); }
 });
 
+app.post("/api/opponents/remember", async (req,res) => {
+  try {
+    if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+    const name=String(req.body?.name||"").trim();
+    if (!name || /^Team\s+[12]$/i.test(name)) return res.status(400).json({error:"Invalid team name"});
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS team_names (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        name_key TEXT NOT NULL UNIQUE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await pool.query(
+      "INSERT INTO team_names (name,name_key) VALUES ($1,LOWER($1)) ON CONFLICT (name_key) DO UPDATE SET name=EXCLUDED.name",
+      [name]
+    );
+    res.json({ok:true,name});
+  } catch(error) { console.error("Remember opponent error:",error); res.status(500).json({error:"Database error"}); }
+});
+
 app.get("/api/opponents", async (req,res) => {
   try {
     const result=await pool.query(`
@@ -761,6 +782,8 @@ app.get("/api/opponents", async (req,res) => {
         SELECT home_name AS name FROM season_matches
         UNION
         SELECT away_name AS name FROM season_matches
+        UNION
+        SELECT name FROM team_names
       ) teams
       WHERE name IS NOT NULL AND BTRIM(name) <> ''
       ORDER BY name
