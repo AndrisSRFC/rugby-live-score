@@ -312,9 +312,15 @@ function setupTeamAutocomplete(id, onPick){
   }
   input.addEventListener('focus',()=>{input.select(); show();});
   input.addEventListener('input',show);
-  input.addEventListener('keydown',e=>{if(e.key==='Escape')menu.classList.remove('open');});
-  input.addEventListener('blur',()=>{ rememberTeamName(input.value); setTimeout(()=>menu.classList.remove('open'),180); });
-  input.addEventListener('change',()=>rememberTeamName(input.value));
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Escape')menu.classList.remove('open');
+    if(e.key==='Enter'){
+      e.preventDefault();
+      rememberTeamName(input.value);
+      menu.classList.remove('open');
+    }
+  });
+  input.addEventListener('blur',()=>setTimeout(()=>menu.classList.remove('open'),180));
 }
 
 async function generateMatchControlPin() {
