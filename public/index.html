@@ -242,6 +242,11 @@
     .reaction-btn.dislike { border-color: #ff3038; }
     .reaction-btn.selected { transform: scale(1.08); box-shadow: 0 0 15px currentColor; }
 
+    /* Desktop only: centre feedback buttons in the gap below Install. */
+    @media (min-width: 701px) {
+      .social-actions { transform: translateY(-8px); }
+    }
+
     .score-help {
       max-width: 560px;
       margin: 0 auto;
