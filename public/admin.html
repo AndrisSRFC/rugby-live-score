@@ -34,7 +34,7 @@
     #refreshAccessRequests.request-alert,#refreshPendingResults.pending-alert{background:#ff453a;color:#fff;border-color:#ff453a;animation:requestAlertPulse .8s infinite;font-weight:1000;}
     a { color:white; }
     @media(min-width:721px){
-      .admin{width:min(980px,100%);overflow:visible;}
+      .admin{width:min(1120px,100%);overflow:visible;}
       .admin-top-panel{
         width:calc(100vw - 48px);
         max-width:none;
@@ -98,6 +98,12 @@
       .grid > .panel:nth-child(4) > .green{margin-top:10px;}
       .grid > .panel:nth-child(5) .row,
       .grid > .panel:nth-child(6) .row{gap:8px;}
+      .lower-original-width{
+        width:min(980px,calc(100vw - 48px));
+        box-sizing:border-box;
+        margin-left:auto;
+        margin-right:auto;
+      }
     }
     .admin-top-panel{position:relative;}
     .pending-top-shortcut{position:absolute;right:20px;top:20px;}
@@ -297,7 +303,7 @@ white-space:nowrap;
 </section>
   </div>
 </div>
-<section class="panel">
+<section class="panel lower-original-width">
   <label>Other NLD Results</label>
   <div class="row">
     <input id="nldOtherHome" placeholder="Home Team" list="teamSuggestions">
@@ -310,18 +316,18 @@ white-space:nowrap;
   <div class="row" style="margin-top:12px"><button type="button" onclick="loadOtherNldResults()">Refresh Other NLD Results</button></div>
   <div id="otherNldResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
 </section>
-<section class="panel" id="pendingResultsPanel">
+<section class="panel lower-original-width" id="pendingResultsPanel">
   <label>Current Season — Pending Results</label>
   <div class="row"><button id="refreshPendingResults" type="button" onclick="loadPendingResults()">Refresh Pending Results</button></div>
   <div id="pendingResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
 </section>
-<section class="panel">
+<section class="panel lower-original-width">
   <label>Current Season — Confirmed Results</label>
   <div class="row"><button type="button" onclick="loadConfirmedResults()">Refresh Confirmed Results</button></div>
   <div id="confirmedResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
   <div class="preview">Undo returns a confirmed result to Pending and immediately removes it from season statistics until it is confirmed again.</div>
 </section>
-<section class="panel">
+<section class="panel lower-original-width">
   <label>NLD Match History</label>
   <div class="row">
     <input id="historyGeneration" placeholder="Generation, e.g. 2013">
