@@ -98,6 +98,11 @@
       .grid > .panel:nth-child(4) > .green{margin-top:10px;}
       .grid > .panel:nth-child(5) .row,
       .grid > .panel:nth-child(6) .row{gap:8px;}
+      /* Move only the six primary cards left; do not resize them or Next Live. */
+      .primary-control-card{
+        position:relative;
+        left:calc((1120px - 100vw) / 2 + 24px);
+      }
       .lower-original-width{
         width:min(980px,calc(100vw - 48px));
         box-sizing:border-box;
@@ -222,7 +227,7 @@ white-space:nowrap;
   </div>
 
   <div class="grid">
-    <section class="panel">
+    <section class="primary-control-card panel">
       <label>Home Team</label>
       <input id="homeName" value="Team 1" list="teamSuggestions" />
       <div class="bigscore" id="homeScore">0</div>
@@ -235,7 +240,7 @@ white-space:nowrap;
       </div>
     </section>
 
-    <section class="panel">
+    <section class="primary-control-card panel">
       <label>Away Team</label>
       <input id="awayName" value="Team 2" list="teamSuggestions" />
       <div class="bigscore" id="awayScore">0</div>
@@ -248,7 +253,7 @@ white-space:nowrap;
       </div>
     </section>
 
-    <section class="panel clock-panel">
+    <section class="primary-control-card panel clock-panel">
       <label>Match Clock</label>
       
       <div class="row clock-controls">
@@ -258,7 +263,7 @@ white-space:nowrap;
       </div>
     </section>
 
-    <section class="panel">
+    <section class="primary-control-card panel">
       <label>Half</label>
       <div class="row">
         <button id="half1Btn" onclick="act('setHalf',{half:1})">1st Half</button>
@@ -267,7 +272,7 @@ white-space:nowrap;
       <br>
       <button class="green" onclick="newMatch()">New Match / 0:0</button>
     </section>
-<section class="panel">
+<section class="primary-control-card panel">
   <label>Age Group</label>
   <div class="row">
     <button id="ageU13" onclick="act('setAgeGroup',{ageGroup:'U13'})">U13</button>
@@ -279,7 +284,7 @@ white-space:nowrap;
     <button id="age2ndXV" onclick="act('setAgeGroup',{ageGroup:'2nd XV'})">2nd XV</button>
   </div>
 </section>
-<section class="panel">
+<section class="primary-control-card panel">
   <label>Match Type</label>
   <div class="row">
     <button id="matchFriendly" onclick="act('setMatchType',{matchType:'Friendly'})">Friendly</button>
