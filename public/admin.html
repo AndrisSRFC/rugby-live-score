@@ -103,6 +103,14 @@
         position:relative;
         left:calc((1120px - 100vw) / 2 + 24px);
       }
+      /* Desktop only: place Next Live in the free space to the right of the 2x3 controls. */
+      .next-live-panel{
+        position:absolute;
+        top:0;
+        left:calc(50% + 12px);
+        width:calc(50% - 12px);
+        box-sizing:border-box;
+      }
       .lower-original-width{
         width:min(980px,calc(100vw - 48px));
         box-sizing:border-box;
@@ -291,7 +299,7 @@ white-space:nowrap;
     <button id="matchNLD" onclick="act('setMatchType',{matchType:'NLD'})">NLD</button>
   </div>
 </section>
-    <section class="panel">
+    <section class="panel next-live-panel">
   <label>Next Live</label>
   <div class="row">
     <input id="nextHome" placeholder="Next Home Team">
