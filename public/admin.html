@@ -34,7 +34,22 @@
     #refreshAccessRequests.request-alert,#refreshPendingResults.pending-alert{background:#ff453a;color:#fff;border-color:#ff453a;animation:requestAlertPulse .8s infinite;font-weight:1000;}
     a { color:white; }
     @media(min-width:721px){
-      .top-controls{transform:translateY(-6px);}
+      .admin{width:min(1120px,100%);}
+      .admin-top-panel{padding:14px 20px;}
+      .desktop-top-line{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
+      .desktop-top-line .top-controls{transform:none;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
+      .desktop-top-line #adminProtected{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+      .desktop-top-line .live-actions,
+      .desktop-top-line .control-actions{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;margin:0!important;}
+      .desktop-top-line button,
+      .desktop-top-line .public-live-btn{white-space:nowrap;padding:10px 12px;}
+      .desktop-top-line .pin{width:150px;}
+      .desktop-top-line .pending-top-shortcut{position:static;margin-left:auto;}
+      .desktop-top-line .pending-top-shortcut button{min-width:150px;}
+      .desktop-top-line #controlPinPreview{display:none;}
+      .desktop-top-info{display:flex;gap:12px;align-items:center;margin-top:8px;font-size:12px;color:#aaa;}
+      .desktop-top-info #controlRequests{margin:0;}
+      .desktop-top-info .public-note{margin:0;}
     }
     .admin-top-panel{position:relative;}
     .pending-top-shortcut{position:absolute;right:20px;top:20px;}
@@ -123,28 +138,32 @@ white-space:nowrap;
   <h1>Rugby LIVE — Control Panel</h1>
 
   <div class="panel admin-top-panel" style="margin-bottom:18px">
-    <div class="pending-top-shortcut"><button id="pendingTopBtn" type="button" onclick="jumpToPending()">Pending Results</button></div>
-    <div class="row top-controls">
-      <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
-      <a id="publicLiveLink" href="/live.html?team=U13" target="_blank" class="public-live-btn">Open LIVE page ↗</a>
+    <div class="desktop-top-line">
+      <div class="row top-controls">
+        <input id="pin" class="pin" type="password" placeholder="Admin PIN" value="" />
+        <a id="publicLiveLink" href="/live.html?team=U13" target="_blank" class="public-live-btn">Open LIVE page ↗</a>
+      </div>
+      <div id="adminProtected">
+        <div class="row live-actions">
+          <button id="startLiveBtn" class="green" onclick="toggleLive()">▶ Start LIVE</button>
+          <button id="endMatch" class="red" onclick="act('endMatch',{message:'Full Time'})">■ End Match</button>
+          <button id="copyLiveLink" type="button" onclick="copyLiveLink()">🔗 Copy Link</button>
+        </div>
+        <div class="row control-actions">
+          <button id="generateControlPin" type="button" onclick="generateMatchControlPin()">🔒 Generate PIN</button>
+          <button id="copyControlAccess" type="button" onclick="copyMatchControlAccess()" style="display:none">📋 Copy PIN + Link</button>
+          <button id="revokeControl" type="button" class="red" onclick="revokeMatchControl()" style="display:none">Remove Operator Access</button>
+          <a id="matchControlLink" href="/match-control.html" target="_blank" class="public-live-btn">⚙ Open Control ↗</a>
+          <button id="refreshAccessRequests" type="button" onclick="loadControlRequests()">↻ Refresh Requests</button>
+        </div>
+        <div id="controlPinPreview" class="preview"></div>
+      </div>
+      <div class="pending-top-shortcut"><button id="pendingTopBtn" type="button" onclick="jumpToPending()">◷ Pending Results</button></div>
     </div>
-    <div id="adminProtected">
-    <div class="row live-actions">
-      <button id="startLiveBtn" class="green" onclick="toggleLive()">Start LIVE</button>
-      <button id="endMatch" class="red" onclick="act('endMatch',{message:'Full Time'})">End Match</button>
-      <button id="copyLiveLink" type="button" onclick="copyLiveLink()">📋 Copy LIVE Link</button>
+    <div class="desktop-top-info">
+      <div id="controlRequests" class="preview"><b>Match Control Requests:</b> Enter Admin PIN to check requests.</div>
+      <div class="preview public-note">The public link is always the main server address.</div>
     </div>
-    <div class="row" style="margin-top:8px">
-      <button id="generateControlPin" type="button" onclick="generateMatchControlPin()">Generate Match Control PIN</button>
-      <button id="copyControlAccess" type="button" onclick="copyMatchControlAccess()" style="display:none">📋 Copy PIN + Link</button>
-      <button id="revokeControl" type="button" class="red" onclick="revokeMatchControl()" style="display:none">Remove Operator Access</button>
-      <a id="matchControlLink" href="/match-control.html" target="_blank" class="public-live-btn">Open Match Control ↗</a>
-    </div>
-    <div id="controlPinPreview" class="preview"></div>
-    <div id="controlRequests" class="preview"><b>Match Control Requests:</b> Enter Admin PIN to check requests.</div>
-    <button id="refreshAccessRequests" type="button" onclick="loadControlRequests()">Refresh Access Requests</button>
-    <div class="preview">The public link is always the main server address.</div>
-  </div>
   </div>
 
   <div class="grid">
