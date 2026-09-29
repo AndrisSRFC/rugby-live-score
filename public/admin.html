@@ -57,6 +57,47 @@
       .desktop-top-info{display:flex;gap:12px;align-items:center;margin-top:8px;font-size:12px;color:#aaa;}
       .desktop-top-info #controlRequests{margin:0;}
       .desktop-top-info .public-note{margin:0;}
+
+      /* Desktop: compact the first six match-control cards and align controls. */
+      .grid{gap:12px;justify-content:start;}
+      .grid > .panel:nth-child(-n+6){
+        padding:14px 16px;
+        border-radius:16px;
+        min-height:0;
+        box-sizing:border-box;
+      }
+      .grid > .panel:nth-child(-n+6) .row{
+        align-items:center;
+        align-content:center;
+      }
+      .grid > .panel:nth-child(1) .bigscore,
+      .grid > .panel:nth-child(2) .bigscore{
+        font-size:60px;
+        line-height:1;
+        margin:8px 0 10px;
+      }
+      .grid > .panel:nth-child(1) input,
+      .grid > .panel:nth-child(2) input{padding:10px 12px;}
+      .grid > .panel:nth-child(1) button,
+      .grid > .panel:nth-child(2) button,
+      .grid > .panel:nth-child(3) button,
+      .grid > .panel:nth-child(4) button,
+      .grid > .panel:nth-child(5) button,
+      .grid > .panel:nth-child(6) button{padding:9px 12px;}
+      .grid > .panel:nth-child(3) .clock-controls{
+        display:flex;
+        align-items:center;
+        gap:12px;
+        flex-wrap:nowrap;
+      }
+      .grid > .panel:nth-child(3) #clock{
+        font-size:58px!important;
+        line-height:1;
+      }
+      .grid > .panel:nth-child(4) br{display:none;}
+      .grid > .panel:nth-child(4) > .green{margin-top:10px;}
+      .grid > .panel:nth-child(5) .row,
+      .grid > .panel:nth-child(6) .row{gap:8px;}
     }
     .admin-top-panel{position:relative;}
     .pending-top-shortcut{position:absolute;right:20px;top:20px;}
