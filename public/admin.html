@@ -221,6 +221,10 @@ white-space:nowrap;
     .team-autocomplete-option{display:block;width:100%;min-height:44px;padding:11px 14px;background:#111;color:#fff;border:0;border-bottom:1px solid #333;border-radius:0;text-align:left;font-size:18px}
     .team-autocomplete-option:last-child{border-bottom:0}
     .team-autocomplete-option:active,.team-autocomplete-option:hover{background:#222;color:#35ff25}
+    .team-autocomplete-row{display:flex;border-bottom:1px solid #333}
+    .team-autocomplete-row .team-autocomplete-option{flex:1;border-bottom:0}
+    .team-autocomplete-delete{background:#111;color:#ff453a;border:0;border-radius:0;padding:8px 14px;font-size:18px}
+    .team-autocomplete-add{display:block;width:100%;background:#132613;color:#35ff25;border:0;border-radius:0;text-align:left;padding:11px 14px}
   </style>
 </head>
 <body>
@@ -399,18 +403,30 @@ function filterTeamSuggestions(value){
 async function rememberTeamName(name){
   name=String(name||'').trim();
   if(!name || /^Team\s+[12]$/i.test(name))return;
-  const exists=allTeamSuggestions.some(n=>String(n).toLowerCase()===name.toLowerCase());
-  if(!exists){
-    allTeamSuggestions.push(name);
-    allTeamSuggestions.sort((a,b)=>String(a).localeCompare(String(b)));
-  }
   try{
-    await fetch('/api/opponents/remember',{
+    const r=await fetch('/api/opponents/remember',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({pin:$('pin').value,name})
     });
-  }catch(e){}
+    if(!r.ok)throw new Error((await r.json()).error||'Could not save team');
+    if(!allTeamSuggestions.some(n=>String(n).toLowerCase()===name.toLowerCase())){
+      allTeamSuggestions.push(name);
+      allTeamSuggestions.sort((a,b)=>String(a).localeCompare(String(b)));
+    }
+  }catch(e){alert(e.message||'Could not save team');}
+}
+async function deleteTeamName(name){
+  if(!confirm('Remove '+name+' from saved teams?'))return false;
+  try{
+    const r=await fetch('/api/opponents/delete',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pin:$('pin').value,name})
+    });
+    if(!r.ok)throw new Error((await r.json()).error||'Could not remove team');
+    allTeamSuggestions=allTeamSuggestions.filter(n=>String(n).toLowerCase()!==String(name).toLowerCase());
+    return true;
+  }catch(e){alert(e.message||'Could not remove team');return false;}
 }
 function setupTeamAutocomplete(id, onPick){
   const input=$(id); if(!input || input.dataset.customAutocomplete)return;
@@ -424,11 +440,28 @@ function setupTeamAutocomplete(id, onPick){
     const matches=allTeamSuggestions.filter(n=>!q||String(n).toLowerCase().startsWith(q)).slice(0,12);
     menu.innerHTML='';
     matches.forEach(name=>{
+      const row=document.createElement('div'); row.className='team-autocomplete-row';
       const b=document.createElement('button'); b.type='button'; b.className='team-autocomplete-option'; b.textContent=name;
       b.addEventListener('pointerdown',e=>{e.preventDefault(); input.value=name; menu.classList.remove('open'); input.dispatchEvent(new Event('input',{bubbles:true})); if(onPick)onPick(name);});
-      menu.appendChild(b);
+      row.appendChild(b);
+      if(String(name).toLowerCase()!=='sleaford'){
+        const remove=document.createElement('button'); remove.type='button'; remove.className='team-autocomplete-delete';
+        remove.textContent='×'; remove.title='Remove '+name+' from saved teams'; remove.setAttribute('aria-label',remove.title);
+        remove.addEventListener('pointerdown',e=>e.preventDefault());
+        remove.addEventListener('click',async()=>{if(await deleteTeamName(name))show();});
+        row.appendChild(remove);
+      }
+      menu.appendChild(row);
     });
-    menu.classList.toggle('open',matches.length>0);
+    const newName=input.value.trim();
+    if(newName && !/^Team\s+[12]$/i.test(newName) && !allTeamSuggestions.some(n=>String(n).toLowerCase()===newName.toLowerCase())){
+      const add=document.createElement('button'); add.type='button'; add.className='team-autocomplete-add';
+      add.textContent='＋ Save team: '+newName;
+      add.addEventListener('pointerdown',e=>e.preventDefault());
+      add.addEventListener('click',async()=>{await rememberTeamName(newName);show();});
+      menu.appendChild(add);
+    }
+    menu.classList.toggle('open',menu.childElementCount>0);
   }
   input.addEventListener('focus',()=>{input.select(); show();});
   input.addEventListener('input',show);
@@ -436,7 +469,6 @@ function setupTeamAutocomplete(id, onPick){
     if(e.key==='Escape')menu.classList.remove('open');
     if(e.key==='Enter'){
       e.preventDefault();
-      rememberTeamName(input.value);
       menu.classList.remove('open');
     }
   });
