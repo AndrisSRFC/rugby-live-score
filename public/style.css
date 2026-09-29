@@ -82,6 +82,14 @@ body {
     font-size: clamp(20px, 6vw, 32px);
   }
 
+  /* Keep the home name on one line, anchored at the left edge. */
+  .team:nth-of-type(2) .name {
+    width: max-content;
+    max-width: 46vw;
+    text-align: left;
+    white-space: nowrap;
+  }
+
   /* Team 2 stays anchored on the right; a longer name grows to the left. */
   .team:last-of-type .name {
     position: relative;
