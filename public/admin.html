@@ -34,18 +34,25 @@
     #refreshAccessRequests.request-alert,#refreshPendingResults.pending-alert{background:#ff453a;color:#fff;border-color:#ff453a;animation:requestAlertPulse .8s infinite;font-weight:1000;}
     a { color:white; }
     @media(min-width:721px){
-      .admin{width:min(1120px,100%);}
-      .admin-top-panel{padding:14px 20px;}
-      .desktop-top-line{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
-      .desktop-top-line .top-controls{transform:none;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
-      .desktop-top-line #adminProtected{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+      .admin{width:min(1120px,100%);overflow:visible;}
+      .admin-top-panel{
+        width:calc(100vw - 48px);
+        max-width:none;
+        margin-left:50%;
+        transform:translateX(-50%);
+        box-sizing:border-box;
+        padding:14px 20px;
+      }
+      .desktop-top-line{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;width:100%;}
+      .desktop-top-line .top-controls{transform:none;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;}
+      .desktop-top-line #adminProtected{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
       .desktop-top-line .live-actions,
-      .desktop-top-line .control-actions{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;margin:0!important;}
+      .desktop-top-line .control-actions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;margin:0!important;}
       .desktop-top-line button,
-      .desktop-top-line .public-live-btn{white-space:nowrap;padding:10px 12px;}
-      .desktop-top-line .pin{width:150px;}
+      .desktop-top-line .public-live-btn{white-space:nowrap;padding:10px 11px;}
+      .desktop-top-line .pin{width:130px;}
       .desktop-top-line .pending-top-shortcut{position:static;margin-left:auto;}
-      .desktop-top-line .pending-top-shortcut button{min-width:150px;}
+      .desktop-top-line .pending-top-shortcut button{min-width:0;}
       .desktop-top-line #controlPinPreview{display:none;}
       .desktop-top-info{display:flex;gap:12px;align-items:center;margin-top:8px;font-size:12px;color:#aaa;}
       .desktop-top-info #controlRequests{margin:0;}
@@ -155,10 +162,11 @@ white-space:nowrap;
           <button id="revokeControl" type="button" class="red" onclick="revokeMatchControl()" style="display:none">Remove Operator Access</button>
           <a id="matchControlLink" href="/match-control.html" target="_blank" class="public-live-btn">⚙ Open Control ↗</a>
           <button id="refreshAccessRequests" type="button" onclick="loadControlRequests()">↻ Refresh Requests</button>
+          <div class="pending-top-shortcut"><button id="pendingTopBtn" type="button" onclick="jumpToPending()">◷ Pending Results</button></div>
         </div>
         <div id="controlPinPreview" class="preview"></div>
       </div>
-      <div class="pending-top-shortcut"><button id="pendingTopBtn" type="button" onclick="jumpToPending()">◷ Pending Results</button></div>
+
     </div>
     <div class="desktop-top-info">
       <div id="controlRequests" class="preview"><b>Match Control Requests:</b> Enter Admin PIN to check requests.</div>
