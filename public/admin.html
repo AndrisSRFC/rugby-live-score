@@ -13,6 +13,8 @@
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
     .panel { background:#111; border:1px solid #262626; border-radius:20px; padding:20px; }
     .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .next-live-actions { display:flex; gap:10px; flex-wrap:nowrap; align-items:center; }
+    .next-live-actions button { white-space:nowrap; }
     input, button {
       font:inherit; border-radius:12px; border:1px solid #333; padding:12px 14px;
     }
@@ -219,8 +221,10 @@ white-space:nowrap;
     <button id="nextFriendly" type="button" onclick="setNextType('Friendly')">FRIENDLY</button>
 <button id="nextNLD" type="button" onclick="setNextType('NLD')">NLD</button>
     <input id="nextLive" placeholder="e.g. Today 14:30">
-    <button onclick="act('setNextLive',{nextHome:$('nextHome').value,nextAway:$('nextAway').value,nextAge:$('nextAge').value,nextType:nextTypeSelected,nextLive:$('nextLive').value})">Save Next Live</button>
-    <button type="button" class="red" onclick="clearPlannedLive()">Clear Planned LIVE</button>
+    <div class="next-live-actions">
+      <button onclick="act('setNextLive',{nextHome:$('nextHome').value,nextAway:$('nextAway').value,nextAge:$('nextAge').value,nextType:nextTypeSelected,nextLive:$('nextLive').value})">Save Next Live</button>
+      <button type="button" class="red" onclick="clearPlannedLive()">Clear Planned LIVE</button>
+    </div>
   </div>
 </section>
   </div>
