@@ -82,15 +82,21 @@ body {
     font-size: clamp(20px, 6vw, 32px);
   }
 
-  /* Team 2 stays anchored on the right; a longer name grows to the left. */
+  /* On mobile both team names may wrap like Team 1.
+     Keep each wrapped line centred inside its own team column. */
+  .team .name {
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
   .team:last-of-type .name {
-    position: relative;
-    left: 100%;
-    width: max-content;
-    max-width: 46vw;
-    transform: translateX(-100%);
-    text-align: right;
-    white-space: nowrap;
+    position: static;
+    left: auto;
+    transform: none;
   }
 
   .score {
