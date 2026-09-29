@@ -799,6 +799,16 @@ app.post("/api/opponents/remember", async (req,res) => {
   } catch(error) { console.error("Remember opponent error:",error); res.status(500).json({error:"Database error"}); }
 });
 
+app.post("/api/opponents/delete", async (req,res) => {
+  try {
+    if (String(req.body?.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+    const name=String(req.body?.name||"").trim();
+    if (!name || name.toLowerCase()==='sleaford') return res.status(400).json({error:"Invalid team name"});
+    await pool.query("DELETE FROM team_names WHERE name_key=LOWER($1)",[name]);
+    res.json({ok:true});
+  } catch(error) { console.error("Delete opponent error:",error); res.status(500).json({error:"Database error"}); }
+});
+
 app.get("/api/opponents", async (req,res) => {
   try {
     await pool.query(`
