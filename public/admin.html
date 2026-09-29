@@ -220,6 +220,7 @@ white-space:nowrap;
 <button id="nextNLD" type="button" onclick="setNextType('NLD')">NLD</button>
     <input id="nextLive" placeholder="e.g. Today 14:30">
     <button onclick="act('setNextLive',{nextHome:$('nextHome').value,nextAway:$('nextAway').value,nextAge:$('nextAge').value,nextType:nextTypeSelected,nextLive:$('nextLive').value})">Save Next Live</button>
+    <button type="button" class="red" onclick="clearPlannedLive()">Clear Planned LIVE</button>
   </div>
 </section>
   </div>
@@ -594,6 +595,29 @@ async function act(action,payload={}) {
 }
 
 function score(team,delta){ act('score',{team,delta}); }
+
+async function clearPlannedLive(){
+  if(!confirm('Clear Planned LIVE for '+selectedTeam+'?')) return;
+  const r = await fetch('/api/admin', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      pin:$('pin').value,
+      action:'setNextLive',
+      payload:{nextHome:'',nextAway:'',nextAge:'',nextType:'Friendly',nextLive:''},
+      team:selectedTeam
+    })
+  });
+  const data=await r.json();
+  if(!r.ok) return alert(data.error||'Could not clear Planned LIVE');
+  $('nextHome').value='';
+  $('nextAway').value='';
+  $('nextAge').value='';
+  $('nextLive').value='';
+  nextTypeSelected='Friendly';
+  $('nextFriendly').className='green';
+  $('nextNLD').className='';
+}
 
 function newMatch(){
   $('homeName').value='Team 1';
