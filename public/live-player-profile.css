@@ -26,3 +26,6 @@
 #liveSquadList button{display:block;min-width:0;width:100%;background:transparent;color:#fff;border:0;border-radius:6px;padding:8px 4px;text-align:left;font:inherit;cursor:pointer;min-height:44px;overflow-wrap:anywhere}
 #liveSquadList button:hover,#liveSquadList button:focus-visible{background:#162016;color:#35ff25}
 @media(max-width:600px){.live-player-profile{padding:20px 16px}.player-stat-cards{grid-template-columns:minmax(0,1fr)}.player-stat-values strong{font-size:34px}.live-player-profile header{margin-bottom:26px}}
+
+
+.player-profile-photo{display:block;width:180px;height:180px;object-fit:cover;border:2px solid #35ff25;border-radius:18px;margin:24px 0;background:#111}

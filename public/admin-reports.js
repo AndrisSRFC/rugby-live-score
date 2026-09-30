@@ -60,7 +60,7 @@ async function openPlayerProfile(playerId){
 }
 async function loadPlayerProfile(){
   const serial=++profileSerial;$('profileContent').replaceChildren();$('profileMessage').textContent='Loading statistics…';
-  try{const data=await reportRequest('profile',{playerId:$('profilePlayerSelect').value});if(serial!==profileSerial||!playerDialog.open)return;const box=$('profileContent');box.replaceChildren();box.append(reportNode('h2',data.player.name),reportNode('p',data.player.team_key+(data.player.active?'':' · archived'),'report-muted'));
+  try{const data=await reportRequest('profile',{playerId:$('profilePlayerSelect').value});if(serial!==profileSerial||!playerDialog.open)return;const box=$('profileContent');box.replaceChildren();if(data.player.photo_data){const photo=reportNode('img');photo.src=data.player.photo_data;photo.alt=data.player.name+' player photo';Object.assign(photo.style,{width:'180px',height:'180px',objectFit:'cover',borderRadius:'18px',border:'2px solid #35ff25',display:'block',marginBottom:'20px'});box.append(photo);}box.append(reportNode('h2',data.player.name),reportNode('p',data.player.team_key+(data.player.active?'':' · archived'),'report-muted'));
     if(!data.player.active){
       const remove=reportNode('button','Delete from List');remove.type='button';
       remove.addEventListener('click',async()=>{
@@ -79,3 +79,4 @@ async function loadPlayerProfile(){
   }catch(e){$('profileMessage').textContent=e.message;}
 }
 $('openPlayerStats').addEventListener('click',()=>openPlayerProfile());$('profilePlayerSelect').addEventListener('change',loadPlayerProfile);$('profileBack').addEventListener('click',()=>{playerDialog.close();profileSerial++;});playerDialog.addEventListener('close',()=>{profileSerial++;});
+

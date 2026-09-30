@@ -45,7 +45,8 @@ function drawSquadPlayers(){
       try{await squadRequest('/api/players/archive',{id:player.id},draft.team);if(squadDraft!==draft)return;draft.players=draft.players.filter(p=>p.id!==player.id);if(!draft.finished)draft.ids.delete(player.id);drawSquadPlayers();updateSquadCount();}
       catch(error){squadError(error);}finally{setSquadBusy(false);}
     });
-    row.append(label,remove);list.appendChild(row);
+    const photo=document.createElement('button');photo.type='button';photo.className='squad-photo-button';photo.textContent=player.has_photo?'EDIT PHOTO':'ADD PHOTO';photo.setAttribute('aria-label','Photo for '+player.name);photo.addEventListener('click',()=>openPlayerPhoto(player));
+    row.append(label,photo,remove);list.appendChild(row);
   });
   updateSquadCount();setSquadBusy(squadBusy);
 }
@@ -103,3 +104,46 @@ $('transferSquadPlayers').addEventListener('click',async()=>{
     $('squadTransferStatus').textContent=data.count+' transferred to '+target;
   }catch(error){squadError(error);}finally{setSquadBusy(false);}
 });
+
+
+// Photos are managed from the PC roster picker and follow the player ID.
+const playerPhotoDialog=document.createElement('dialog');playerPhotoDialog.id='playerPhotoDialog';
+playerPhotoDialog.innerHTML='<div class="squad-dialog-heading"><h2 id="playerPhotoTitle">Player photo</h2><button type="button" id="closePlayerPhoto" aria-label="Close photo editor">×</button></div><p class="squad-note">This photo will appear in the public LIVE player profile. Choose a clear portrait.</p><img id="playerPhotoPreview" alt="Player photo preview" hidden><label class="squad-photo-file">CHOOSE PHOTO<input type="file" id="playerPhotoFile" accept="image/jpeg,image/png,image/webp"></label><label class="squad-show"><input type="checkbox" id="playerPhotoConsent">I have permission to publish this player’s photo on Rugby LIVE.</label><p id="playerPhotoError" role="status"></p><div class="squad-dialog-footer"><button type="button" id="savePlayerPhoto" class="green">SAVE PHOTO</button><button type="button" id="removePlayerPhoto">REMOVE PHOTO</button></div>';
+playerPhotoDialog.setAttribute('aria-labelledby','playerPhotoTitle');document.body.append(playerPhotoDialog);
+let photoDraft=null,photoSerial=0,photoBusy=false;
+function photoControls(busy){photoBusy=busy;['playerPhotoFile','playerPhotoConsent','savePlayerPhoto','removePlayerPhoto'].forEach(id=>$(id).disabled=busy);}
+function photoPreview(photo){$('playerPhotoPreview').hidden=!photo;if(photo)$('playerPhotoPreview').src=photo;else $('playerPhotoPreview').removeAttribute('src');}
+async function openPlayerPhoto(player){
+  if(squadBusy || !squadDraft)return;
+  const token=++photoSerial;photoDraft={player,team:squadDraft.team,photo:null,changed:false};
+  $('playerPhotoTitle').textContent=player.name+' — Photo';$('playerPhotoFile').value='';$('playerPhotoConsent').checked=false;$('playerPhotoError').textContent='Loading photo…';photoPreview(null);playerPhotoDialog.showModal();photoControls(true);
+  try{const data=await squadRequest('/api/players/photo/read',{id:player.id},photoDraft.team);if(token!==photoSerial)return;photoDraft.photo=data.photo;photoPreview(data.photo);$('playerPhotoError').textContent='';}
+  catch(e){if(token===photoSerial)$('playerPhotoError').textContent=e.message;}finally{if(token===photoSerial)photoControls(false);}
+}
+$('closePlayerPhoto').addEventListener('click',()=>{if(!photoBusy)playerPhotoDialog.close();});
+playerPhotoDialog.addEventListener('cancel',event=>{if(photoBusy)event.preventDefault();});
+playerPhotoDialog.addEventListener('close',()=>{photoSerial++;photoDraft=null;photoPreview(null);});
+$('playerPhotoFile').addEventListener('change',async()=>{
+  const file=$('playerPhotoFile').files[0];if(!file || !photoDraft)return;
+  const token=++photoSerial;photoControls(true);$('playerPhotoError').textContent='Preparing photo…';
+  let bitmap;
+  try{
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10*1024*1024)throw new Error('Choose a JPG, PNG or WebP image under 10 MB.');
+    bitmap=await createImageBitmap(file);if(!bitmap.width || !bitmap.height || bitmap.width*bitmap.height>50000000)throw new Error('Image is too large. Choose a smaller photo.');
+    const ratio=Math.min(1,600/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*ratio));canvas.height=Math.max(1,Math.round(bitmap.height*ratio));
+    const ctx=canvas.getContext('2d');ctx.fillStyle='#111';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+    const photo=canvas.toDataURL('image/jpeg',0.85);if(photo.length>450000)throw new Error('Photo is too large. Choose a simpler image.');
+    if(token!==photoSerial)return;photoDraft.photo=photo;photoDraft.changed=true;photoPreview(photo);$('playerPhotoError').textContent='Ready to save.';
+  }catch(e){if(token===photoSerial)$('playerPhotoError').textContent=e.message;}finally{bitmap?.close();if(token===photoSerial)photoControls(false);}
+});
+async function savePhoto(remove){
+  if(photoBusy || !photoDraft)return;
+  if(!remove && (!photoDraft.photo || !photoDraft.changed)){$('playerPhotoError').textContent='Choose a new photo first.';return;}
+  if(!remove && !$('playerPhotoConsent').checked){$('playerPhotoError').textContent='Confirm permission to publish this photo.';return;}
+  const draft=photoDraft;photoControls(true);$('playerPhotoError').textContent='Saving…';
+  try{
+    const data=await squadRequest('/api/players/photo',{id:draft.player.id,photo:remove?null:draft.photo,consent:$('playerPhotoConsent').checked},draft.team);
+    draft.player.has_photo=data.hasPhoto;if(squadDraft?.team===draft.team)drawSquadPlayers();playerPhotoDialog.close();
+  }catch(e){$('playerPhotoError').textContent=e.message;}finally{photoControls(false);}
+}
+$('savePlayerPhoto').addEventListener('click',()=>savePhoto(false));$('removePlayerPhoto').addEventListener('click',()=>savePhoto(true));

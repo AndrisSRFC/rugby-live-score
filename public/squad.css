@@ -48,3 +48,14 @@
   .next-live-squad-stack > .next-live-panel{position:static;transform:none;width:100%;max-width:none}
   .next-live-squad-stack > .squad-admin-panel{width:100%;box-sizing:border-box}
 }
+
+
+#playerPhotoDialog{width:min(560px,calc(100vw - 48px));max-height:85vh;box-sizing:border-box;padding:24px;border:1px solid #35ff25;border-radius:18px;background:#111;color:#fff;overflow-y:auto}
+#playerPhotoDialog::backdrop{background:rgba(0,0,0,.78)}
+#playerPhotoPreview{display:block;width:180px;height:180px;object-fit:cover;border:1px solid #35ff25;border-radius:14px;margin:18px auto}
+#playerPhotoPreview[hidden]{display:none}
+.squad-photo-file{display:block;color:#35ff25;font-size:13px;margin:18px 0}
+.squad-photo-file input{display:block;margin-top:10px;max-width:100%}
+#playerPhotoError{color:#ffb4a8;font-size:14px;min-height:20px}
+#squadDialog .squad-photo-button{background:#182018;color:#35ff25;border:1px solid #355335;padding:8px 10px;font-size:11px;white-space:nowrap}
+#playerPhotoDialog button:disabled{opacity:.45}

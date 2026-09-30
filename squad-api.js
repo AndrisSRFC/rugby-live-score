@@ -29,11 +29,41 @@ module.exports = function registerSquadApi({app, pool, adminPin, teamIds, getSta
     if (!authorize(req,res)) return;
     try {
       const team=req.body.team;
-      const result=await pool.query('SELECT id,name,shirt_number FROM rugby_players WHERE team_key=$1 AND active=TRUE ORDER BY shirt_number NULLS LAST,LOWER(name),id',[team]);
+      const result=await pool.query('SELECT id,name,shirt_number,(photo_data IS NOT NULL) AS has_photo FROM rugby_players WHERE team_key=$1 AND active=TRUE ORDER BY shirt_number NULLS LAST,LOWER(name),id',[team]);
       const state=getState(team);
       res.json({players:result.rows,matchId:state.matchId,selected:state.matchSquad || [],visible:!!state.showSquad,finished:state.message==='Full Time'});
     } catch(error) { fail(res,error); }
   });
+
+  app.post('/api/players/photo/read',async(req,res)=>{
+    res.set('Cache-Control','no-store');
+    if(!authorize(req,res))return;
+    if(!uuid.test(req.body.id || ''))return res.status(400).json({error:'Invalid player'});
+    try{
+      const r=await pool.query('SELECT photo_data FROM rugby_players WHERE id=$1 AND team_key=$2 AND active=TRUE',[req.body.id,req.body.team]);
+      if(!r.rowCount)return res.status(404).json({error:'Player not found in this age group.'});
+      res.json({photo:r.rows[0].photo_data || null});
+    }catch(e){fail(res,e);}
+  });
+  app.post('/api/players/photo',async(req,res)=>{
+    res.set('Cache-Control','no-store');
+    if(!authorize(req,res))return;
+    if(!uuid.test(req.body.id || ''))return res.status(400).json({error:'Invalid player'});
+    const photo=req.body.photo;
+    if(photo!==null){
+      const match=typeof photo==='string' && photo.match(/^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/);
+      if(!match || req.body.consent!==true)return res.status(400).json({error:'Choose a JPG, PNG or WebP photo and confirm permission to publish it.'});
+      const bytes=Buffer.from(match[2],'base64');
+      const valid=match[1]==='jpeg' ? bytes.subarray(0,3).equals(Buffer.from([255,216,255])) : match[1]==='png' ? bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])) : bytes.toString('ascii',0,4)==='RIFF' && bytes.toString('ascii',8,12)==='WEBP';
+      if(!valid || bytes.length>350*1024 || bytes.length<12 || bytes.toString('base64')!==match[2])return res.status(400).json({error:'Photo is invalid or too large. Choose another image.'});
+    }
+    try{
+      const r=await pool.query('UPDATE rugby_players SET photo_data=$1 WHERE id=$2 AND team_key=$3 AND active=TRUE RETURNING id',[photo,req.body.id,req.body.team]);
+      if(!r.rowCount)return res.status(404).json({error:'Player not found in this age group.'});
+      res.json({ok:true,hasPhoto:photo!==null});
+    }catch(e){fail(res,e);}
+  });
+
   app.post('/api/players/add', async (req,res) => {
     if (!authorize(req,res)) return;
     const name=String(req.body.name || '').trim().replace(/\s+/g,' ');
@@ -130,3 +160,4 @@ module.exports = function registerSquadApi({app, pool, adminPin, teamIds, getSta
     finally { if(client)client.release(); }
   });
 };
+

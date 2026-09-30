@@ -86,7 +86,7 @@ function register({app,pool,adminPin,teamIds}){
     if(!authorized(req,res))return;
     if(!UUID.test(req.body.playerId || ''))return res.status(400).json({error:'Select a player.'});
     try{
-      const player=await pool.query('SELECT id,name,team_key,active FROM rugby_players WHERE id=$1',[req.body.playerId]);
+      const player=await pool.query('SELECT id,name,team_key,active,photo_data FROM rugby_players WHERE id=$1',[req.body.playerId]);
       if(!player.rowCount)return res.status(404).json({error:'Player not found.'});
       const result=await pool.query(`SELECT m.id,m.season_id,m.team_key,m.played_at,m.home_name,m.away_name,m.home_score,m.away_score,s.played,s.tries,s.conversions
         FROM rugby_player_match_stats s JOIN season_matches m ON m.id=s.match_result_id
@@ -99,3 +99,4 @@ function register({app,pool,adminPin,teamIds}){
   });
 }
 module.exports=register;module.exports.init=init;
+

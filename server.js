@@ -165,6 +165,7 @@ async function initDatabase() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
+  await pool.query("ALTER TABLE rugby_players ADD COLUMN IF NOT EXISTS photo_data TEXT");
   await pool.query("CREATE UNIQUE INDEX IF NOT EXISTS rugby_players_active_name ON rugby_players (team_key,LOWER(name)) WHERE active=TRUE");
   await pool.query(`
     CREATE TABLE IF NOT EXISTS rugby_state (
@@ -359,6 +360,7 @@ async function initDatabase() {
   console.log(`Loaded \${TEAM_CONFIG.length} independent rugby match states`);
 }
 
+app.use('/api/players/photo',express.json({limit:'800kb'}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -1086,3 +1088,4 @@ async function startServer() {
 }
 
 startServer();
+
