@@ -61,6 +61,16 @@ async function openPlayerProfile(playerId){
 async function loadPlayerProfile(){
   const serial=++profileSerial;$('profileContent').replaceChildren();$('profileMessage').textContent='Loading statistics…';
   try{const data=await reportRequest('profile',{playerId:$('profilePlayerSelect').value});if(serial!==profileSerial||!playerDialog.open)return;const box=$('profileContent');box.replaceChildren();box.append(reportNode('h2',data.player.name),reportNode('p',data.player.team_key+(data.player.active?'':' · archived'),'report-muted'));
+    if(!data.player.active){
+      const remove=reportNode('button','Delete from List');remove.type='button';
+      remove.addEventListener('click',async()=>{
+        if(!confirm('Remove '+data.player.name+' from the Player Statistics list? Previous match records will be kept.'))return;
+        remove.disabled=true;
+        try{await reportRequest('hide-player',{playerId:data.player.id});await openPlayerProfile();}
+        catch(e){$('profileMessage').textContent=e.message;remove.disabled=false;}
+      });
+      box.append(remove);
+    }
     const current=data.seasons.filter(s=>s.season===data.currentSeason).reduce((a,s)=>({appearances:a.appearances+s.appearances,tries:a.tries+s.tries,conversions:a.conversions+s.conversions}),{appearances:0,tries:0,conversions:0});
     const tiles=reportNode('div',undefined,'report-stats');for(const [label,stats] of [['THIS SEASON · '+data.currentSeason,current],['CAREER TOTAL',data.totals]]){const tile=reportNode('section');tile.append(reportNode('h3',label),reportNode('p',stats.appearances+' games · '+stats.tries+' tries · '+stats.conversions+' conversions'));tiles.append(tile);}box.append(tiles,reportNode('p','Only confirmed matches with recorded player statistics are counted.','report-muted'));
     const seasons=reportNode('select');seasons.setAttribute('aria-label','Statistics season');seasons.append(new Option('All seasons',''));[...new Set(data.seasons.map(s=>s.season))].forEach(s=>seasons.append(new Option(s || 'Unspecified',s || '')));box.append(seasons);const details=reportNode('div');box.append(details);
