@@ -16,10 +16,10 @@ async function squadRequest(path,body,team=selectedTeam){
 function squadError(error){$('squadError').textContent=error?.message || '';}
 function setSquadBusy(busy){
   squadBusy=busy;
-  $('addSquadPlayer').disabled=busy;
-  $('saveMatchSquad').disabled=busy || !!squadDraft?.finished;
-  $('clearSquadSelection').disabled=busy || !!squadDraft?.finished;
-  $('squadShowLive').disabled=busy || !!squadDraft?.finished;
+  $('addSquadPlayer').disabled=busy || !squadDraft;
+  $('saveMatchSquad').disabled=busy || !squadDraft || !!squadDraft?.finished;
+  $('clearSquadSelection').disabled=busy || !squadDraft || !!squadDraft?.finished;
+  $('squadShowLive').disabled=busy || !squadDraft || !!squadDraft?.finished;
   $('squadPlayerList').querySelectorAll('button,input').forEach(control=>control.disabled=busy || (control.type==='checkbox' && !!squadDraft?.finished));
 }
 function updateSquadCount(){$('squadSelectedCount').textContent=squadDraft ? squadDraft.ids.size+' selected' : '0 selected';}
@@ -46,7 +46,7 @@ function drawSquadPlayers(){
 }
 $('openSquadPicker').addEventListener('click',async()=>{
   const team=selectedTeam, serial=++squadRequestSerial;
-  squadDraft=null;squadError(null);$('squadTitle').textContent=team+' — Match Squad';$('squadPlayerList').textContent='Loading players…';$('squadPlayerName').value='';$('squadPlayerNumber').value='';$('squadShowLive').checked=false;
+  squadDraft=null;squadError(null);updateSquadCount();$('squadTitle').textContent=team+' — Match Squad';$('squadPlayerList').textContent='Loading players…';$('squadPlayerName').value='';$('squadPlayerNumber').value='';$('squadShowLive').checked=false;
   $('squadDialog').showModal();setSquadBusy(true);
   try{
     const data=await squadRequest('/api/players/list',{},team);
@@ -55,7 +55,7 @@ $('openSquadPicker').addEventListener('click',async()=>{
     $('squadShowLive').checked=data.selected.length ? data.visible : true;
     if(data.finished)squadError(new Error('This match is finished. Use New Match before choosing another squad.'));
     drawSquadPlayers();
-  }catch(error){if(serial===squadRequestSerial)squadError(error);}finally{if(serial===squadRequestSerial){setSquadBusy(false);if(!squadDraft)$('saveMatchSquad').disabled=true;}}
+  }catch(error){if(serial===squadRequestSerial){squadError(error);$('squadPlayerList').textContent='Close this window, check your Admin PIN and reopen the squad picker.';}}finally{if(serial===squadRequestSerial)setSquadBusy(false);}
 });
 $('closeSquad').addEventListener('click',()=>$('squadDialog').close());
 $('squadDialog').addEventListener('close',()=>{squadRequestSerial++;});
