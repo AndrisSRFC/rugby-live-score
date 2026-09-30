@@ -1,5 +1,6 @@
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 async function init(pool){
+  await pool.query('ALTER TABLE rugby_players ADD COLUMN IF NOT EXISTS hidden_from_profiles BOOLEAN NOT NULL DEFAULT FALSE');
   await pool.query(`CREATE TABLE IF NOT EXISTS rugby_player_match_stats (
     match_result_id INTEGER NOT NULL REFERENCES season_matches(id) ON DELETE CASCADE,
     player_id UUID NOT NULL REFERENCES rugby_players(id),
@@ -27,7 +28,7 @@ function register({app,pool,adminPin,teamIds}){
   });
   app.post('/api/admin-reports/players',async(req,res)=>{
     if(!authorized(req,res))return;
-    try{const r=await pool.query('SELECT id,name,team_key,active FROM rugby_players ORDER BY LOWER(name),team_key,id');res.json(r.rows);}catch(e){error(res,e);}
+    try{const r=await pool.query('SELECT id,name,team_key,active FROM rugby_players WHERE hidden_from_profiles=FALSE ORDER BY LOWER(name),team_key,id');res.json(r.rows);}catch(e){error(res,e);}
   });
   app.post('/api/admin-reports/report',async(req,res)=>{
     if(!authorized(req,res,true))return;
@@ -70,6 +71,17 @@ function register({app,pool,adminPin,teamIds}){
       await client.query('COMMIT');res.json({ok:true});
     }catch(e){if(client)await client.query('ROLLBACK');error(res,e);}finally{if(client)client.release();}
   });
+
+  app.post('/api/admin-reports/hide-player',async(req,res)=>{
+    if(!authorized(req,res))return;
+    if(!UUID.test(req.body.playerId || ''))return res.status(400).json({error:'Select a player.'});
+    try{
+      const result=await pool.query('UPDATE rugby_players SET hidden_from_profiles=TRUE WHERE id=$1 AND active=FALSE RETURNING id',[req.body.playerId]);
+      if(!result.rowCount)return res.status(409).json({error:'Only archived players can be removed here. Delete the player from the active roster first.'});
+      res.json({ok:true});
+    }catch(e){error(res,e);}
+  });
+
   app.post('/api/admin-reports/profile',async(req,res)=>{
     if(!authorized(req,res))return;
     if(!UUID.test(req.body.playerId || ''))return res.status(400).json({error:'Select a player.'});
