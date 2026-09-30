@@ -71,6 +71,42 @@ module.exports = function registerSquadApi({app, pool, adminPin, teamIds, getSta
     } catch(error) { if(client)await client.query('ROLLBACK'); fail(res,error); }
     finally { if(client)client.release(); }
   });
+
+  app.post('/api/players/transfer', async (req,res) => {
+    if (!authorize(req,res)) return;
+    const ids=req.body.playerIds, target=req.body.targetTeam, source=req.body.team;
+    if (!Object.hasOwn(teamIds,target) || target===source || !Array.isArray(ids) || !ids.length || ids.length>60 || ids.some(id=>typeof id!=='string' || !uuid.test(id)) || new Set(ids).size!==ids.length) {
+      return res.status(400).json({error:'Choose players and a different destination age group.'});
+    }
+    let client;
+    try {
+      client=await pool.connect();await client.query('BEGIN');
+      const selected=await client.query('SELECT id,name FROM rugby_players WHERE team_key=$1 AND active=TRUE AND id=ANY($2::uuid[]) FOR UPDATE',[source,ids]);
+      if(selected.rows.length!==ids.length){await client.query('ROLLBACK');return res.status(409).json({error:'The roster changed. Reopen the picker and select the players again.'});}
+      const conflict=await client.query('SELECT name FROM rugby_players WHERE team_key=$1 AND active=TRUE AND LOWER(name)=ANY($2::text[])',[target,selected.rows.map(p=>p.name.toLowerCase())]);
+      if(conflict.rowCount){await client.query('ROLLBACK');return res.status(409).json({error:'A player with the same name already exists in '+target+'. Check that roster before transferring.'});}
+      await client.query(`CREATE TABLE IF NOT EXISTS rugby_player_transfers (
+        id UUID PRIMARY KEY,player_id UUID NOT NULL REFERENCES rugby_players(id),
+        from_team TEXT NOT NULL,to_team TEXT NOT NULL,season_id TEXT,
+        transferred_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`);
+      await client.query('UPDATE rugby_players SET team_key=$1 WHERE team_key=$2 AND active=TRUE AND id=ANY($3::uuid[])',[target,source,ids]);
+      for(const id of ids)await client.query('INSERT INTO rugby_player_transfers (id,player_id,from_team,to_team,season_id) VALUES ($1,$2,$3,$4,(SELECT current_season FROM season_config WHERE id=1))',[crypto.randomUUID(),id,source,target]);
+      const state=getState(source);
+      let patch=null;
+      if(state.message!=='Full Time' && (state.matchSquad || []).some(p=>ids.includes(p.id))){
+        patch=await storeSquad(client,source,state,state.matchSquad.filter(p=>!ids.includes(p.id)),state.showSquad);
+      }
+      await client.query('COMMIT');
+      if(patch && getState(source).matchId===state.matchId){Object.assign(getState(source),patch);broadcast(source);}
+      res.json({ok:true,count:ids.length,targetTeam:target});
+    } catch(error) {
+      if(client)await client.query('ROLLBACK');
+      if(error.code==='23505')return res.status(409).json({error:'A player with the same name already exists in the destination group.'});
+      fail(res,error);
+    } finally {if(client)client.release();}
+  });
+
   app.post('/api/squad/save', async (req,res) => {
     if (!authorize(req,res)) return;
     const ids=req.body.playerIds;
