@@ -21,7 +21,9 @@
 .squad-show{display:flex;align-items:center;gap:8px;margin:0;color:#fff;font-size:14px}
 #squadSelectedCount{font-size:14px;color:#aaa}
 #squadDialog button:disabled{opacity:.45;cursor:default}
-.live-squad{width:min(580px,100%);margin:40px auto 110px;border-top:1px solid #35ff25;border-bottom:1px solid #262626;padding:14px 0;color:#fff}
+.wrap:has(.live-squad){grid-template-columns:minmax(0,1fr)}
+.wrap > .card:has(.live-squad){min-width:0;justify-self:center}
+.live-squad{width:min(580px,100%);min-width:0;contain:inline-size;margin:40px auto 110px;border-top:1px solid #35ff25;border-bottom:1px solid #262626;padding:14px 0;color:#fff}
 .live-squad[hidden],#liveSquadList[hidden]{display:none}
 .live-squad-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
 .live-squad-title{font-size:13px;letter-spacing:1px;font-weight:800;color:#35ff25}
