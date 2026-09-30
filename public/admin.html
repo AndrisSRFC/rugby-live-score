@@ -253,6 +253,16 @@ white-space:nowrap;
     @media(min-width:721px) and (max-width:1100px){
       .results-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:calc(100% - 48px);margin-left:24px;margin-right:24px}
     }
+
+    @media(min-width:721px){
+      .primary-control-card{
+        left:calc((min(1072px,calc(100vw - 48px)) - min(1582px,calc(100vw - 80px))) / 2);
+      }
+      .grid > .next-live-squad-stack{
+        left:calc(50% + min(791px,calc(50vw - 40px)) - 500px);
+      }
+      .results-layout{margin-left:auto;margin-right:auto}
+    }
 </style>
 </head>
 <body>
