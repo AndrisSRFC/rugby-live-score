@@ -21,9 +21,11 @@ function setSquadBusy(busy){
   squadBusy=busy;
   $('addSquadPlayer').disabled=busy || !squadDraft;
   $('saveMatchSquad').disabled=busy || !squadDraft || !!squadDraft?.finished;
-  $('clearSquadSelection').disabled=busy || !squadDraft || !!squadDraft?.finished;
+  $('clearSquadSelection').disabled=busy || !squadDraft;
+  $('transferSquadPlayers').disabled=busy || !squadDraft;
+  $('squadTransferTarget').disabled=busy || !squadDraft;
   $('squadShowLive').disabled=busy || !squadDraft || !!squadDraft?.finished;
-  $('squadPlayerList').querySelectorAll('button,input').forEach(control=>control.disabled=busy || (control.type==='checkbox' && !!squadDraft?.finished));
+  $('squadPlayerList').querySelectorAll('button,input').forEach(control=>control.disabled=busy);
 }
 function updateSquadCount(){$('squadSelectedCount').textContent=squadDraft ? squadDraft.ids.size+' selected' : '0 selected';}
 function drawSquadPlayers(){
@@ -32,7 +34,7 @@ function drawSquadPlayers(){
   squadDraft.players.forEach(player=>{
     const row=document.createElement('div');row.className='squad-player-row';
     const label=document.createElement('label');label.className='squad-player-check';
-    const check=document.createElement('input');check.type='checkbox';check.checked=squadDraft.ids.has(player.id);check.disabled=squadDraft.finished;
+    const check=document.createElement('input');check.type='checkbox';check.checked=squadDraft.ids.has(player.id);check.disabled=squadBusy;
     check.addEventListener('change',()=>{if(check.checked)squadDraft.ids.add(player.id);else squadDraft.ids.delete(player.id);updateSquadCount();});
     const name=document.createElement('span');name.textContent=(player.shirt_number ? player.shirt_number+'. ' : '')+player.name;
     label.append(check,name);
@@ -54,7 +56,12 @@ $('openSquadPicker').addEventListener('click',async()=>{
   try{
     const data=await squadRequest('/api/players/list',{},team);
     if(serial!==squadRequestSerial || team!==selectedTeam || !$('squadDialog').open)return;
-    squadDraft={...data,team,ids:new Set(data.selected.map(p=>p.id))};
+    squadDraft={...data,team,ids:new Set(data.selected.filter(p=>data.players.some(active=>active.id===p.id)).map(p=>p.id))};
+    const groups=['U13','U14','U15','U16','Colts','1st XV','2nd XV'];
+    const target=$('squadTransferTarget');target.replaceChildren();
+    groups.filter(group=>group!==team).forEach(group=>{const option=document.createElement('option');option.value=group;option.textContent=group;target.appendChild(option);});
+    target.value=({'U13':'U14','U14':'U15','U15':'U16','U16':'Colts','Colts':'1st XV','1st XV':'2nd XV','2nd XV':'1st XV'})[team];
+    $('squadTransferStatus').textContent='';
     $('squadShowLive').checked=data.selected.length ? data.visible : true;
     if(data.finished)squadError(new Error('This match is finished. Use New Match before choosing another squad.'));
     drawSquadPlayers();
@@ -82,3 +89,17 @@ $('saveMatchSquad').addEventListener('click',async()=>{
 function updateSquadSummary(state){$('squadSummary').textContent=(state.matchSquad || []).length+' selected · '+(state.showSquad ? 'Visible on LIVE' : 'Hidden on LIVE');}
 if(last)updateSquadSummary(last);
 socket.on('state',updateSquadSummary);
+
+$('transferSquadPlayers').addEventListener('click',async()=>{
+  if(squadBusy || !squadDraft)return;
+  const draft=squadDraft, ids=[...draft.ids], target=$('squadTransferTarget').value;
+  if(!ids.length){squadError(new Error('Tick the players you want to transfer.'));return;}
+  if(!confirm('Transfer '+ids.length+' selected player(s) from '+draft.team+' to '+target+'? They will leave the active '+draft.team+' roster. Previous match squads and player IDs will be kept.'))return;
+  setSquadBusy(true);squadError(null);$('squadTransferStatus').textContent='';
+  try{
+    const data=await squadRequest('/api/players/transfer',{playerIds:ids,targetTeam:target},draft.team);
+    if(squadDraft!==draft)return;
+    draft.players=draft.players.filter(p=>!ids.includes(p.id));draft.ids.clear();drawSquadPlayers();
+    $('squadTransferStatus').textContent=data.count+' transferred to '+target;
+  }catch(error){squadError(error);}finally{setSquadBusy(false);}
+});
