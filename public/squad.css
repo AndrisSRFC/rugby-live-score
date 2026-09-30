@@ -42,3 +42,9 @@
 @keyframes live-squad-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media(max-width:700px){.live-squad{margin-top:36px;width:calc(100% - 20px)}.live-squad-player{font-size:17px}#squadPause{min-height:36px}#liveSquadList{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.live-squad-track{animation:none}.live-squad-ticker{overflow-x:auto}}
+
+@media(min-width:721px){
+  .next-live-squad-stack{position:absolute;top:105px;left:calc(50% + 170px);width:500px;max-width:calc(50vw - 36px);box-sizing:border-box;transform:translateY(100px)}
+  .next-live-squad-stack > .next-live-panel{position:static;transform:none;width:100%;max-width:none}
+  .next-live-squad-stack > .squad-admin-panel{width:100%;box-sizing:border-box}
+}
