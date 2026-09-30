@@ -12,6 +12,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rugby LIVE</title>
   <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/squad.css" />
 <style>
 /* Compact season W/D/L preview. Data connection comes in the next step. */
 .season-mini{
@@ -155,6 +156,12 @@ body.table-open .table-screen{transform:translateX(0);}
       </div>
     </section>
 
+  <section id="liveSquad" class="live-squad" hidden aria-label="Today's Sleaford squad">
+    <div class="live-squad-heading"><span class="live-squad-title">TODAY’S SQUAD <span>· SLEAFORD</span></span><button id="squadPause" type="button" aria-pressed="false">Pause</button></div>
+    <button id="squadTicker" class="live-squad-ticker" type="button" aria-expanded="false" aria-controls="liveSquadList" aria-label="View full squad"><span id="squadTrack" class="live-squad-track"></span></button>
+    <div class="live-squad-hint">TAP TO VIEW FULL SQUAD</div>
+    <ul id="liveSquadList" hidden></ul>
+  </section>
   <div id="nextLiveBox" class="next-live"></div></main>
 </div>
 
@@ -170,6 +177,7 @@ function fmt(sec) {
 let currentState = null;
 function render(s) {
   currentState = s;
+  if(typeof renderMatchSquad==='function')renderMatchSquad(s);
   $('coveragePaused').style.display = s.message==='Live updates paused' ? 'block' : 'none';
   $('homeName').textContent = s.homeName;
   $('awayName').textContent = s.awayName;
@@ -271,5 +279,6 @@ const socket = io({ query: { team: selectedTeam, role: 'viewer' } });
 socket.on('viewerCount', count => { $('viewerCount').textContent = Number(count || 0); });
 socket.on('state', s => { render(s); loadSeasonStats(); });
 </script>
+<script src="/live-squad.js"></script>
 </body>
 </html>

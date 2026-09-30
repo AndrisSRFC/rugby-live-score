@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rugby LIVE — Control Panel</title>
   <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/squad.css" />
   <style>
     .admin { width:min(980px,100%); margin:auto; padding:24px; }
     h1 { margin:0 0 18px; }
@@ -382,6 +383,23 @@ white-space:nowrap;
   </div>
 </section>
 </div>
+<dialog id="squadDialog" aria-labelledby="squadTitle">
+  <div class="squad-dialog-heading"><h2 id="squadTitle">Match Squad</h2><button type="button" id="closeSquad" aria-label="Close squad picker">×</button></div>
+  <p class="squad-note">Tick the players selected for this match.</p>
+  <div class="squad-add-row">
+    <label>Player name<input id="squadPlayerName" maxlength="80" placeholder="First name"></label>
+    <label class="squad-number">Shirt number<input id="squadPlayerNumber" type="number" min="1" max="99" placeholder="Optional"></label>
+    <button type="button" id="addSquadPlayer" class="green">Add Player</button>
+  </div>
+  <p id="squadError" role="alert"></p>
+  <div id="squadPlayerList"></div>
+  <div class="squad-dialog-footer">
+    <span id="squadSelectedCount" aria-live="polite">0 selected</span>
+    <label class="squad-show"><input id="squadShowLive" type="checkbox"> Show on LIVE</label>
+    <button type="button" id="clearSquadSelection">Clear Selection</button>
+    <button type="button" id="saveMatchSquad" class="green">Save Match Squad</button>
+  </div>
+</dialog>
 <script src="/socket.io/socket.io.js"></script>
 <script>
 let generatedControlPin = '';
@@ -690,6 +708,7 @@ function render(s) {
     nextLiveLoaded = true;
     }
   last = s;
+  if(typeof updateSquadSummary==='function')updateSquadSummary(s);
   $('startLiveBtn').className = s.matchLive ? 'red' : 'green';
   $('startLiveBtn').textContent = s.matchLive ? 'Stop LIVE' : 'Start LIVE';
   $('homeScore').textContent = s.homeScore;
@@ -710,6 +729,7 @@ $('matchFriendly').className = s.matchType === 'Friendly' ? 'green' : '';
 $('matchNLD').className = s.matchType === 'NLD' ? 'green' : '';}
 
 function selectTeam(team) {
+  if ($('squadDialog').open) $('squadDialog').close();
   selectedTeam = team;
   const url = new URL(window.location.href);
   url.searchParams.set('team', team);
@@ -856,5 +876,6 @@ async function decideControlRequest(id,decision){
 setInterval(watchControlRequests,3000);
 setInterval(watchPendingResults,3000);
 </script>
+<script src="/admin-squad.js"></script>
 </body>
 </html>

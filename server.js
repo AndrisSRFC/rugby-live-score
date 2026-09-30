@@ -76,7 +76,7 @@ function normalizeTeamKey(value) {
 }
 
 function createDefaultState(teamKey) {
-  return { ...defaultState, ageGroup: teamKey };
+  return { ...defaultState, ageGroup: teamKey, matchId: crypto.randomUUID(), matchSquad: [], showSquad: false };
 }
 
 let matchStates = Object.fromEntries(
@@ -148,6 +148,25 @@ function broadcast(teamKey) {
 
 async function initDatabase() {
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS rugby_players (
+      id UUID PRIMARY KEY,
+      team_key TEXT NOT NULL,
+      name TEXT NOT NULL,
+      shirt_number INTEGER,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS rugby_match_squads (
+      match_id UUID PRIMARY KEY,
+      team_key TEXT NOT NULL,
+      players JSONB NOT NULL DEFAULT '[]'::jsonb,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+  await pool.query("CREATE UNIQUE INDEX IF NOT EXISTS rugby_players_active_name ON rugby_players (team_key,LOWER(name)) WHERE active=TRUE");
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS rugby_state (
       id INTEGER PRIMARY KEY,
       data JSONB NOT NULL
@@ -209,6 +228,7 @@ async function initDatabase() {
 
   await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS season_id TEXT");
   await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS squad_id TEXT");
+  await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS lineup_match_id UUID");
   await pool.query("UPDATE season_matches SET season_id='2026-27' WHERE season_id IS NULL");
   await pool.query(`
     UPDATE season_matches m SET squad_id=s.squad_id
@@ -330,7 +350,7 @@ async function initDatabase() {
       ageGroup: team.key
     };
 
-    if (!row) {
+    if (!row || !row.data?.matchId) {
       await saveState(team.key);
     }
   }
@@ -494,6 +514,10 @@ app.post("/api/reactions", async (req, res) => {
   }
 });
 
+require('./squad-api')({
+  app, pool, adminPin: ADMIN_PIN, teamIds: TEAM_IDS, getState, broadcast
+});
+
 app.post("/api/admin", async (req, res) => {
   const { pin, controlToken, action, payload = {}, team } = req.body || {};
   const teamKey = normalizeTeamKey(team);
@@ -604,9 +628,9 @@ app.post("/api/admin", async (req, res) => {
         }
         const seasonMeta = await getCurrentSeasonMeta(teamKey);
         await pool.query(
-          `INSERT INTO season_matches (team_key,home_name,away_name,home_score,away_score,match_type,status,season_id,squad_id)
-           VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8)`,
-          [teamKey, selectedState.homeName, selectedState.awayName, selectedState.homeScore, selectedState.awayScore, selectedState.matchType, seasonMeta.seasonId, seasonMeta.squadId]
+          `INSERT INTO season_matches (team_key,home_name,away_name,home_score,away_score,match_type,status,season_id,squad_id,lineup_match_id)
+           VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8,$9)`,
+          [teamKey, selectedState.homeName, selectedState.awayName, selectedState.homeScore, selectedState.awayScore, selectedState.matchType, seasonMeta.seasonId, seasonMeta.squadId, selectedState.matchId]
         );
         selectedState.matchLive = false;
         selectedState.running = false;
