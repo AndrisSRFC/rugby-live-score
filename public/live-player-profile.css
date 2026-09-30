@@ -29,3 +29,19 @@
 
 
 .player-profile-photo{display:block;width:180px;height:180px;object-fit:cover;border:2px solid #35ff25;border-radius:18px;margin:24px 0;background:#111}
+
+/* Keep the season picker and history beside the player's photo. */
+.player-photo-history{display:grid;grid-template-columns:180px minmax(0,1fr);align-items:start;gap:24px;margin:24px 0}
+.player-photo-history .player-profile-photo{box-sizing:border-box;margin:0;max-width:100%}
+.player-history-content{min-width:0}
+.player-photo-history .player-season-label{margin:0 0 18px}
+.player-photo-history .player-season-label select{width:100%;box-sizing:border-box}
+.player-photo-history .player-profile-note{overflow-wrap:anywhere}
+@media(max-width:600px){
+  .player-photo-history{grid-template-columns:clamp(90px,28vw,150px) minmax(0,1fr);gap:14px;margin:20px 0}
+  .player-photo-history .player-profile-photo{width:100%;height:auto;aspect-ratio:1;border-radius:14px}
+  .player-photo-history h2{font-size:12px;letter-spacing:.5px;margin-bottom:12px}
+  .player-photo-history .player-season-label{margin-bottom:16px}
+  .player-photo-history .player-season-label select{padding:10px 8px;font-size:14px;min-height:44px}
+  .player-photo-history .player-match h3{font-size:14px}
+}

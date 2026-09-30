@@ -9,11 +9,14 @@
     document.getElementById('livePlayerTitle').textContent=data.player.name;
     document.getElementById('livePlayerGroup').textContent=data.player.team+' · SLEAFORD';
     const content=document.getElementById('livePlayerContent');content.replaceChildren();
-    if(data.player.photo){const photo=el('img',undefined,'player-profile-photo');photo.src=data.player.photo;photo.alt=data.player.name+' player photo';photo.width=180;photo.height=180;content.append(photo);}
+    const photoRow=data.player.photo ? el('div',undefined,'player-photo-history') : null;
+    if(photoRow){content.append(photoRow);const photo=el('img',undefined,'player-profile-photo');photo.src=data.player.photo;photo.alt=data.player.name+' player photo';photo.width=180;photo.height=180;photoRow.append(photo);}
     const current=data.seasons.filter(s=>s.season===data.currentSeason).reduce((a,s)=>({appearances:a.appearances+s.appearances,tries:a.tries+s.tries,conversions:a.conversions+s.conversions}),{appearances:0,tries:0,conversions:0});
     const cards=el('div',undefined,'player-stat-cards');cards.append(statCard('THIS SEASON · '+(data.currentSeason || '—'),current),statCard('CAREER TOTAL',data.totals));content.append(cards,el('p','Only recorded statistics from confirmed matches are counted.','player-profile-note'));
-    const label=el('label','SEASON','player-season-label');const select=el('select');select.setAttribute('aria-label','Player statistics season');select.append(new Option('All seasons',''));[...new Set(data.seasons.map(s=>s.season))].filter(Boolean).forEach(s=>select.append(new Option(s,s)));label.append(select);content.append(label);
-    const detail=el('div');content.append(detail);
+    const label=el('label','SEASON','player-season-label');const select=el('select');select.setAttribute('aria-label','Player statistics season');select.append(new Option('All seasons',''));[...new Set(data.seasons.map(s=>s.season))].filter(Boolean).forEach(s=>select.append(new Option(s,s)));label.append(select);
+    const history=el('section',undefined,'player-history-content');history.append(label);
+    const detail=el('div');history.append(detail);
+    (photoRow || content).append(history);
     function showSeason(){
       detail.replaceChildren();
       const groups=data.seasons.filter(s=>!select.value||s.season===select.value);
