@@ -231,6 +231,7 @@ async function initDatabase() {
   await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS squad_id TEXT");
   await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS lineup_match_id UUID");
   await require("./admin-reports-api").init(pool);
+  await require("./nld-voting-api").init(pool);
   await pool.query("UPDATE season_matches SET season_id='2026-27' WHERE season_id IS NULL");
   await pool.query(`
     UPDATE season_matches m SET squad_id=s.squad_id
@@ -517,6 +518,7 @@ app.post("/api/reactions", async (req, res) => {
   }
 });
 
+require('./nld-voting-api')({app,pool,adminPin:ADMIN_PIN,teamIds:TEAM_IDS});
 require('./public-player-api')({app,pool,teamIds:TEAM_IDS,getState});
 require('./admin-reports-api')({app,pool,adminPin:ADMIN_PIN,teamIds:TEAM_IDS});
 require('./squad-api')({
@@ -789,7 +791,7 @@ app.get("/api/season-stats", async (req, res) => {
   try {
     const teamKey = normalizeTeamKey(req.query.team);
     const result = await pool.query(
-      "SELECT * FROM season_matches WHERE team_key=$1 AND status='confirmed' ORDER BY played_at DESC, id DESC",
+      `SELECT m.*,CASE WHEN p.state='published' AND m.match_type='NLD' THEN (SELECT c->>'name' FROM jsonb_array_elements(p.candidates) c WHERE c->>'id'=p.winner_id::text LIMIT 1) END AS fans_award FROM season_matches m LEFT JOIN rugby_nld_polls p ON p.match_id=m.id WHERE m.team_key=$1 AND m.status='confirmed' ORDER BY m.played_at DESC,m.id DESC`,
       [teamKey]
     );
     let wins=0, draws=0, losses=0, pointsFor=0, pointsAgainst=0;

@@ -82,6 +82,7 @@ body.table-open .table-screen{transform:translateX(0);}
 .home-link:hover,.home-link:focus{border-color:#25ff18;box-shadow:0 0 10px rgba(37,255,24,.28);outline:none}
 @media(max-width:700px){.home-link{top:36px;left:8px;font-size:11px;padding:6px 8px}}
 </style>
+<link rel="stylesheet" href="/nld-voting.css">
 </head>
 <body>
   <a class="home-link" href="/" aria-label="Back to Rugby LIVE home">← HOME</a>
@@ -228,6 +229,7 @@ async function loadSeasonStats(){
     $('statsPair').textContent=opponent ? 'SLEAFORD — '+opponent.toUpperCase() : 'SLEAFORD — OPPONENT';
     const box=document.querySelector('.stats-history');
     box.innerHTML=vsMatches.length?vsMatches.map(m=>'<div class="stats-empty" style="margin-top:16px"><div style="font-size:17px;font-weight:900;color:#fff">'+m.home_name+' '+m.home_score+' – '+m.away_score+' '+m.away_name+'</div><div style="margin-top:5px;font-size:11px;font-weight:900;letter-spacing:1px">'+(m.outcome==='W'?'WIN':m.outcome==='L'?'LOSS':'DRAW')+'</div></div>').join(''):'<div class="stats-empty">No confirmed matches against '+(opponent||'this opponent')+' yet</div>';
+    vsMatches.forEach((m,index)=>{if(m.fans_award && box.children[index]){const award=document.createElement('div');award.className='nld-history-award';award.textContent='🏆 Fans’ Player of the Match: '+m.fans_award;box.children[index].append(award);}});
   }catch(e){}
 }
 function openStats(){ loadSeasonStats(); document.body.classList.add('stats-open'); }

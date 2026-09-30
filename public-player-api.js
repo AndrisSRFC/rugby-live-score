@@ -14,6 +14,7 @@ module.exports=function({app,pool,teamIds,getState}){
         FROM rugby_player_match_stats s JOIN season_matches m ON m.id=s.match_result_id
         WHERE s.player_id=$1 AND m.status='confirmed' ORDER BY m.played_at DESC,m.id DESC`,[id]);
       const season=await pool.query('SELECT current_season FROM season_config WHERE id=1');
+      const awards=await require('./nld-voting-api').awards(pool,id);
       if(!published())return res.status(404).json({error:'This player is no longer in the published match squad.'});
       const totals={appearances:0,tries:0,conversions:0},groups=new Map();
       for(const m of result.rows){
@@ -21,7 +22,7 @@ module.exports=function({app,pool,teamIds,getState}){
         if(!groups.has(key))groups.set(key,{season:m.season_id,team:m.team_key,appearances:0,tries:0,conversions:0});
         if(m.played){const g=groups.get(key);g.appearances++;totals.appearances++;g.tries+=Number(m.tries);g.conversions+=Number(m.conversions);totals.tries+=Number(m.tries);totals.conversions+=Number(m.conversions);}
       }
-      res.json({player:{id,name:pick.name,team:player.rows[0].team_key,photo:player.rows[0].photo_data || null},currentSeason:season.rows[0]?.current_season,seasons:[...groups.values()],totals,matches:result.rows});
+      res.json({player:{id,name:pick.name,team:player.rows[0].team_key,photo:player.rows[0].photo_data || null},currentSeason:season.rows[0]?.current_season,seasons:[...groups.values()],totals,awards,matches:result.rows});
     }catch(e){console.error('Public player profile error:',e);res.status(500).json({error:'Player statistics are temporarily unavailable. Please try again.'});}
   });
 };
