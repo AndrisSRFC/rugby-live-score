@@ -8,6 +8,12 @@ squadFullButton.setAttribute('aria-controls','liveSquadList');
 squadFullButton.setAttribute('aria-expanded','false');
 Object.assign(squadFullButton.style,{display:'block',width:'100%',minHeight:'44px',background:'transparent',border:'0',padding:'8px 0',cursor:'pointer'});
 squadHint.replaceWith(squadFullButton);
+const squadStatsHint=document.createElement('p');
+squadStatsHint.className='live-squad-hint';
+squadStatsHint.textContent="TAP A PLAYER’S NAME TO VIEW STATS";
+squadStatsHint.hidden=true;
+Object.assign(squadStatsHint.style,{textAlign:'center',margin:'4px 0 10px',fontSize:'12px'});
+document.getElementById('liveSquadList').before(squadStatsHint);
 function fitSquadTicker(){
   const section=document.getElementById('liveSquad');
   document.querySelectorAll('#squadTrack .live-squad-group').forEach(group=>group.style.minWidth=section.clientWidth+'px');
@@ -25,7 +31,9 @@ function renderMatchSquad(state){
     const row=document.createElement('li');
     const button=document.createElement('button');button.type='button';button.dataset.playerId=player.id;button.setAttribute('aria-label','View '+player.name+' statistics');
     if(player.shirt_number){const number=document.createElement('b');number.textContent=player.shirt_number;button.append(number);}
-    button.append(document.createTextNode(player.name));row.append(button);list.append(row);
+    button.append(document.createTextNode(player.name));
+    const statsIcon=document.createElement('span');statsIcon.textContent='📊';statsIcon.setAttribute('aria-hidden','true');statsIcon.style.marginLeft='8px';button.append(statsIcon);
+    row.append(button);list.append(row);
   });
   for(let copy=0;copy<2;copy++){
     const group=document.createElement('span');group.className='live-squad-group';
@@ -40,7 +48,7 @@ function renderMatchSquad(state){
   }
   track.style.setProperty('--squad-duration',Math.max(18,players.length*5)+'s');
   fitSquadTicker();
-  list.hidden=true;document.getElementById('squadTicker').setAttribute('aria-expanded','false');
+  list.hidden=true;squadStatsHint.hidden=true;document.getElementById('squadTicker').setAttribute('aria-expanded','false');
   squadFullButton.setAttribute('aria-expanded','false');squadFullButton.textContent='TAP TO VIEW FULL SQUAD';
 }
 document.getElementById('squadPause').addEventListener('click',event=>{
@@ -49,6 +57,7 @@ document.getElementById('squadPause').addEventListener('click',event=>{
 });
 function toggleFullSquad(){
   const list=document.getElementById('liveSquadList');list.hidden=!list.hidden;
+  squadStatsHint.hidden=list.hidden;
   document.getElementById('squadTicker').setAttribute('aria-expanded',String(!list.hidden));
   squadFullButton.setAttribute('aria-expanded',String(!list.hidden));
   squadFullButton.textContent=list.hidden?'TAP TO VIEW FULL SQUAD':'TAP TO HIDE FULL SQUAD';
