@@ -2,7 +2,10 @@
 const squadPanel=document.createElement('section');
 squadPanel.className='panel squad-admin-panel';
 squadPanel.innerHTML='<label>Match Squad</label><div class="row"><button type="button" id="openSquadPicker" class="green">SELECT MATCH SQUAD</button><span id="squadSummary" class="squad-note">Choose today’s players</span></div>';
-document.querySelector('.grid').insertAdjacentElement('afterend',squadPanel);
+const nextLivePanel=document.querySelector('.next-live-panel');
+const nextSquadStack=document.createElement('div');nextSquadStack.className='next-live-squad-stack';
+nextLivePanel.insertAdjacentElement('beforebegin',nextSquadStack);
+nextSquadStack.append(nextLivePanel,squadPanel);
 let squadDraft=null;
 let squadRequestSerial=0;
 let squadBusy=false;
