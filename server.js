@@ -229,6 +229,7 @@ async function initDatabase() {
   await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS season_id TEXT");
   await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS squad_id TEXT");
   await pool.query("ALTER TABLE season_matches ADD COLUMN IF NOT EXISTS lineup_match_id UUID");
+  await require("./admin-reports-api").init(pool);
   await pool.query("UPDATE season_matches SET season_id='2026-27' WHERE season_id IS NULL");
   await pool.query(`
     UPDATE season_matches m SET squad_id=s.squad_id
@@ -514,6 +515,7 @@ app.post("/api/reactions", async (req, res) => {
   }
 });
 
+require('./admin-reports-api')({app,pool,adminPin:ADMIN_PIN,teamIds:TEAM_IDS});
 require('./squad-api')({
   app, pool, adminPin: ADMIN_PIN, teamIds: TEAM_IDS, getState, broadcast
 });
