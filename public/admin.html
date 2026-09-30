@@ -226,7 +226,23 @@ white-space:nowrap;
     .team-autocomplete-row .team-autocomplete-option{flex:1;border-bottom:0}
     .team-autocomplete-delete{background:#111;color:#ff453a;border:0;border-radius:0;padding:8px 14px;font-size:18px}
     .team-autocomplete-add{display:block;width:100%;background:#132613;color:#35ff25;border:0;border-radius:0;text-align:left;padding:11px 14px}
-  </style>
+  
+    @media(min-width:721px){
+      .results-layout{
+        display:grid;
+        grid-template-columns:minmax(0,2fr) minmax(0,1fr);
+        align-items:start;
+        gap:12px;
+        width:min(1620px,calc(100vw - 48px));
+        position:relative;
+        left:calc((1120px - 100vw) / 2 + 24px);
+        margin:18px 0 12px;
+      }
+      .results-layout > .lower-original-width{width:100%;min-width:0;margin:0;box-sizing:border-box}
+      .results-layout > .season-results-row{width:100%;min-width:0;margin:0;grid-template-columns:minmax(0,1fr);gap:12px}
+      .results-layout input{max-width:100%;box-sizing:border-box}
+    }
+</style>
 </head>
 <body>
 <datalist id="teamSuggestions"></datalist>
@@ -345,6 +361,7 @@ white-space:nowrap;
 </section>
   </div>
 </div>
+<div class="results-layout">
 <section class="panel lower-original-width">
   <label>Other NLD Results</label>
   <div class="row">
@@ -370,6 +387,7 @@ white-space:nowrap;
   <div id="confirmedResults" class="preview" style="margin-top:12px">Enter Admin PIN and refresh.</div>
   <div class="preview">Undo returns a confirmed result to Pending and immediately removes it from season statistics until it is confirmed again.</div>
 </section>
+</div>
 </div>
 <section class="panel lower-original-width">
   <label>NLD Match History</label>
