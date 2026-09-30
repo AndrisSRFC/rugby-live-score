@@ -1,4 +1,13 @@
 let liveSquadSignature='';
+const squadHint=document.querySelector('#liveSquad .live-squad-hint');
+const squadFullButton=document.createElement('button');
+squadFullButton.type='button';
+squadFullButton.className='live-squad-hint';
+squadFullButton.textContent='TAP TO VIEW FULL SQUAD';
+squadFullButton.setAttribute('aria-controls','liveSquadList');
+squadFullButton.setAttribute('aria-expanded','false');
+Object.assign(squadFullButton.style,{display:'block',width:'100%',minHeight:'44px',background:'transparent',border:'0',padding:'8px 0',cursor:'pointer'});
+squadHint.replaceWith(squadFullButton);
 function fitSquadTicker(){
   const section=document.getElementById('liveSquad');
   document.querySelectorAll('#squadTrack .live-squad-group').forEach(group=>group.style.minWidth=section.clientWidth+'px');
@@ -31,13 +40,19 @@ function renderMatchSquad(state){
   track.style.setProperty('--squad-duration',Math.max(18,players.length*5)+'s');
   fitSquadTicker();
   list.hidden=true;document.getElementById('squadTicker').setAttribute('aria-expanded','false');
+  squadFullButton.setAttribute('aria-expanded','false');squadFullButton.textContent='TAP TO VIEW FULL SQUAD';
 }
 document.getElementById('squadPause').addEventListener('click',event=>{
   const paused=document.getElementById('liveSquad').classList.toggle('squad-paused');
   event.currentTarget.textContent=paused?'Play':'Pause';event.currentTarget.setAttribute('aria-pressed',String(paused));
 });
-document.getElementById('squadTicker').addEventListener('click',event=>{
-  const list=document.getElementById('liveSquadList');list.hidden=!list.hidden;event.currentTarget.setAttribute('aria-expanded',String(!list.hidden));
-});
+function toggleFullSquad(){
+  const list=document.getElementById('liveSquadList');list.hidden=!list.hidden;
+  document.getElementById('squadTicker').setAttribute('aria-expanded',String(!list.hidden));
+  squadFullButton.setAttribute('aria-expanded',String(!list.hidden));
+  squadFullButton.textContent=list.hidden?'TAP TO VIEW FULL SQUAD':'TAP TO HIDE FULL SQUAD';
+}
+document.getElementById('squadTicker').addEventListener('click',toggleFullSquad);
+squadFullButton.addEventListener('click',toggleFullSquad);
 if(currentState)renderMatchSquad(currentState);
 new ResizeObserver(fitSquadTicker).observe(document.getElementById('liveSquad'));
