@@ -424,7 +424,7 @@ white-space:nowrap;
 </div>
 <dialog id="squadDialog" aria-labelledby="squadTitle">
   <div class="squad-dialog-heading"><h2 id="squadTitle">Match Squad</h2><button type="button" id="closeSquad" aria-label="Close squad picker">×</button></div>
-  <p class="squad-note">Tick the players selected for this match.</p>
+  <p class="squad-note">Tick players for this match or select them to transfer to another age group.</p>
   <div class="squad-add-row">
     <label>Player name<input id="squadPlayerName" maxlength="80" placeholder="First name"></label>
     <label class="squad-number">Shirt number<input id="squadPlayerNumber" type="number" min="1" max="99" placeholder="Optional"></label>
@@ -432,6 +432,13 @@ white-space:nowrap;
   </div>
   <p id="squadError" role="alert"></p>
   <div id="squadPlayerList"></div>
+  <div class="squad-transfer-row" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-top:22px;padding-top:16px;border-top:1px solid #333">
+    <label style="margin:0;color:#aaa">Transfer selected players to
+      <select id="squadTransferTarget" style="display:block;margin-top:6px;padding:10px 12px;background:#080808;color:#fff;border:1px solid #333;border-radius:10px;font:inherit"></select>
+    </label>
+    <button type="button" id="transferSquadPlayers">Transfer Selected</button>
+    <span id="squadTransferStatus" class="squad-note" role="status"></span>
+  </div>
   <div class="squad-dialog-footer">
     <span id="squadSelectedCount" aria-live="polite">0 selected</span>
     <label class="squad-show"><input id="squadShowLive" type="checkbox"> Show on LIVE</label>
