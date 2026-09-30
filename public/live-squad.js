@@ -23,8 +23,9 @@ function renderMatchSquad(state){
   track.replaceChildren();list.replaceChildren();
   players.forEach(player=>{
     const row=document.createElement('li');
-    if(player.shirt_number){const number=document.createElement('b');number.textContent=player.shirt_number;row.append(number);}
-    row.append(document.createTextNode(player.name));list.append(row);
+    const button=document.createElement('button');button.type='button';button.dataset.playerId=player.id;button.setAttribute('aria-label','View '+player.name+' statistics');
+    if(player.shirt_number){const number=document.createElement('b');number.textContent=player.shirt_number;button.append(number);}
+    button.append(document.createTextNode(player.name));row.append(button);list.append(row);
   });
   for(let copy=0;copy<2;copy++){
     const group=document.createElement('span');group.className='live-squad-group';

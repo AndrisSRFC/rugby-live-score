@@ -515,6 +515,7 @@ app.post("/api/reactions", async (req, res) => {
   }
 });
 
+require('./public-player-api')({app,pool,teamIds:TEAM_IDS,getState});
 require('./admin-reports-api')({app,pool,adminPin:ADMIN_PIN,teamIds:TEAM_IDS});
 require('./squad-api')({
   app, pool, adminPin: ADMIN_PIN, teamIds: TEAM_IDS, getState, broadcast

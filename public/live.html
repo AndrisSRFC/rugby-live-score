@@ -13,6 +13,7 @@
   <title>Rugby LIVE</title>
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/squad.css" />
+  <link rel="stylesheet" href="/live-player-profile.css" />
 <style>
 /* Compact season W/D/L preview. Data connection comes in the next step. */
 .season-mini{
@@ -248,12 +249,12 @@ $('closeTable').addEventListener('click', closeTable);
 let touchStartX = 0;
 let touchStartY = 0;
 document.addEventListener('touchstart', e => {
-  if (!e.touches.length) return;
+  if (document.getElementById('livePlayerProfile')?.open || !e.touches.length) return;
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
 }, {passive:true});
 document.addEventListener('touchend', e => {
-  if (!e.changedTouches.length) return;
+  if (document.getElementById('livePlayerProfile')?.open || !e.changedTouches.length) return;
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
   if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy)) return;
@@ -280,5 +281,6 @@ socket.on('viewerCount', count => { $('viewerCount').textContent = Number(count 
 socket.on('state', s => { render(s); loadSeasonStats(); });
 </script>
 <script src="/live-squad.js"></script>
+<script src="/live-player-profile.js"></script>
 </body>
 </html>
