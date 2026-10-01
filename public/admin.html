@@ -325,6 +325,12 @@ white-space:nowrap;
  .mobile-admin-paged #squadDialog .squad-add-row,.mobile-admin-paged #squadDialog .squad-transfer-row,.mobile-admin-paged #squadDialog .squad-delete,.mobile-admin-paged #squadDialog .squad-photo-button{display:none!important}
  .mobile-admin-paged #squadDialog{width:calc(100vw - 24px);padding:16px}
 }
+
+@media(max-width:720px){
+ .mobile-admin-pages-nav{display:none!important}
+ .mobile-admin-paged[data-admin-page="2"] .admin>h1,
+ .mobile-admin-paged[data-admin-page="2"] .admin>.admin-top-panel{display:none}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 </head>
@@ -1026,7 +1032,7 @@ setInterval(watchPendingResults,3000);
  function switchPage(value){
   if(!mobile.matches||value===page||value<1||value>2)return;
   scrollPositions[page]=window.scrollY;page=value;draw();
-  window.scrollTo({top:scrollPositions[page]||Math.max(0,nav.getBoundingClientRect().top+window.scrollY),behavior:'instant'});
+  window.scrollTo({top:scrollPositions[page]||0,behavior:'instant'});
  }
  prev.addEventListener('click',()=>switchPage(page-1));next.addEventListener('click',()=>switchPage(page+1));
  function configure(){
