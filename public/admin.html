@@ -305,6 +305,26 @@ white-space:nowrap;
  .admin .clock-controls{min-width:0}
  .admin .clock-controls button{flex:1;min-width:0;font-size:14px;padding:8px 6px}
 }
+
+/* Phone-only second page; desktop cards keep their original placement. */
+.mobile-admin-pages-nav[hidden],#mobileAdminPageTwo[hidden]{display:none!important}
+@media(max-width:720px){
+ .mobile-admin-pages-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin:0 0 16px;padding:8px;border:1px solid #333;border-radius:12px;background:#111}
+ .mobile-admin-pages-nav button{min-width:44px;min-height:44px;padding:6px 12px;background:#181818;color:#35ff25}
+ .mobile-admin-pages-nav span{font-size:13px;color:#aaa}
+ .mobile-admin-paged[data-admin-page="2"] .admin>.grid{display:none}
+ .mobile-admin-paged .results-layout,.mobile-admin-paged .lower-original-width{display:none}
+ #mobileAdminPageTwo{display:grid;gap:18px;min-width:0}
+ #mobileAdminPageTwo .next-live-squad-stack{position:static;transform:none;width:100%;max-width:100%;display:grid;gap:18px}
+ #mobileAdminPageTwo .panel{box-sizing:border-box;width:100%;min-width:0;margin:0}
+ #mobileAdminPageTwo .next-live-panel{position:static;transform:none;max-width:100%}
+ #mobileAdminPageTwo .squad-admin-panel{display:block}
+ #mobileAdminPageTwo .next-live-actions{flex-wrap:wrap}
+ #mobileAdminPageTwo .next-live-actions button{font-size:14px}
+ #mobileAdminPageTwo .admin-report-controls,#mobileAdminPageTwo #openNldVoting{display:none}
+ .mobile-admin-paged #squadDialog .squad-add-row,.mobile-admin-paged #squadDialog .squad-transfer-row,.mobile-admin-paged #squadDialog .squad-delete,.mobile-admin-paged #squadDialog .squad-photo-button{display:none!important}
+ .mobile-admin-paged #squadDialog{width:calc(100vw - 24px);padding:16px}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 </head>
@@ -980,6 +1000,52 @@ setInterval(watchPendingResults,3000);
  }
  placeMatchType();
  mobile.addEventListener('change',placeMatchType);
+})();
+</script>
+
+<script>
+(()=>{
+ const admin=document.querySelector('.admin'),grid=admin.querySelector('.grid');
+ const stack=document.querySelector('.next-live-squad-stack');
+ if(!stack)return;
+ const anchor=document.createComment('Original Next LIVE and squad position');
+ stack.before(anchor);
+ const nav=document.createElement('nav');nav.className='mobile-admin-pages-nav';nav.setAttribute('aria-label','Admin pages');
+ const prev=document.createElement('button'),next=document.createElement('button'),status=document.createElement('span');
+ prev.type=next.type='button';prev.textContent='‹';next.textContent='›';
+ prev.setAttribute('aria-label','Previous admin page');next.setAttribute('aria-label','Next admin page');
+ status.setAttribute('aria-live','polite');nav.append(prev,status,next);grid.before(nav);
+ const pageTwo=document.createElement('div');pageTwo.id='mobileAdminPageTwo';pageTwo.hidden=true;grid.after(pageTwo);
+ const mobile=window.matchMedia('(max-width:720px)');
+ let page=1,start=null;const scrollPositions={1:0,2:0};
+ function draw(){
+  document.body.dataset.adminPage=String(page);pageTwo.hidden=page!==2||!mobile.matches;
+  prev.disabled=page===1;next.disabled=page===2;
+  status.textContent=page+' / 2 · Swipe '+(page===1?'←':'→');
+ }
+ function switchPage(value){
+  if(!mobile.matches||value===page||value<1||value>2)return;
+  scrollPositions[page]=window.scrollY;page=value;draw();
+  window.scrollTo({top:scrollPositions[page]||Math.max(0,nav.getBoundingClientRect().top+window.scrollY),behavior:'instant'});
+ }
+ prev.addEventListener('click',()=>switchPage(page-1));next.addEventListener('click',()=>switchPage(page+1));
+ function configure(){
+  nav.hidden=!mobile.matches;document.body.classList.toggle('mobile-admin-paged',mobile.matches);
+  if(mobile.matches)pageTwo.append(stack);else{anchor.after(stack);page=1;}
+  draw();
+ }
+ admin.addEventListener('touchstart',event=>{
+  start=null;
+  if(!mobile.matches||event.touches.length!==1||event.target.closest('input,button,select,textarea,label,a,dialog,[contenteditable]'))return;
+  start={x:event.touches[0].clientX,y:event.touches[0].clientY};
+ },{passive:true});
+ admin.addEventListener('touchend',event=>{
+  if(!start||!event.changedTouches.length)return;
+  const dx=event.changedTouches[0].clientX-start.x,dy=event.changedTouches[0].clientY-start.y;start=null;
+  if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4)switchPage(page+(dx<0?1:-1));
+ },{passive:true});
+ admin.addEventListener('touchcancel',()=>{start=null;},{passive:true});
+ mobile.addEventListener('change',configure);configure();
 })();
 </script>
 </body>
