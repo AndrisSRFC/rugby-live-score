@@ -1,5 +1,6 @@
 (()=>{
  const teams=['U13','U14','U15','U16','Colts','1st XV','2nd XV'];
+ const teamLabel=team=>/^U\d+$/.test(team)?team+"'s":team;
  const node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
  const box=node('section',undefined,'nld-vote-home');box.setAttribute('aria-labelledby','voteHomeTitle');
  const title=node('h2','FANS’ PLAYER OF THE MATCH');title.id='voteHomeTitle';
@@ -18,17 +19,17 @@
  dialog.addEventListener('cancel',e=>{if(busy)e.preventDefault();});
  dialog.addEventListener('close',()=>{serial++;origin?.focus();});
  const buttons=new Map();
- teams.forEach(team=>{const b=node('button',team);b.type='button';b.addEventListener('click',()=>open(team,b));buttons.set(team,b);groups.append(b);});
+ teams.forEach(team=>{const b=node('button',teamLabel(team));b.type='button';b.addEventListener('click',()=>open(team,b));buttons.set(team,b);groups.append(b);});
  async function get(url){const r=await fetch(url,{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error || 'Could not load voting.');return d;}
- async function refresh(){try{const d=await get('/api/nld-voting/groups');for(const g of d.groups){const b=buttons.get(g.team);if(!b)continue;b.textContent=g.team+(g.state==='published'?' 🏆':g.state==='open'?' · VOTE':'');b.setAttribute('aria-label',g.team+(g.state==='published'?' - winner published':g.state==='open'?' - voting open':' - voting status'));}}catch(e){box.querySelector('p').textContent='NLD matches only · Voting temporarily unavailable';}}
+ async function refresh(){try{const d=await get('/api/nld-voting/groups');for(const g of d.groups){const b=buttons.get(g.team);if(!b)continue;b.textContent=teamLabel(g.team)+(g.state==='published'?' 🏆':g.state==='open'?' · VOTE':'');b.setAttribute('aria-label',teamLabel(g.team)+(g.state==='published'?' - winner published':g.state==='open'?' - voting open':' - voting status'));}}catch(e){box.querySelector('p').textContent='NLD matches only · Voting temporarily unavailable';}}
  async function open(team,button){
   origin=button;const token=++serial;body.replaceChildren();message.textContent='Loading…';if(!dialog.open)dialog.showModal();
   try{
    const d=await get('/api/nld-voting/poll?team='+encodeURIComponent(team));if(token!==serial || !dialog.open)return;
    message.textContent='';
-   if(!d.poll){body.append(node('p','No NLD vote is available for '+team+' yet.','nld-vote-note'));return;}
+   if(!d.poll){body.append(node('p','No NLD vote is available for '+teamLabel(team)+' yet.','nld-vote-note'));return;}
    const poll=d.poll;
-   body.append(node('h3',team+' · '+poll.home+' '+poll.homeScore+' – '+poll.awayScore+' '+poll.away),node('p',new Date(poll.date).toLocaleDateString('en-GB')+' · '+(poll.season || ''),'nld-vote-note'));
+   body.append(node('h3',teamLabel(team)+' · '+poll.home+' '+poll.homeScore+' – '+poll.awayScore+' '+poll.away),node('p',new Date(poll.date).toLocaleDateString('en-GB')+' · '+(poll.season || ''),'nld-vote-note'));
    if(poll.state==='published'){
      const w=poll.winner;body.append(node('h3','🏆 FANS’ PLAYER OF THE MATCH'));
      if(w?.photo){const img=node('img',undefined,'nld-vote-winner-photo');img.src=w.photo;img.alt=w.name+' player photo';body.append(img);}
