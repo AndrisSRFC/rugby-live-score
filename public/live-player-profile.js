@@ -20,7 +20,7 @@
     const clubList=el('div',undefined,'player-club-dropdown');
     if(!clubs.length)clubList.append(el('p','No club history recorded yet.','player-profile-note'));
     for(const c of clubs)clubList.append(el('p',c.club+' · '+c.start+'–'+(c.end || 'Present'),'player-club-entry'));
-    clubDetails.append(clubList);group.append(clubDetails);
+    clubDetails.append(clubList);
     const photoRow=data.player.photo ? el('div',undefined,'player-photo-history') : null;
     if(photoRow){content.append(photoRow);const photo=el('img',undefined,'player-profile-photo');photo.src=data.player.photo;photo.alt=data.player.name+' player photo';photo.width=180;photo.height=180;photoRow.append(photo);}
     const current=data.seasons.filter(s=>s.season===data.currentSeason).reduce((a,s)=>({appearances:a.appearances+s.appearances,tries:a.tries+s.tries,conversions:a.conversions+s.conversions}),{appearances:0,tries:0,conversions:0});
@@ -28,7 +28,8 @@
     const awards=data.awards || [];
     if(awards.length){const summary=el('p','🏆 Fans’ Player of the Match · This season: '+awards.filter(a=>a.season_id===data.currentSeason).length+' · Career: '+awards.length,'player-awards');content.append(summary);}
     const label=el('label','SEASON','player-season-label');const select=el('select');select.setAttribute('aria-label','Player statistics season');select.append(new Option('All seasons',''));[...new Set(data.seasons.map(s=>s.season))].filter(Boolean).forEach(s=>select.append(new Option(s,s)));label.append(select);
-    const history=el('section',undefined,'player-history-content');history.append(label);
+    const history=el('section',undefined,'player-history-content');
+    const pickers=el('div',undefined,'player-profile-pickers');pickers.append(label,clubDetails);history.append(pickers);
     const detail=el('div');history.append(detail);
     (photoRow || content).append(history);
     function showSeason(){
