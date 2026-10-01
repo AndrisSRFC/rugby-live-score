@@ -321,7 +321,8 @@ white-space:nowrap;
  #mobileAdminPageTwo .squad-admin-panel{display:block}
  #mobileAdminPageTwo .next-live-actions{flex-wrap:wrap}
  #mobileAdminPageTwo .next-live-actions button{font-size:14px}
- #mobileAdminPageTwo .admin-report-controls,#mobileAdminPageTwo #openNldVoting{display:none}
+ #mobileAdminPageTwo .admin-report-controls{display:flex;flex-wrap:wrap}
+ #mobileAdminPageTwo #openNldVoting{display:inline-block;margin-top:8px}
  .mobile-admin-paged #squadDialog .squad-add-row,.mobile-admin-paged #squadDialog .squad-transfer-row,.mobile-admin-paged #squadDialog .squad-delete,.mobile-admin-paged #squadDialog .squad-photo-button{display:none!important}
  .mobile-admin-paged #squadDialog{width:calc(100vw - 24px);padding:16px}
 }
@@ -1014,6 +1015,9 @@ setInterval(watchPendingResults,3000);
  const admin=document.querySelector('.admin'),grid=admin.querySelector('.grid');
  const stack=document.querySelector('.next-live-squad-stack');
  if(!stack)return;
+ const pending=document.getElementById('pendingResultsPanel');
+ const pendingAnchor=document.createComment('Original pending results position');
+ if(pending)pending.before(pendingAnchor);
  const anchor=document.createComment('Original Next LIVE and squad position');
  stack.before(anchor);
  const nav=document.createElement('nav');nav.className='mobile-admin-pages-nav';nav.setAttribute('aria-label','Admin pages');
@@ -1037,7 +1041,8 @@ setInterval(watchPendingResults,3000);
  prev.addEventListener('click',()=>switchPage(page-1));next.addEventListener('click',()=>switchPage(page+1));
  function configure(){
   nav.hidden=!mobile.matches;document.body.classList.toggle('mobile-admin-paged',mobile.matches);
-  if(mobile.matches)pageTwo.append(stack);else{anchor.after(stack);page=1;}
+  if(mobile.matches){pageTwo.append(stack);if(pending)stack.append(pending);}
+  else{anchor.after(stack);if(pending)pendingAnchor.after(pending);page=1;}
   draw();
  }
  admin.addEventListener('touchstart',event=>{
