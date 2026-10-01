@@ -11,3 +11,25 @@
 #adminVoteDialog{width:min(800px,calc(100vw - 48px));max-height:85vh;padding:24px;box-sizing:border-box;border:1px solid #39ff14;border-radius:18px;background:#111;color:#fff;overflow-y:auto}#adminVoteDialog::backdrop{background:rgba(0,0,0,.8)}.admin-vote-match{border-top:1px solid #444;margin-top:20px;padding-top:16px}.admin-vote-match h3{font-size:16px}.admin-vote-match p{font-size:13px;line-height:1.4}.admin-vote-match button{margin:8px 10px 0 0;min-height:44px}.admin-vote-match label{display:block;margin-top:15px}.admin-vote-match select{display:block;margin-top:8px;max-width:100%;background:#111;color:#fff}
 .player-awards{color:#ffd400;font-size:14px;margin:20px 0;line-height:1.6}.nld-history-award{color:#ffd400;font-size:12px;margin-top:8px}
 @media(max-width:600px){.nld-vote-dialog{padding:20px 16px}.nld-vote-footer{bottom:-20px}.nld-vote-home{padding:20px 16px 28px}.nld-vote-groups button{font-size:13px}}
+
+/* Keep the ball artwork in its original viewport while the controls follow it. */
+.home-screen{background:none;isolation:isolate}
+.home-screen::before{content:"";position:absolute;inset:0 0 auto;height:100svh;z-index:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.28) 48%,rgba(0,0,0,.45) 100%),url("/GALVENAJAM%20EKRANAM.png") center center / cover no-repeat}
+.home-screen .content{flex:none;min-height:calc(72svh - 90px)}
+.home-screen .bottom{padding-bottom:20px}
+.bottom .nld-vote-home{border:1px solid #39ff14;border-radius:16px;padding:16px;margin:0 auto 18px;background:rgba(0,0,0,.94)}
+.bottom .nld-vote-home h2{font-size:clamp(17px,4vw,24px)}
+.bottom .nld-vote-home p{margin:8px 0}
+.bottom .nld-vote-groups{margin-top:12px}
+.home-live-heading{color:#fff;font-size:16px;font-weight:900;letter-spacing:1px;text-align:center;margin:0 0 14px}
+@media(max-width:700px){
+ .home-screen::before{background-size:auto 76%;background-position:center 36%}
+ .home-screen .content{min-height:calc(72svh - 62px);padding-bottom:16px;box-sizing:border-box}
+ .bottom .age-groups,.bottom .install-wrap,.bottom .install-lift,.bottom .trial-badge{transform:none}
+ .bottom .install-lift{display:none}
+ .bottom .age-groups{margin-bottom:12px}
+ .bottom .trial-badge{margin-top:12px}
+ .bottom .nld-vote-home{padding:14px 10px;margin-bottom:16px}
+ .bottom .nld-vote-groups{gap:6px}
+ .bottom .nld-vote-groups button{padding:8px 10px;font-size:12px}
+}

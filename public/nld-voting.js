@@ -5,7 +5,9 @@
  const title=node('h2','FANS’ PLAYER OF THE MATCH');title.id='voteHomeTitle';
  box.append(title,node('p','NLD matches only · Vote after full-time'));
  const groups=node('div',undefined,'nld-vote-groups');box.append(groups);
- document.querySelector('.home-screen').insertAdjacentElement('afterend',box);
+ const liveGroups=document.querySelector('.bottom .age-groups');
+ liveGroups.before(box);
+ const liveHeading=node('h2','LIVE SCORES','home-live-heading');liveGroups.before(liveHeading);
  const dialog=node('dialog',undefined,'nld-vote-dialog');dialog.id='nldVoteDialog';
  dialog.setAttribute('aria-labelledby','nldVoteTitle');
  const header=node('header'),back=node('button','← BACK TO HOME');back.type='button';header.append(back,node('span','RUGBY LIVE'));dialog.append(header);
