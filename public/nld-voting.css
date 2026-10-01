@@ -33,3 +33,32 @@
  .bottom .nld-vote-groups{gap:6px}
  .bottom .nld-vote-groups button{padding:8px 10px;font-size:12px}
 }
+
+/* Phone home: reserve one viewport for artwork and all primary controls. */
+@media(max-width:700px){
+ .home-screen{height:100svh;min-height:100svh}
+ .home-screen::before{height:calc(100svh - 270px);background-size:auto 100%;background-position:center center}
+ .home-screen .topbar{flex-shrink:0}
+ .home-screen .content{flex:1;min-height:0;padding:70px 18px 0;align-items:flex-start}
+ .home-screen .title{font-size:clamp(36px,12vw,58px)}
+ .home-screen .bottom{flex-shrink:0;padding:0 10px max(8px,env(safe-area-inset-bottom))}
+ .bottom .nld-vote-home{padding:8px;margin-bottom:8px;border-radius:12px}
+ .bottom .nld-vote-home h2{font-size:clamp(13px,3.7vw,17px);margin:0;line-height:1.2}
+ .bottom .nld-vote-home p{font-size:10px;line-height:1.2;margin:4px 0 6px}
+ .bottom .nld-vote-groups{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:0}
+ .bottom .nld-vote-groups button{min-width:0;min-height:40px;padding:4px 0;font-size:10px;white-space:nowrap;border-radius:7px}
+ .home-live-heading{font-size:13px;line-height:16px;margin:0 0 4px}
+ .bottom .age-groups{gap:4px;margin-bottom:6px}
+ .bottom .age-btn{min-height:38px;padding:4px 2px;font-size:12px}
+ .bottom .install-wrap{margin:0}
+ .bottom #installApp{min-width:230px;margin-top:0;padding:8px 14px;font-size:13px}
+ .bottom .trial-badge{margin-top:4px;padding:5px 8px;font-size:10px;max-width:100%}
+}
+@media(max-width:700px) and (max-height:650px){
+ .home-screen .content{padding-top:58px}
+ .home-screen .title{font-size:clamp(32px,10vw,46px)}
+ .home-screen .social-actions,.home-screen .score-help{top:65px}
+ .bottom .nld-vote-home{padding:6px;margin-bottom:5px}
+ .bottom .nld-vote-groups button{min-height:36px}
+ .bottom .age-btn{min-height:34px}
+}
