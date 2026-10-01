@@ -86,3 +86,11 @@
   background-repeat:no-repeat;
  }
 }
+
+/* Lift in normal flow so the top auxiliary controls stay anchored to home. */
+@media(max-width:700px){
+ .home-screen .bottom{transform:none;margin-bottom:40px}
+}
+@media(max-width:700px) and (max-height:650px){
+ .home-screen .bottom{margin-bottom:24px}
+}
