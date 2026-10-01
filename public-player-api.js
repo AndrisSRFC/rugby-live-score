@@ -8,7 +8,7 @@ module.exports=function({app,pool,teamIds,getState}){
     const pick=published();
     if(!pick)return res.status(404).json({error:'This player is not in the published match squad.'});
     try{
-      const player=await pool.query('SELECT id,team_key,photo_data FROM rugby_players WHERE id=$1',[id]);
+      const player=await pool.query('SELECT id,team_key,photo_data,club_history FROM rugby_players WHERE id=$1',[id]);
       if(!player.rowCount)return res.status(404).json({error:'Player not found.'});
       const result=await pool.query(`SELECT m.id,m.season_id,m.team_key,m.played_at,m.home_name,m.away_name,m.home_score,m.away_score,s.played,s.tries,s.conversions
         FROM rugby_player_match_stats s JOIN season_matches m ON m.id=s.match_result_id
@@ -22,7 +22,7 @@ module.exports=function({app,pool,teamIds,getState}){
         if(!groups.has(key))groups.set(key,{season:m.season_id,team:m.team_key,appearances:0,tries:0,conversions:0});
         if(m.played){const g=groups.get(key);g.appearances++;totals.appearances++;g.tries+=Number(m.tries);g.conversions+=Number(m.conversions);totals.tries+=Number(m.tries);totals.conversions+=Number(m.conversions);}
       }
-      res.json({player:{id,name:pick.name,team:player.rows[0].team_key,photo:player.rows[0].photo_data || null},currentSeason:season.rows[0]?.current_season,seasons:[...groups.values()],totals,awards,matches:result.rows});
+      res.json({player:{id,name:pick.name,team:player.rows[0].team_key,photo:player.rows[0].photo_data || null,clubs:player.rows[0].club_history || []},currentSeason:season.rows[0]?.current_season,seasons:[...groups.values()],totals,awards,matches:result.rows});
     }catch(e){console.error('Public player profile error:',e);res.status(500).json({error:'Player statistics are temporarily unavailable. Please try again.'});}
   });
 };

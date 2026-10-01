@@ -59,3 +59,11 @@
 #playerPhotoError{color:#ffb4a8;font-size:14px;min-height:20px}
 #squadDialog .squad-photo-button{background:#182018;color:#35ff25;border:1px solid #355335;padding:8px 10px;font-size:11px;white-space:nowrap}
 #playerPhotoDialog button:disabled{opacity:.45}
+
+#playerClubDialog{width:min(740px,calc(100vw - 48px));max-height:85vh;box-sizing:border-box;padding:24px;border:1px solid #35ff25;border-radius:18px;background:#111;color:#fff;overflow:auto}
+#playerClubDialog::backdrop{background:rgba(0,0,0,.8)}
+.player-club-edit-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;align-items:end;gap:10px;margin:18px 0}
+.player-club-edit-row label{min-width:0;font-size:12px;color:#aaa;margin:0}
+.player-club-edit-row input{width:100%;box-sizing:border-box;display:block;margin-top:6px;min-width:0}
+.squad-club-button{font-size:12px;padding:8px}
+@media(max-width:720px){.squad-club-button{display:none}}

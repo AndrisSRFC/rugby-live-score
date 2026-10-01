@@ -166,6 +166,7 @@ async function initDatabase() {
     )
   `);
   await pool.query("ALTER TABLE rugby_players ADD COLUMN IF NOT EXISTS photo_data TEXT");
+  await pool.query("ALTER TABLE rugby_players ADD COLUMN IF NOT EXISTS club_history JSONB NOT NULL DEFAULT '[]'::jsonb");
   await pool.query("CREATE UNIQUE INDEX IF NOT EXISTS rugby_players_active_name ON rugby_players (team_key,LOWER(name)) WHERE active=TRUE");
   await pool.query(`
     CREATE TABLE IF NOT EXISTS rugby_state (

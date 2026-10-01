@@ -46,7 +46,8 @@ function drawSquadPlayers(){
       catch(error){squadError(error);}finally{setSquadBusy(false);}
     });
     const photo=document.createElement('button');photo.type='button';photo.className='squad-photo-button';photo.textContent=player.has_photo?'EDIT PHOTO':'ADD PHOTO';photo.setAttribute('aria-label','Photo for '+player.name);photo.addEventListener('click',()=>openPlayerPhoto(player));
-    row.append(label,photo,remove);list.appendChild(row);
+    const clubs=document.createElement('button');clubs.type='button';clubs.className='squad-club-button';clubs.textContent='CLUB HISTORY';clubs.addEventListener('click',()=>openPlayerClubs(player));
+    row.append(label,photo,clubs,remove);list.appendChild(row);
   });
   updateSquadCount();setSquadBusy(squadBusy);
 }
@@ -147,3 +148,41 @@ async function savePhoto(remove){
   }catch(e){$('playerPhotoError').textContent=e.message;}finally{photoControls(false);}
 }
 $('savePlayerPhoto').addEventListener('click',()=>savePhoto(false));$('removePlayerPhoto').addEventListener('click',()=>savePhoto(true));
+
+const playerClubDialog=document.createElement('dialog');playerClubDialog.id='playerClubDialog';
+playerClubDialog.setAttribute('aria-labelledby','playerClubTitle');
+playerClubDialog.innerHTML='<div class="squad-dialog-heading"><h2 id="playerClubTitle">Club history</h2><button type="button" id="closePlayerClubs" aria-label="Close club history">×</button></div><p class="squad-note">Enter the actual starting season. Leave the end season empty for the current club. This does not add match statistics.</p><div id="playerClubRows"></div><p id="playerClubMessage" role="status"></p><div class="squad-dialog-footer"><button type="button" id="addPlayerClub">ADD CLUB</button><button type="button" class="green" id="savePlayerClubs">SAVE CLUB HISTORY</button></div>';
+document.body.append(playerClubDialog);
+let clubDraft=null,clubSerial=0,clubBusy=false;
+function clubControls(busy){clubBusy=busy;playerClubDialog.querySelectorAll('button,input').forEach(n=>n.disabled=busy);}
+function drawPlayerClubs(){
+ const list=$('playerClubRows');list.replaceChildren();
+ clubDraft.clubs.forEach((c,index)=>{
+  const row=document.createElement('div');row.className='player-club-edit-row';
+  for(const [key,title,placeholder] of [['club','Club','SRFC'],['start','Start season','2026/27'],['end','End season','Present (leave empty)']]){
+   const label=document.createElement('label');label.textContent=title;
+   const input=document.createElement('input');input.value=c[key] || '';input.placeholder=placeholder;input.maxLength=key==='club'?80:7;
+   input.addEventListener('input',()=>c[key]=input.value);label.append(input);row.append(label);
+  }
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.addEventListener('click',()=>{clubDraft.clubs.splice(index,1);drawPlayerClubs();});row.append(remove);list.append(row);
+ });
+}
+async function openPlayerClubs(player){
+ if(squadBusy || !squadDraft)return;
+ const token=++clubSerial;clubDraft={id:player.id,team:squadDraft.team,clubs:[]};
+ $('playerClubTitle').textContent=player.name+' — Club history';$('playerClubRows').replaceChildren();$('playerClubMessage').textContent='Loading…';
+ playerClubDialog.showModal();clubControls(true);
+ try{const d=await squadRequest('/api/players/clubs/read',{id:player.id},clubDraft.team);if(token!==clubSerial)return;clubDraft.clubs=d.clubs.map(c=>({...c}));drawPlayerClubs();$('playerClubMessage').textContent='';}
+ catch(e){if(token===clubSerial){$('playerClubMessage').textContent=e.message;clubDraft=null;}}
+ finally{if(token===clubSerial){clubControls(false);$('savePlayerClubs').disabled=!clubDraft;$('addPlayerClub').disabled=!clubDraft;}}
+}
+$('closePlayerClubs').addEventListener('click',()=>{if(!clubBusy)playerClubDialog.close();});
+playerClubDialog.addEventListener('cancel',e=>{if(clubBusy)e.preventDefault();});
+playerClubDialog.addEventListener('close',()=>{clubSerial++;clubDraft=null;});
+$('addPlayerClub').addEventListener('click',()=>{if(!clubDraft||clubBusy)return;clubDraft.clubs.push({club:clubDraft.clubs.length?'':'SRFC',start:'',end:null});drawPlayerClubs();});
+$('savePlayerClubs').addEventListener('click',async()=>{
+ if(!clubDraft||clubBusy)return;const draft=clubDraft;clubControls(true);$('playerClubMessage').textContent='Saving…';
+ try{await squadRequest('/api/players/clubs/save',{id:draft.id,clubs:draft.clubs},draft.team);playerClubDialog.close();}
+ catch(e){$('playerClubMessage').textContent=e.message;}
+ finally{clubControls(false);}
+});

@@ -45,3 +45,11 @@
   .player-photo-history .player-season-label select{padding:10px 8px;font-size:14px;min-height:44px}
   .player-photo-history .player-match h3{font-size:14px}
 }
+
+.player-club-since{font-size:13px;color:#35ff25;margin:0 0 10px}
+.player-club-history{margin:0 0 18px;max-width:440px}
+.player-club-history summary{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:12px;border:1px solid #444;border-radius:10px;background:#111;color:#fff;font-size:14px;cursor:pointer;list-style:none}
+.player-club-history summary::-webkit-details-marker{display:none}
+.player-club-history summary::after{content:"▾"}
+.player-club-history[open] summary::after{content:"▴"}
+.player-club-entry{font-size:13px;color:#ddd;border-bottom:1px solid #333;padding:10px 0;margin:0;overflow-wrap:anywhere}

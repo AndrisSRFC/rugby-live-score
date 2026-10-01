@@ -35,6 +35,44 @@ module.exports = function registerSquadApi({app, pool, adminPin, teamIds, getSta
     } catch(error) { fail(res,error); }
   });
 
+
+  app.post('/api/players/clubs/read',async(req,res)=>{
+    res.set('Cache-Control','no-store');
+    if(!authorize(req,res))return;
+    if(!uuid.test(req.body.id || ''))return res.status(400).json({error:'Invalid player'});
+    try{
+      const r=await pool.query('SELECT club_history FROM rugby_players WHERE id=$1 AND team_key=$2 AND active=TRUE',[req.body.id,req.body.team]);
+      if(!r.rowCount)return res.status(404).json({error:'Player not found in this age group.'});
+      res.json({clubs:r.rows[0].club_history || []});
+    }catch(e){fail(res,e);}
+  });
+  app.post('/api/players/clubs/save',async(req,res)=>{
+    res.set('Cache-Control','no-store');
+    if(!authorize(req,res))return;
+    if(!uuid.test(req.body.id || ''))return res.status(400).json({error:'Invalid player'});
+    const entries=req.body.clubs;
+    const season=value=>{
+      const m=typeof value==='string' && value.trim().match(/^(\d{4})[-/](\d{2})$/);
+      if(!m || Number(m[1])<1900 || Number(m[1])>2100 || (Number(m[1])+1)%100!==Number(m[2]))return null;
+      return m[1]+'/'+m[2];
+    };
+    if(!Array.isArray(entries)||entries.length>30)return res.status(400).json({error:'Enter up to 30 club periods.'});
+    const clubs=[];
+    for(const entry of entries){
+      if(!entry || typeof entry.club!=='string')return res.status(400).json({error:'Enter a club name.'});
+      const club=entry.club.trim().replace(/\s+/g,' '),start=season(entry.start),end=entry.end===null||entry.end===''?null:season(entry.end);
+      if(!club||club.length>80||/[\u0000-\u001f\u007f]/.test(club)||!start||(entry.end!==null&&entry.end!==''&&!end)||end&&end<start)return res.status(400).json({error:'Use seasons such as 2026/27; end cannot be before start.'});
+      clubs.push({club,start,end});
+    }
+    clubs.sort((a,b)=>a.start.localeCompare(b.start));
+    if(clubs.some((c,i)=>i<clubs.length-1&&(!c.end||c.end>clubs[i+1].start)))return res.status(400).json({error:'Close the previous club period before starting another. Only the last club can be current.'});
+    try{
+      const r=await pool.query('UPDATE rugby_players SET club_history=$1::jsonb WHERE id=$2 AND team_key=$3 AND active=TRUE RETURNING id',[JSON.stringify(clubs),req.body.id,req.body.team]);
+      if(!r.rowCount)return res.status(404).json({error:'Player not found in this age group.'});
+      res.json({ok:true,clubs});
+    }catch(e){fail(res,e);}
+  });
+
   app.post('/api/players/photo/read',async(req,res)=>{
     res.set('Cache-Control','no-store');
     if(!authorize(req,res))return;

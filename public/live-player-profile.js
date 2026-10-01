@@ -9,6 +9,15 @@
     document.getElementById('livePlayerTitle').textContent=data.player.name;
     document.getElementById('livePlayerGroup').textContent=data.player.team+' · SLEAFORD';
     const content=document.getElementById('livePlayerContent');content.replaceChildren();
+
+    const clubs=data.player.clubs || [];
+    const currentClub=clubs.find(c=>!c.end) || clubs[clubs.length-1];
+    if(currentClub)content.append(el('p',currentClub.club+' · '+(!currentClub.end?'Since '+currentClub.start:currentClub.start+'–'+currentClub.end),'player-club-since'));
+    const clubDetails=el('details',undefined,'player-club-history');
+    clubDetails.append(el('summary','CLUB HISTORY'));
+    if(!clubs.length)clubDetails.append(el('p','No club history recorded yet.','player-profile-note'));
+    for(const c of clubs)clubDetails.append(el('p',c.club+' · '+c.start+'–'+(c.end || 'Present'),'player-club-entry'));
+    content.append(clubDetails);
     const photoRow=data.player.photo ? el('div',undefined,'player-photo-history') : null;
     if(photoRow){content.append(photoRow);const photo=el('img',undefined,'player-profile-photo');photo.src=data.player.photo;photo.alt=data.player.name+' player photo';photo.width=180;photo.height=180;photoRow.append(photo);}
     const current=data.seasons.filter(s=>s.season===data.currentSeason).reduce((a,s)=>({appearances:a.appearances+s.appearances,tries:a.tries+s.tries,conversions:a.conversions+s.conversions}),{appearances:0,tries:0,conversions:0});
