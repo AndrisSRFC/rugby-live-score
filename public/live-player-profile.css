@@ -53,3 +53,9 @@
 .player-club-history summary::after{content:"▾"}
 .player-club-history[open] summary::after{content:"▴"}
 .player-club-entry{font-size:13px;color:#ddd;border-bottom:1px solid #333;padding:10px 0;margin:0;overflow-wrap:anywhere}
+
+.live-player-profile #livePlayerGroup{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#livePlayerGroup>span{font-size:clamp(11px,3.2vw,16px);letter-spacing:.5px}
+#livePlayerGroup .player-club-history{position:relative;flex-shrink:0;margin:0;letter-spacing:0;max-width:none}
+#livePlayerGroup .player-club-history summary{gap:8px;font-size:11px;padding:8px 10px}
+.player-club-dropdown{position:absolute;right:0;top:calc(100% + 6px);width:min(320px,80vw);box-sizing:border-box;z-index:3;padding:10px 14px;border:1px solid #444;border-radius:10px;background:#111;box-shadow:0 8px 24px #000}
