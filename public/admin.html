@@ -284,6 +284,15 @@ white-space:nowrap;
  #halfControlPanel>#matchTypePanel{grid-column:2;grid-row:1 / span 2;align-self:end}
  #halfControlPanel>#newMatchBtn{grid-column:1 / -1;grid-row:3;width:calc((100% - 10px) / 2)}
 }
+
+@media(max-width:720px){
+ #halfControlPanel>#newMatchBtn{grid-column:1;grid-row:3;width:100%}
+ #halfControlPanel>#matchTypePanel{grid-column:2;grid-row:1 / span 3;align-self:stretch;display:grid;grid-template-rows:subgrid}
+ #halfControlPanel>#matchTypePanel>label{grid-row:1;margin:0;align-self:end}
+ #halfControlPanel>#matchTypePanel>.row{display:contents}
+ #halfControlPanel>#matchTypePanel #matchFriendly{grid-row:2;width:100%}
+ #halfControlPanel>#matchTypePanel #matchNLD{grid-row:3;width:100%}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 </head>
