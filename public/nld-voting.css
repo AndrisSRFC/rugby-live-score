@@ -62,3 +62,16 @@
  .bottom .nld-vote-groups button{min-height:36px}
  .bottom .age-btn{min-height:34px}
 }
+
+/* Let the lower controls sit over the ball instead of a solid panel. */
+.bottom .nld-vote-home{background:rgba(0,0,0,.28)}
+.bottom .nld-vote-groups button{background:rgba(0,0,0,.28);text-shadow:0 2px 5px #000;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.bottom .nld-vote-home h2,.bottom .nld-vote-home p{text-shadow:0 2px 5px #000}
+@media(max-width:700px){
+ .home-screen::before{transform:translateY(24px)}
+ .home-screen .bottom{transform:translateY(-40px)}
+}
+@media(max-width:700px) and (max-height:650px){
+ .home-screen::before{transform:translateY(16px)}
+ .home-screen .bottom{transform:translateY(-24px)}
+}
