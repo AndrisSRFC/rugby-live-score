@@ -275,6 +275,15 @@ white-space:nowrap;
  #halfControlPanel>#matchTypePanel .row{gap:4px;flex-wrap:nowrap}
  #halfControlPanel>#matchTypePanel button{flex:1;min-width:0;min-height:44px;padding:10px 5px;font-size:12px}
 }
+
+@media(max-width:720px){
+ #halfControlPanel{align-items:end;gap:12px 10px}
+ #halfControlPanel>label{grid-column:1;grid-row:1}
+ #halfControlPanel>.row{grid-column:1;grid-row:2;gap:4px;flex-wrap:nowrap}
+ #halfControlPanel>.row button{flex:1;min-width:0;min-height:44px;font-size:12px;padding:10px 5px;white-space:nowrap}
+ #halfControlPanel>#matchTypePanel{grid-column:2;grid-row:1 / span 2;align-self:end}
+ #halfControlPanel>#newMatchBtn{grid-column:1 / -1;grid-row:3;width:calc((100% - 10px) / 2)}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 </head>
