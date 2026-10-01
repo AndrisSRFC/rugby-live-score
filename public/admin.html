@@ -293,6 +293,18 @@ white-space:nowrap;
  #halfControlPanel>#matchTypePanel #matchFriendly{grid-row:2;width:100%}
  #halfControlPanel>#matchTypePanel #matchNLD{grid-row:3;width:100%}
 }
+
+/* Mobile cards share the top panel's available width; inputs cannot widen the grid. */
+@media(max-width:720px){
+ .admin{box-sizing:border-box;max-width:100%}
+ .admin .grid{grid-template-columns:minmax(0,1fr);width:100%;min-width:0}
+ .admin .grid>.panel{box-sizing:border-box;width:100%;max-width:100%;min-width:0}
+ .admin .panel input,.admin .team-autocomplete{box-sizing:border-box;min-width:0;max-width:100%}
+ .admin .primary-control-card>.row{min-width:0}
+ .admin .grid>.primary-control-card:nth-child(-n+2)>.row button{flex:1;min-width:0;padding-left:6px;padding-right:6px}
+ .admin .clock-controls{min-width:0}
+ .admin .clock-controls button{flex:1;min-width:0;font-size:14px;padding:8px 6px}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 </head>
