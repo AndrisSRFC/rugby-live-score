@@ -133,3 +133,8 @@
 @media(min-width:701px){
  .bottom .nld-vote-home{width:max-content;max-width:46%;padding:8px 12px}
 }
+
+/* Align the compact desktop fan vote with the title on the left. */
+@media(min-width:701px){
+ .bottom .nld-vote-home{left:7vw;right:auto}
+}
