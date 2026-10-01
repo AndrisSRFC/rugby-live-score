@@ -75,3 +75,14 @@
  .home-screen::before{transform:translateY(16px)}
  .home-screen .bottom{transform:translateY(-24px)}
 }
+
+/* Show the supplied ball composition in full on phones, without side cropping. */
+@media(max-width:700px){
+ .home-screen::before{
+  height:calc(100svh - 200px);
+  background-image:url("/GALVENAJAM%20EKRANAM.png");
+  background-size:contain;
+  background-position:center center;
+  background-repeat:no-repeat;
+ }
+}
