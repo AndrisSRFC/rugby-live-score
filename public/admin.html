@@ -263,6 +263,18 @@ white-space:nowrap;
       }
       .results-layout{margin-left:auto;margin-right:auto}
     }
+
+@media(max-width:720px){
+ #halfControlPanel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 10px;align-items:end}
+ #halfControlPanel>label,#halfControlPanel>.row{grid-column:1 / -1}
+ #halfControlPanel>label{margin:0}
+ #halfControlPanel>br{display:none}
+ #halfControlPanel>#newMatchBtn{width:100%;font-size:13px;padding:12px 6px;min-height:44px}
+ #halfControlPanel>#matchTypePanel{position:static;padding:0;margin:0;border:0;border-radius:0;background:transparent;min-width:0}
+ #halfControlPanel>#matchTypePanel label{font-size:13px;margin-bottom:6px}
+ #halfControlPanel>#matchTypePanel .row{gap:4px;flex-wrap:nowrap}
+ #halfControlPanel>#matchTypePanel button{flex:1;min-width:0;min-height:44px;padding:10px 5px;font-size:12px}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 </head>
@@ -338,14 +350,14 @@ white-space:nowrap;
       </div>
     </section>
 
-    <section class="primary-control-card panel">
+    <section class="primary-control-card panel" id="halfControlPanel">
       <label>Half</label>
       <div class="row">
         <button id="half1Btn" onclick="act('setHalf',{half:1})">1st Half</button>
         <button id="half2Btn" onclick="act('setHalf',{half:2})">2nd Half</button>
       </div>
       <br>
-      <button class="green" onclick="newMatch()">New Match / 0:0</button>
+      <button class="green" id="newMatchBtn" onclick="newMatch()">New Match / 0:0</button>
     </section>
 <section class="primary-control-card panel">
   <label>Age Group</label>
@@ -359,7 +371,7 @@ white-space:nowrap;
     <button id="age2ndXV" onclick="act('setAgeGroup',{ageGroup:'2nd XV'})">2nd XV</button>
   </div>
 </section>
-<section class="primary-control-card panel">
+<section class="primary-control-card panel" id="matchTypePanel">
   <label>Match Type</label>
   <div class="row">
     <button id="matchFriendly" onclick="act('setMatchType',{matchType:'Friendly'})">Friendly</button>
@@ -926,5 +938,19 @@ setInterval(watchPendingResults,3000);
 <script src="/admin-squad.js"></script>
 <script src="/admin-reports.js"></script>
 <script src="/admin-voting.js"></script>
+<script>
+(()=>{
+ const half=document.getElementById('halfControlPanel');
+ const type=document.getElementById('matchTypePanel');
+ const parent=type.parentNode,next=type.nextSibling;
+ const mobile=window.matchMedia('(max-width:720px)');
+ function placeMatchType(){
+  if(mobile.matches)half.append(type);
+  else parent.insertBefore(type,next);
+ }
+ placeMatchType();
+ mobile.addEventListener('change',placeMatchType);
+})();
+</script>
 </body>
 </html>
