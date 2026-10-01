@@ -129,3 +129,7 @@
  .bottom .social-actions{position:static;transform:none;justify-content:flex-end;margin:0}
  .bottom .score-help{position:static;width:100%;margin:0;max-width:none}
 }
+
+@media(min-width:701px){
+ .bottom .nld-vote-home{width:max-content;max-width:46%;padding:8px 12px}
+}
