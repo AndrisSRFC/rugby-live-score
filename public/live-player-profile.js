@@ -1,13 +1,15 @@
 (()=>{
   const dialog=document.createElement('dialog');dialog.id='livePlayerProfile';dialog.className='live-player-profile';dialog.setAttribute('aria-labelledby','livePlayerTitle');
-  dialog.innerHTML='<header><button type="button" id="playerBackLive">← BACK TO LIVE</button><span>RUGBY LIVE</span></header><main><h1 id="livePlayerTitle">Player Statistics</h1><p id="livePlayerGroup"></p><p id="livePlayerMessage" role="status" aria-live="polite"></p><div id="livePlayerContent"></div></main>';
+  dialog.innerHTML='<header><button type="button" id="playerBackLive">← BACK TO LIVE</button><span>RUGBY LIVE</span></header><main><h1 id="livePlayerTitle">Player Statistics</h1><div id="livePlayerGroup"></div><p id="livePlayerMessage" role="status" aria-live="polite"></p><div id="livePlayerContent"></div></main>';
   document.body.append(dialog);
   let serial=0,lastButton=null,request=null;
   const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
   function statCard(label,stats){const card=el('section',undefined,'player-stat-card');card.append(el('h2',label));const row=el('div',undefined,'player-stat-values');for(const [value,name] of [[stats.appearances,'GAMES'],[stats.tries,'TRIES'],[stats.conversions,'CONVERSIONS']]){const cell=el('div');cell.append(el('strong',value),el('span',name));row.append(cell);}card.append(row);return card;}
   function draw(data){
     document.getElementById('livePlayerTitle').textContent=data.player.name;
-    document.getElementById('livePlayerGroup').textContent=data.player.team+' · SLEAFORD';
+    const group=document.getElementById('livePlayerGroup');group.replaceChildren();
+    const teamLabel=/^U\d+$/.test(data.player.team)?data.player.team+"'s":data.player.team;
+    group.append(el('span',teamLabel+' · SLEAFORD'));
     const content=document.getElementById('livePlayerContent');content.replaceChildren();
 
     const clubs=data.player.clubs || [];
@@ -15,9 +17,10 @@
     if(currentClub)content.append(el('p',currentClub.club+' · '+(!currentClub.end?'Since '+currentClub.start:currentClub.start+'–'+currentClub.end),'player-club-since'));
     const clubDetails=el('details',undefined,'player-club-history');
     clubDetails.append(el('summary','CLUB HISTORY'));
-    if(!clubs.length)clubDetails.append(el('p','No club history recorded yet.','player-profile-note'));
-    for(const c of clubs)clubDetails.append(el('p',c.club+' · '+c.start+'–'+(c.end || 'Present'),'player-club-entry'));
-    content.append(clubDetails);
+    const clubList=el('div',undefined,'player-club-dropdown');
+    if(!clubs.length)clubList.append(el('p','No club history recorded yet.','player-profile-note'));
+    for(const c of clubs)clubList.append(el('p',c.club+' · '+c.start+'–'+(c.end || 'Present'),'player-club-entry'));
+    clubDetails.append(clubList);group.append(clubDetails);
     const photoRow=data.player.photo ? el('div',undefined,'player-photo-history') : null;
     if(photoRow){content.append(photoRow);const photo=el('img',undefined,'player-profile-photo');photo.src=data.player.photo;photo.alt=data.player.name+' player photo';photo.width=180;photo.height=180;photoRow.append(photo);}
     const current=data.seasons.filter(s=>s.season===data.currentSeason).reduce((a,s)=>({appearances:a.appearances+s.appearances,tries:a.tries+s.tries,conversions:a.conversions+s.conversions}),{appearances:0,tries:0,conversions:0});
