@@ -354,6 +354,7 @@ white-space:nowrap;
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/subscription.css">
 <link rel="stylesheet" href="/view-counting.css">
+<link rel="stylesheet" href="/touchline-heroes-admin.css">
 </head>
 <body>
 <datalist id="teamSuggestions"></datalist>
@@ -385,6 +386,7 @@ white-space:nowrap;
       <button id="subscriptionTopBtn" class="subscription-top-button" type="button" aria-controls="subscriptionAdminPanel" aria-expanded="false">APP SUBSCRIPTIONS</button>
     </div>
     <div class="desktop-top-info">
+<button id="heroesAdminOpen" class="heroes-admin-desktop" type="button">TOUCHLINE HEROES</button>
 <button id="viewCountOpen" class="view-count-desktop" type="button">VIEW COUNTING</button>
       <div id="controlRequests" class="preview"><b>Match Control Requests:</b> Enter Admin PIN to check requests.</div>
       <div class="preview public-note">The public link is always the main server address.</div>
@@ -1055,5 +1057,6 @@ setInterval(watchPendingResults,3000);
 </script>
 <script src="/subscription-admin.js"></script>
 <dialog id="viewCountDialog" class="view-count-dialog" aria-labelledby="viewCountTitle"><button id="viewCountClose" type="button">← Back to Admin</button><h2 id="viewCountTitle">VIEW COUNTING</h2><label class="exclude-visits-label"><input type="checkbox" id="excludeMyVisits"> Exclude my visits on this browser</label><p>Excludes public page visits from WATCHING and TOTAL VIEWS. Admin and Match Control connections are always excluded.</p><p id="viewCountStatus" role="status"></p><button id="viewCountStart" type="button">START VIEW COUNTING</button><button id="viewCountRefresh" type="button">REFRESH TOTALS</button><table><thead><tr><th>Page / group</th><th>Total visits</th></tr></thead><tbody id="viewCountRows"></tbody></table></dialog><script src="/view-counting-admin.js"></script>
+<dialog id="heroesAdminDialog" class="heroes-admin-dialog" aria-labelledby="heroesAdminTitle"><button id="heroesAdminClose" type="button">← Back to Admin</button><h2 id="heroesAdminTitle">TOUCHLINE HEROES</h2><p>Add volunteers’ names, groups and manually recorded matches covered. Publish names with the volunteer’s agreement. Untick “Show publicly” to hide a name.</p><div id="heroesAdminRows"></div><button id="heroesAdminAdd" type="button">ADD VOLUNTEER</button><button id="heroesAdminSave" type="button">SAVE HEROES</button><p id="heroesAdminStatus" role="status"></p></dialog><script src="/touchline-heroes-admin.js"></script>
 </body>
 </html>
