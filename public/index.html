@@ -512,8 +512,7 @@
  body.rugby-draw-open{overflow:hidden}
 }
 
-/* Draw preview temporarily hidden until launch. */
-#openRugbyDraw,#rugbyDrawScreen{display:none!important}
+/* Draw preview visible on TEST for layout review. */
 
 .why-app-teaser{position:absolute;right:26px;top:100px;z-index:4;width:190px;padding:12px;border:1px solid #39ff14;border-radius:12px;background:rgba(0,0,0,.72);color:#fff;text-align:center;cursor:pointer}
 .why-app-teaser strong{display:block;font-size:13px;color:#39ff14}
@@ -538,6 +537,14 @@
  .why-app-dialog{padding:18px}
  .why-app-prices{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+.home-promo-stack{position:absolute;z-index:4;right:26px;top:100px;width:clamp(290px,23vw,360px);display:flex;flex-direction:column;gap:12px}
+.home-promo-stack>.why-app-teaser,.home-promo-stack>.home-draw-preview{position:static;width:100%;box-sizing:border-box}
+@media(max-width:700px){
+ .home-promo-stack{right:14px;top:154px;width:125px;gap:8px}
+ .home-promo-stack>.home-draw-link{position:static;width:100%}
+ .home-promo-stack>.home-draw-preview.draw-open{position:fixed;width:auto}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/subscription.css">
@@ -555,8 +562,10 @@
   </div>
 
   <main class="home-screen">
+<div class="home-promo-stack">
 <button id="whyAppOpen" class="why-app-teaser" type="button" aria-controls="whyAppDialog"><strong>WHY GET THE APP?</strong><span>30 days free · See benefits →</span></button>
 <button id="openRugbyDraw" class="home-draw-link" type="button" aria-controls="rugbyDrawScreen" aria-expanded="false"><span class="draw-link-preview" aria-hidden="true"><strong>RUGBY BALL DRAW</strong><span class="draw-thumb-price">£5 PER BALL · 10% TO CLUB</span><span class="draw-demo-balls"><span class="draw-demo-ball"><span>1</span></span><span class="draw-demo-ball"><span>2</span></span><span class="draw-demo-ball"><span>3</span></span><span class="draw-demo-ball"><span>4</span></span><span class="draw-demo-ball"><span>5</span></span><span class="draw-demo-ball"><span>6</span></span><span class="draw-demo-ball"><span>7</span></span><span class="draw-demo-ball"><span>8</span></span><span class="draw-demo-ball"><span>9</span></span><span class="draw-demo-ball"><span>10</span></span><span class="draw-demo-ball"><span>11</span></span><span class="draw-demo-ball"><span>12</span></span><span class="draw-demo-ball"><span>13</span></span><span class="draw-demo-ball"><span>14</span></span><span class="draw-demo-ball"><span>15</span></span><span class="draw-demo-ball"><span>16</span></span><span class="draw-demo-ball"><span>17</span></span><span class="draw-demo-ball"><span>18</span></span><span class="draw-demo-ball"><span>19</span></span><span class="draw-demo-ball"><span>20</span></span><span class="draw-demo-ball"><span>21</span></span></span><span class="draw-thumb-prizes">1st £47.25 · 2nd £28.35 · 3rd £18.90</span></span><small>Tap to view →</small></button><div class="home-draw-preview" id="rugbyDrawScreen" tabindex="-1"><button id="closeRugbyDraw" class="draw-back" type="button">← Back to LIVE</button><section class="rugby-draw-demo" aria-label="Rugby ball draw preview"><h2>RUGBY BALL DRAW</h2><p class="draw-demo-note">DEMO · Example only</p><div class="draw-demo-price"><strong>£5 PER BALL</strong><span>10% TO THE CLUB</span></div><div class="draw-demo-balls"><span class="draw-demo-ball"><span>1</span></span><span class="draw-demo-ball"><span>2</span></span><span class="draw-demo-ball"><span>3</span></span><span class="draw-demo-ball"><span>4</span></span><span class="draw-demo-ball"><span>5</span></span><span class="draw-demo-ball"><span>6</span></span><span class="draw-demo-ball"><span>7</span></span><span class="draw-demo-ball"><span>8</span></span><span class="draw-demo-ball"><span>9</span></span><span class="draw-demo-ball"><span>10</span></span><span class="draw-demo-ball"><span>11</span></span><span class="draw-demo-ball"><span>12</span></span><span class="draw-demo-ball"><span>13</span></span><span class="draw-demo-ball"><span>14</span></span><span class="draw-demo-ball"><span>15</span></span><span class="draw-demo-ball"><span>16</span></span><span class="draw-demo-ball"><span>17</span></span><span class="draw-demo-ball"><span>18</span></span><span class="draw-demo-ball"><span>19</span></span><span class="draw-demo-ball"><span>20</span></span><span class="draw-demo-ball"><span>21</span></span></div><p class="draw-demo-note">21 example numbers · Entries are not open</p><div class="draw-demo-prizes"><div><b>1st</b><strong>£47.25</strong></div><div><b>2nd</b><strong>£28.35</strong></div><div><b>3rd</b><strong>£18.90</strong></div></div><p class="draw-demo-note">Example if all 21 balls sell: £105 total<br>£10.50 to the club · £94.50 prize fund</p><button type="button" disabled>DRAW WINNERS · DEMO ONLY</button></section></div>
+</div>
 
     <div class="topbar">
 
