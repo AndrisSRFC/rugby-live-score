@@ -83,6 +83,7 @@ body.table-open .table-screen{transform:translateX(0);}
 @media(max-width:700px){.home-link{top:36px;left:8px;font-size:11px;padding:6px 8px}}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
+<link rel="stylesheet" href="/app-upgrade.css">
 </head>
 <body>
   <a class="home-link" href="/" aria-label="Back to Rugby LIVE home">← HOME</a>
@@ -167,6 +168,7 @@ body.table-open .table-screen{transform:translateX(0);}
   <div id="nextLiveBox" class="next-live"></div></main>
 </div>
 
+<script src="/app-content-access.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -210,38 +212,33 @@ $('matchType').textContent = (s.matchType || 'Friendly').toUpperCase() + ' GAME'
   : '';
 }
 
-async function loadSeasonStats(){
+async function loadSeasonStats(full=false){
   try{
-    const r=await fetch('/api/season-stats?team='+encodeURIComponent(selectedTeam));
-    const s=await r.json();
-    const home=currentState?.homeName||'';
-    const away=currentState?.awayName||'';
-    const sleafordHome=home.toLowerCase().includes('sleaford');
-    const opponent=(sleafordHome?away:home).trim();
-    const norm=v=>(v||'').trim().toLowerCase();
-    const vsMatches=(s.matches||[]).filter(m=>{
-      const names=[norm(m.home_name),norm(m.away_name)];
-      return opponent && names.includes(norm(opponent)) && names.some(n=>n.includes('sleaford'));
-    });
-    let wins=0,draws=0,losses=0;
-    vsMatches.forEach(m=>{ if(m.outcome==='W') wins++; else if(m.outcome==='L') losses++; else draws++; });
-    $('seasonWins').textContent=wins; $('seasonDraws').textContent=draws; $('seasonLosses').textContent=losses;
-    $('statsPair').textContent=opponent ? 'SLEAFORD — '+opponent.toUpperCase() : 'SLEAFORD — OPPONENT';
-    const box=document.querySelector('.stats-history');
-    box.innerHTML=vsMatches.length?vsMatches.map(m=>'<div class="stats-empty" style="margin-top:16px"><div style="font-size:17px;font-weight:900;color:#fff">'+m.home_name+' '+m.home_score+' – '+m.away_score+' '+m.away_name+'</div><div style="margin-top:5px;font-size:11px;font-weight:900;letter-spacing:1px">'+(m.outcome==='W'?'WIN':m.outcome==='L'?'LOSS':'DRAW')+'</div></div>').join(''):'<div class="stats-empty">No confirmed matches against '+(opponent||'this opponent')+' yet</div>';
-    vsMatches.forEach((m,index)=>{if(m.fans_award && box.children[index]){const award=document.createElement('div');award.className='nld-history-award';award.textContent='🏆 Fans’ Player of the Match: '+m.fans_award;box.children[index].append(award);}});
-  }catch(e){}
+    const home=currentState?.homeName||'',away=currentState?.awayName||'';
+    const opponent=(home.toLowerCase().includes('sleaford')?away:home).trim();
+    const r=await RugbyAppAccess.fetch('/api/season-stats?team='+encodeURIComponent(selectedTeam)+'&opponent='+encodeURIComponent(opponent));
+    if(!r.ok)throw Error('Statistics unavailable');
+    const s=await r.json(),v=s.versus||{wins:0,draws:0,losses:0};
+    $('seasonWins').textContent=v.wins;$('seasonDraws').textContent=v.draws;$('seasonLosses').textContent=v.losses;
+    $('statsPair').textContent=opponent?'SLEAFORD — '+opponent.toUpperCase():'SLEAFORD — OPPONENT';
+    const box=document.querySelector('.stats-history');box.replaceChildren();
+    if(!s.matches){if(full)RugbyAppAccess.show(RugbyAppAccess.installed());return false;}
+    const norm=v=>String(v||'').trim().toLowerCase();
+    const matches=s.matches.filter(m=>opponent&&norm(m.opponent)===norm(opponent));
+    if(!matches.length){const note=document.createElement('div');note.className='stats-empty';note.textContent='No confirmed matches against '+(opponent||'this opponent')+' yet';box.append(note);}
+    for(const m of matches){const row=document.createElement('div');row.className='stats-empty';row.style.marginTop='16px';const score=document.createElement('div');score.style.cssText='font-size:17px;font-weight:900;color:#fff';score.textContent=m.home_name+' '+m.home_score+' – '+m.away_score+' '+m.away_name;const outcome=document.createElement('div');outcome.style.cssText='margin-top:5px;font-size:11px;font-weight:900;letter-spacing:1px';outcome.textContent=m.outcome==='W'?'WIN':m.outcome==='L'?'LOSS':'DRAW';row.append(score,outcome);if(m.fans_award){const award=document.createElement('div');award.className='nld-history-award';award.textContent='🏆 Fans’ Player of the Match: '+m.fans_award;row.append(award);}box.append(row);}
+    return true;
+  }catch(e){if(full){document.body.classList.remove('stats-open','table-open');RugbyAppAccess.show(RugbyAppAccess.installed(),e.message);}return false;}
 }
-function openStats(){ loadSeasonStats(); document.body.classList.add('stats-open'); }
-function closeStats(){ document.body.classList.remove('stats-open'); }
+async function openStats(){if(!await RugbyAppAccess.ensure())return;if(await loadSeasonStats(true))document.body.classList.add('stats-open');}
+function closeStats(){document.body.classList.remove('stats-open','table-open');}
 async function loadNldTable(){
-  try{
-    const r=await fetch('/api/nld-table?team='+encodeURIComponent(selectedTeam)); const d=await r.json();
-    const body=$('leagueBody');
-    body.innerHTML=(d.table||[]).length?(d.table||[]).map(t=>'<tr><td>'+t.team+'</td><td>'+t.played+'</td><td>'+t.wins+'</td><td>'+t.draws+'</td><td>'+t.losses+'</td><td>'+t.pf+'</td><td>'+t.pa+'</td><td>'+(t.diff>0?'+':'')+t.diff+'</td></tr>').join(''):'<tr><td colspan="8">No NLD results yet</td></tr>';
-  }catch(e){}
+ try{const r=await RugbyAppAccess.fetch('/api/nld-table?team='+encodeURIComponent(selectedTeam));if(!r.ok)throw Error('NLD table unavailable');const d=await r.json(),body=$('leagueBody');body.replaceChildren();
+ if(!d.table?.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=8;cell.textContent='No NLD results yet';row.append(cell);body.append(row);}
+ for(const t of d.table||[]){const row=document.createElement('tr');for(const value of [t.team,t.played,t.wins,t.draws,t.losses,t.pf,t.pa,t.diff>0?'+'+t.diff:t.diff]){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);}return true;
+ }catch(e){RugbyAppAccess.show(RugbyAppAccess.installed(),e.message);return false;}
 }
-function openTable(){ loadNldTable(); document.body.classList.add('stats-open'); document.body.classList.add('table-open'); }
+async function openTable(){if(!await RugbyAppAccess.ensure())return;if(await loadNldTable())document.body.classList.add('stats-open','table-open');}
 function closeTable(){ document.body.classList.remove('table-open'); }
 $('openStats').addEventListener('click', openStats);
 $('closeStats').addEventListener('click', closeStats);
@@ -251,12 +248,12 @@ $('closeTable').addEventListener('click', closeTable);
 let touchStartX = 0;
 let touchStartY = 0;
 document.addEventListener('touchstart', e => {
-  if (document.getElementById('livePlayerProfile')?.open || !e.touches.length) return;
+  if (document.getElementById('livePlayerProfile')?.open || document.getElementById('appUpgradeDialog')?.open || !e.touches.length) return;
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
 }, {passive:true});
 document.addEventListener('touchend', e => {
-  if (document.getElementById('livePlayerProfile')?.open || !e.changedTouches.length) return;
+  if (document.getElementById('livePlayerProfile')?.open || document.getElementById('appUpgradeDialog')?.open || !e.changedTouches.length) return;
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
   if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy)) return;

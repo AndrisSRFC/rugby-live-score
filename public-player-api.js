@@ -1,6 +1,6 @@
-module.exports=function({app,pool,teamIds,getState}){
+module.exports=function({app,pool,teamIds,getState,requireAppAccess}){
   const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  app.get('/api/player-profile',async(req,res)=>{
+  app.get('/api/player-profile',requireAppAccess,async(req,res)=>{
     res.set('Cache-Control','no-store');
     const team=req.query.team,id=req.query.playerId;
     if(!Object.hasOwn(teamIds,team) || typeof id!=='string' || !uuid.test(id))return res.status(400).json({error:'Invalid player or age group.'});

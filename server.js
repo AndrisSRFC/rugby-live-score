@@ -16,6 +16,7 @@ const ADMIN_PIN = process.env.ADMIN_PIN || "1234";
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 });
+const appContentAccess=require("./app-content-access")(pool,ADMIN_PIN);
 
 const TEAM_CONFIG = [
   { key: "U13", id: 1, label: "U13's" },
@@ -525,7 +526,7 @@ app.post("/api/reactions", async (req, res) => {
 });
 
 require('./nld-voting-api')({app,pool,adminPin:ADMIN_PIN,teamIds:TEAM_IDS});
-require('./public-player-api')({app,pool,teamIds:TEAM_IDS,getState});
+require('./public-player-api')({app,pool,teamIds:TEAM_IDS,getState,requireAppAccess:appContentAccess.requireAccess});
 require('./admin-reports-api')({app,pool,adminPin:ADMIN_PIN,teamIds:TEAM_IDS});
 require('./squad-api')({
   app, pool, adminPin: ADMIN_PIN, teamIds: TEAM_IDS, getState, broadcast
@@ -811,7 +812,11 @@ app.get("/api/season-stats", async (req, res) => {
       if(outcome==='W') wins++; else if(outcome==='D') draws++; else losses++;
       return {...m, opponent, pointsFor:pf, pointsAgainst:pa, outcome};
     });
-    res.json({team:teamKey, played:matches.length, wins, draws, losses, pointsFor, pointsAgainst, matches});
+    res.set('Cache-Control','no-store');
+    const fullAccess=await appContentAccess.allowed(req);
+    const opponent=String(req.query.opponent||'').trim().toLowerCase();
+    const versus=matches.filter(m=>opponent&&String(m.opponent).trim().toLowerCase()===opponent).reduce((v,m)=>{v.played++;if(m.outcome==='W')v.wins++;else if(m.outcome==='L')v.losses++;else v.draws++;return v;},{played:0,wins:0,draws:0,losses:0});
+    res.json({team:teamKey,played:matches.length,wins,draws,losses,pointsFor,pointsAgainst,versus,...(fullAccess?{matches}:{appRequired:true})});
   } catch(error) { console.error("Season stats error:",error); res.status(500).json({error:"Database error"}); }
 });
 
@@ -966,7 +971,7 @@ app.delete("/api/nld-results/:id", async (req,res) => {
   }catch(error){console.error("Delete Other NLD result error:",error);res.status(500).json({error:"Database error"});}
 });
 
-app.get("/api/nld-table", async (req,res) => {
+app.get("/api/nld-table", appContentAccess.requireAccess, async (req,res) => {
   try{
     const teamKey=normalizeTeamKey(req.query.team);
     const sleaford=await pool.query("SELECT home_name,away_name,home_score,away_score FROM season_matches WHERE team_key=$1 AND status='confirmed' AND LOWER(match_type)='nld'",[teamKey]);
@@ -987,7 +992,7 @@ app.get("/api/nld-table", async (req,res) => {
   }catch(error){console.error("NLD table error:",error);res.status(500).json({error:"Database error"});}
 });
 
-app.get("/api/history", async (req, res) => {
+app.get("/api/history", appContentAccess.requireAccess, async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM nld_history ORDER BY id DESC"

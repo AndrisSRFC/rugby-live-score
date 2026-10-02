@@ -49,11 +49,12 @@
   document.getElementById('playerBackLive').addEventListener('click',()=>dialog.close());dialog.addEventListener('close',finish);
   document.getElementById('liveSquadList').addEventListener('click',async event=>{
     const button=event.target.closest('button[data-player-id]');if(!button)return;
+    if(!await RugbyAppAccess.ensure())return;
     lastButton=button;const token=++serial;if(request)request.abort();request=new AbortController();
     document.getElementById('livePlayerTitle').textContent=button.textContent.trim();document.getElementById('livePlayerGroup').textContent='';document.getElementById('livePlayerContent').replaceChildren();document.getElementById('livePlayerMessage').textContent='Loading statistics…';
     if(!dialog.open)dialog.showModal();
     try{
-      const response=await fetch('/api/player-profile?team='+encodeURIComponent(selectedTeam)+'&playerId='+encodeURIComponent(button.dataset.playerId),{cache:'no-store',signal:request.signal});const data=await response.json();if(!response.ok)throw new Error(data.error || 'Could not load statistics.');
+      const response=await RugbyAppAccess.fetch('/api/player-profile?team='+encodeURIComponent(selectedTeam)+'&playerId='+encodeURIComponent(button.dataset.playerId),{cache:'no-store',signal:request.signal});const data=await response.json();if(!response.ok)throw new Error(data.error || 'Could not load statistics.');
       if(token!==serial||!dialog.open)return;draw(data);document.getElementById('livePlayerMessage').textContent='';
     }catch(e){if(e.name!=='AbortError'&&token===serial&&dialog.open)document.getElementById('livePlayerMessage').textContent=e.message;}
   });
