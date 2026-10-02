@@ -84,6 +84,7 @@ body.table-open .table-screen{transform:translateX(0);}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/app-upgrade.css">
+<link rel="stylesheet" href="/view-counting.css">
 </head>
 <body>
   <a class="home-link" href="/" aria-label="Back to Rugby LIVE home">← HOME</a>
@@ -95,7 +96,7 @@ body.table-open .table-screen{transform:translateX(0);}
 </div>
   <div class="live-status-wrap">
     <div class="live-corner" id="liveCorner"><img src="/age-group-live-icon.png" alt="LIVE"></div>
-    <div id="matchViewers">👁 <span id="viewerCount">0</span> WATCHING</div>
+    <div id="matchViewers">👁 <span id="viewerCount">0</span> WATCHING<div id="totalViewsRow" class="total-views-line">TOTAL VIEWS · <span id="totalViewsCount">0</span></div></div>
   </div>
 <div class="stats-screen" id="statsScreen">
   <div class="stats-panel">
@@ -169,6 +170,7 @@ body.table-open .table-screen{transform:translateX(0);}
 </div>
 
 <script src="/app-content-access.js"></script>
+<script src="/view-counting.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -275,7 +277,9 @@ fetch('/api/state?team=' + encodeURIComponent(selectedTeam))
   .then(r => r.json())
   .then(render);
 
-const socket = io({ query: { team: selectedTeam, role: 'viewer' } });
+const socket = io({ query: { team: selectedTeam, role: 'viewer',...RugbyVisits.query() } });
+RugbyVisits.bind(socket);
+socket.on('visitTotals',data=>RugbyVisits.render(data,selectedTeam));
 socket.on('viewerCount', count => { $('viewerCount').textContent = Number(count || 0); });
 socket.on('state', s => { render(s); loadSeasonStats(); });
 </script>

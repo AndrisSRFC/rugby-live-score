@@ -551,6 +551,7 @@
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/subscription.css">
+<link rel="stylesheet" href="/view-counting.css">
 </head>
 
 <body>
@@ -575,7 +576,7 @@
       <div class="live-area">
         <div class="watching">
           <span class="eye">👁</span>
-          <span id="totalViewers">0</span> WATCHING NOW
+          <span id="totalViewers">0</span> WATCHING NOW<div id="totalViewsRow" class="total-views-line">TOTAL VIEWS · <span id="totalViewsCount">0</span></div>
         </div>
       </div>
 
@@ -664,6 +665,7 @@
     </div>
   </div>
 
+<script src="/view-counting.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
@@ -805,7 +807,9 @@ async function refreshLiveButtons() {
 }
 refreshLiveButtons();
 setInterval(refreshLiveButtons, 5000);
-const homeSocket = io({ query: { role: 'landing' } });
+const homeSocket = io({ query: { role: 'landing',...RugbyVisits.query() } });
+RugbyVisits.bind(homeSocket);
+homeSocket.on('visitTotals',data=>RugbyVisits.render(data));
 homeSocket.on('viewerCounts', counts => {
   document.getElementById('totalViewers').textContent =
     Object.values(counts || {}).reduce((sum, value) => sum + Number(value || 0), 0);

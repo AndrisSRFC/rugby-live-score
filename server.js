@@ -17,6 +17,7 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 });
 const appContentAccess=require("./app-content-access")(pool,ADMIN_PIN);
+let visitCounter;
 
 const TEAM_CONFIG = [
   { key: "U13", id: 1, label: "U13's" },
@@ -322,6 +323,7 @@ async function initDatabase() {
   `);
 
   await subscriptionApi.init(pool);
+  await visitCounter.init();
 
   const result = await pool.query(
     "SELECT id, data FROM rugby_state ORDER BY id"
@@ -371,6 +373,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 subscriptionApi.register(app,pool,ADMIN_PIN);
+visitCounter=require("./view-counting-api")({pool,app,io,adminPin:ADMIN_PIN,teamKeys:TEAM_KEYS});
 
 app.post("/api/app-access/register", async (req,res) => {
   try {
@@ -1033,15 +1036,20 @@ app.post("/api/history", async (req, res) => {
 io.on("connection", socket => {
   let teamKey = normalizeTeamKey(socket.handshake.query?.team);
   const role = String(socket.handshake.query?.role || "control");
-  const isViewer = role === "viewer";
+  const excluded=socket.handshake.query?.excludeVisits==="1";
+  const visitId=socket.handshake.query?.visitId;
+  const isViewer = role === "viewer" && !excluded;
 
   if (role === "landing") {
+    visitCounter.send(socket,"HOME",visitId,excluded);
     socket.emit("viewerCounts", { ...viewerCounts });
     return;
   }
 
+  if(role==="viewer")visitCounter.send(socket,teamKey,visitId,excluded);
   socket.join(teamKey);
   socket.emit("state", currentState(teamKey));
+  if(role==="viewer"&&excluded)socket.emit("viewerCount",viewerCounts[teamKey]||0);
 
   if (isViewer) {
     viewerCounts[teamKey] = (viewerCounts[teamKey] || 0) + 1;
@@ -1062,6 +1070,7 @@ io.on("connection", socket => {
     }
     socket.leave(teamKey);
     teamKey = nextTeam;
+    if(role==="viewer")visitCounter.send(socket,teamKey,visitId,excluded);
     socket.join(teamKey);
     if (isViewer) {
       viewerCounts[teamKey] = (viewerCounts[teamKey] || 0) + 1;
@@ -1069,6 +1078,7 @@ io.on("connection", socket => {
       emitViewerCounts();
     }
     socket.emit("state", currentState(teamKey));
+    if(role==="viewer"&&excluded)socket.emit("viewerCount",viewerCounts[teamKey]||0);
   });
 
   socket.on("disconnect", () => {
