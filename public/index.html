@@ -514,6 +514,30 @@
 
 /* Draw preview temporarily hidden until launch. */
 #openRugbyDraw,#rugbyDrawScreen{display:none!important}
+
+.why-app-teaser{position:absolute;right:26px;top:100px;z-index:4;width:190px;padding:12px;border:1px solid #39ff14;border-radius:12px;background:rgba(0,0,0,.72);color:#fff;text-align:center;cursor:pointer}
+.why-app-teaser strong{display:block;font-size:13px;color:#39ff14}
+.why-app-teaser span{display:block;margin-top:5px;font-size:11px;color:#ddd}
+.why-app-dialog{box-sizing:border-box;width:min(580px,calc(100vw - 28px));max-height:calc(100svh - 28px);overflow:auto;background:#080d08;color:#fff;border:1px solid #39ff14;border-radius:18px;padding:24px;text-align:center}
+.why-app-dialog::backdrop{background:rgba(0,0,0,.92)}
+.why-app-dialog h2{color:#39ff14;margin:16px 0 8px}
+.why-app-dialog h3{color:#ffd400;font-size:15px}
+.why-app-dialog p{line-height:1.5}
+.why-app-features{display:grid;gap:8px;text-align:left;margin:18px 0}
+.why-app-features p{margin:0;padding:10px;border:1px solid #294829;border-radius:10px}
+.why-app-prices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:14px 0}
+.why-app-prices div{padding:9px 4px;border:1px solid #294829;border-radius:10px;font-size:11px}
+.why-app-prices strong{display:block;color:#39ff14;font-size:19px;margin-top:6px}
+.why-app-dialog button{min-height:44px;margin:5px;padding:10px 14px;border:1px solid #39ff14;border-radius:10px;background:#39ff14;color:#000;font-weight:800;cursor:pointer}
+.why-app-dialog .why-app-back{background:#111;color:#fff}
+.why-app-note{font-size:12px;color:#aaa;white-space:pre-wrap}
+@media(max-width:700px){
+ .why-app-teaser{right:14px;top:154px;width:125px;padding:8px 5px}
+ .why-app-teaser strong{font-size:10px}
+ .why-app-teaser span{font-size:9px;margin-top:4px}
+ .why-app-dialog{padding:18px}
+ .why-app-prices{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/subscription.css">
@@ -531,6 +555,7 @@
   </div>
 
   <main class="home-screen">
+<button id="whyAppOpen" class="why-app-teaser" type="button" aria-controls="whyAppDialog"><strong>WHY GET THE APP?</strong><span>30 days free · See benefits →</span></button>
 <button id="openRugbyDraw" class="home-draw-link" type="button" aria-controls="rugbyDrawScreen" aria-expanded="false"><span class="draw-link-preview" aria-hidden="true"><strong>RUGBY BALL DRAW</strong><span class="draw-thumb-price">£5 PER BALL · 10% TO CLUB</span><span class="draw-demo-balls"><span class="draw-demo-ball"><span>1</span></span><span class="draw-demo-ball"><span>2</span></span><span class="draw-demo-ball"><span>3</span></span><span class="draw-demo-ball"><span>4</span></span><span class="draw-demo-ball"><span>5</span></span><span class="draw-demo-ball"><span>6</span></span><span class="draw-demo-ball"><span>7</span></span><span class="draw-demo-ball"><span>8</span></span><span class="draw-demo-ball"><span>9</span></span><span class="draw-demo-ball"><span>10</span></span><span class="draw-demo-ball"><span>11</span></span><span class="draw-demo-ball"><span>12</span></span><span class="draw-demo-ball"><span>13</span></span><span class="draw-demo-ball"><span>14</span></span><span class="draw-demo-ball"><span>15</span></span><span class="draw-demo-ball"><span>16</span></span><span class="draw-demo-ball"><span>17</span></span><span class="draw-demo-ball"><span>18</span></span><span class="draw-demo-ball"><span>19</span></span><span class="draw-demo-ball"><span>20</span></span><span class="draw-demo-ball"><span>21</span></span></span><span class="draw-thumb-prizes">1st £47.25 · 2nd £28.35 · 3rd £18.90</span></span><small>Tap to view →</small></button><div class="home-draw-preview" id="rugbyDrawScreen" tabindex="-1"><button id="closeRugbyDraw" class="draw-back" type="button">← Back to LIVE</button><section class="rugby-draw-demo" aria-label="Rugby ball draw preview"><h2>RUGBY BALL DRAW</h2><p class="draw-demo-note">DEMO · Example only</p><div class="draw-demo-price"><strong>£5 PER BALL</strong><span>10% TO THE CLUB</span></div><div class="draw-demo-balls"><span class="draw-demo-ball"><span>1</span></span><span class="draw-demo-ball"><span>2</span></span><span class="draw-demo-ball"><span>3</span></span><span class="draw-demo-ball"><span>4</span></span><span class="draw-demo-ball"><span>5</span></span><span class="draw-demo-ball"><span>6</span></span><span class="draw-demo-ball"><span>7</span></span><span class="draw-demo-ball"><span>8</span></span><span class="draw-demo-ball"><span>9</span></span><span class="draw-demo-ball"><span>10</span></span><span class="draw-demo-ball"><span>11</span></span><span class="draw-demo-ball"><span>12</span></span><span class="draw-demo-ball"><span>13</span></span><span class="draw-demo-ball"><span>14</span></span><span class="draw-demo-ball"><span>15</span></span><span class="draw-demo-ball"><span>16</span></span><span class="draw-demo-ball"><span>17</span></span><span class="draw-demo-ball"><span>18</span></span><span class="draw-demo-ball"><span>19</span></span><span class="draw-demo-ball"><span>20</span></span><span class="draw-demo-ball"><span>21</span></span></div><p class="draw-demo-note">21 example numbers · Entries are not open</p><div class="draw-demo-prizes"><div><b>1st</b><strong>£47.25</strong></div><div><b>2nd</b><strong>£28.35</strong></div><div><b>3rd</b><strong>£18.90</strong></div></div><p class="draw-demo-note">Example if all 21 balls sell: £105 total<br>£10.50 to the club · £94.50 prize fund</p><button type="button" disabled>DRAW WINNERS · DEMO ONLY</button></section></div>
 
     <div class="topbar">
@@ -868,5 +893,19 @@ signupModal.addEventListener('click', e => { if (e.target === signupModal) signu
 </script>
 <div class="subscription-modal" id="subscriptionModal" hidden role="dialog" aria-modal="true" aria-labelledby="subscriptionTitle"><section class="subscription-card"><button id="subscriptionClose" type="button">← Back</button><h2 id="subscriptionTitle">SUBSCRIBE / SUPPORT</h2><p>Support Rugby LIVE — support your club.<br>50% of your payment goes to Sleaford Rugby Club.</p><form id="subscriptionRequestForm"><label for="subscriptionPeriod">Choose your access period</label><select id="subscriptionPeriod" required></select><label for="subscriptionEmail">Email for your activation code</label><input id="subscriptionEmail" type="email" maxlength="254" autocomplete="email" required><p id="subscriptionPayment"></p><button id="subscriptionSubmit" type="submit">SEND REQUEST</button></form><p>After payment is verified, the administrator will send a one-time code. Activate it on this same app installation. Your period starts on activation; renewals extend existing active access.</p><form id="subscriptionActivateForm"><label for="subscriptionCode">Already have a code?</label><input id="subscriptionCode" autocomplete="off" maxlength="64" required placeholder="Activation code"><button type="submit">ACTIVATE ACCESS</button></form><p id="subscriptionStatus" class="subscription-status" role="status"></p></section></div><script src="/subscription-public.js"></script>
 <script>if(new URLSearchParams(location.search).get("subscribe")==="1" && isInstalledApp())window.openSubscription();</script>
+<dialog id="whyAppDialog" class="why-app-dialog" aria-labelledby="whyAppTitle"><h2 id="whyAppTitle">MORE RUGBY. MORE CONNECTION.</h2><p>Follow your club with the Rugby LIVE app.</p><div class="why-app-features"><p>📊 Player statistics — season and career totals</p><p>🏉 Match results and history</p><p>🏆 NLD league table</p><p>📅 All seasons and club history</p></div><h3>TRY FULL APP ACCESS FREE FOR 30 DAYS</h3><p>Then choose your access period. No automatic renewal.</p><div id="whyAppPrices" class="why-app-prices"></div><p><strong>50% of your payment supports Sleaford Rugby Club.</strong></p><p class="why-app-note">The website keeps LIVE scores, the match clock, Next LIVE, squad names, the W/D/L summary and fans’ voting free.</p><button id="whyAppInstall" type="button">INSTALL APP</button><button id="whyAppSupport" type="button" hidden>SUBSCRIBE / SUPPORT</button><button id="whyAppBack" type="button" class="why-app-back">BACK TO LIVE</button><p id="whyAppMessage" class="why-app-note" role="status"></p></dialog>
+<script>
+(()=>{
+ const dialog=document.getElementById('whyAppDialog'),open=document.getElementById('whyAppOpen'),install=document.getElementById('whyAppInstall'),support=document.getElementById('whyAppSupport'),message=document.getElementById('whyAppMessage');
+ open.addEventListener('click',async()=>{
+  install.hidden=isInstalledApp();support.hidden=!isInstalledApp();message.textContent='';dialog.showModal();
+  const prices=document.getElementById('whyAppPrices');prices.replaceChildren();
+  try{const r=await fetch('/api/subscription/plans',{cache:'no-store'});if(!r.ok)throw Error();const d=await r.json();for(const p of d.plans){const card=document.createElement('div'),label=document.createElement('span'),value=document.createElement('strong');label.textContent=p.months+' month'+(p.months===1?'':'s');value.textContent='£'+(p.pence/100).toFixed(2);card.append(label,value);prices.append(card);}if(!d.paymentReady)message.textContent='Payment details will be added soon. Please wait for payment instructions before paying.';}catch(e){message.textContent='Prices are temporarily unavailable. Please try again.';}
+ });
+ document.getElementById('whyAppBack').addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>open.focus());
+ support.addEventListener('click',()=>{dialog.close();window.openSubscription();});
+ install.addEventListener('click',async()=>{if(deferredInstallPrompt){const prompt=deferredInstallPrompt;deferredInstallPrompt=null;await prompt.prompt();const result=await prompt.userChoice;message.textContent=result.outcome==='accepted'?'Open Rugby LIVE from your home screen to start your 30-day trial.':'You can install later from your browser menu.';}else message.textContent=/iPhone|iPad|iPod/.test(navigator.userAgent)?'iPhone: open in Safari → Share → Add to Home Screen. Then open Rugby LIVE from its icon.':'Android: open your browser menu → Install app or Add to Home Screen. Then open Rugby LIVE from its icon.';});
+})();
+</script>
 </body>
 </html>
