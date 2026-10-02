@@ -5,6 +5,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { Pool } = require("pg");
 
+const subscriptionApi = require("./subscription-api");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
@@ -319,6 +320,8 @@ async function initDatabase() {
     )
   `);
 
+  await subscriptionApi.init(pool);
+
   const result = await pool.query(
     "SELECT id, data FROM rugby_state ORDER BY id"
   );
@@ -365,6 +368,8 @@ async function initDatabase() {
 app.use('/api/players/photo',express.json({limit:'800kb'}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+
+subscriptionApi.register(app,pool,ADMIN_PIN);
 
 app.post("/api/app-access/register", async (req,res) => {
   try {

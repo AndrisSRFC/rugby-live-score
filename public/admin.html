@@ -334,6 +334,7 @@ white-space:nowrap;
 }
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
+<link rel="stylesheet" href="/subscription.css">
 </head>
 <body>
 <datalist id="teamSuggestions"></datalist>
@@ -370,6 +371,7 @@ white-space:nowrap;
     </div>
   </div>
 
+<details class="subscription-card subscription-admin"><summary>APP SUBSCRIPTIONS · Requests & activation codes</summary><p>50% of each payment is allocated to the club. Verify payment before approving. Codes are sent manually.</p><button type="button" id="subscriptionRefresh">REFRESH REQUESTS</button><p id="subscriptionAdminStatus" class="subscription-status" role="status"></p><output id="subscriptionAdminCode" class="subscription-code"></output><div id="subscriptionRequests"></div></details>
   <div class="grid">
     <section class="primary-control-card panel">
       <label>Home Team</label>
@@ -1059,5 +1061,6 @@ setInterval(watchPendingResults,3000);
  mobile.addEventListener('change',configure);configure();
 })();
 </script>
+<script src="/subscription-admin.js"></script>
 </body>
 </html>
