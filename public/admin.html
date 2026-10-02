@@ -341,6 +341,15 @@ white-space:nowrap;
  .mobile-admin-back{display:block;margin:14px 0;min-height:44px;padding:10px 14px;font-size:14px}
  .mobile-admin-paged[data-admin-page="0"] .admin>.grid{display:none}
 }
+
+@media(max-width:720px){
+ .mobile-admin-paged[data-admin-page="1"] .admin>h1,
+ .mobile-admin-paged[data-admin-page="1"] .admin>.admin-top-panel,
+ .mobile-admin-paged[data-admin-page="2"] .admin>h1,
+ .mobile-admin-paged[data-admin-page="2"] .admin>.admin-top-panel{display:none}
+ .mobile-admin-paged[data-admin-page="1"] .mobile-admin-back,
+ .mobile-admin-paged[data-admin-page="2"] .mobile-admin-back{margin-top:0}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/subscription.css">
