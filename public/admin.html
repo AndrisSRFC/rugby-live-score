@@ -350,6 +350,12 @@ white-space:nowrap;
  .mobile-admin-paged[data-admin-page="1"] .mobile-admin-back,
  .mobile-admin-paged[data-admin-page="2"] .mobile-admin-back{margin-top:0}
 }
+
+@media(max-width:720px){
+ .mobile-admin-menu #subscriptionTopBtn,
+ .mobile-admin-menu #heroesAdminOpen,
+ .mobile-admin-menu #viewCountOpen{display:block!important;margin:0;width:100%;white-space:normal}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/subscription.css">
@@ -1046,12 +1052,13 @@ setInterval(watchPendingResults,3000);
  for(const button of [control,squad,back])button.type='button';
  control.textContent='MATCH CONTROL';squad.textContent='MATCH SQUAD & NEXT LIVE';back.textContent='← Back to Admin';back.className='mobile-admin-back';
  menu.append(control,squad);grid.before(menu,back);
+ const extras=['subscriptionTopBtn','heroesAdminOpen','viewCountOpen'].map(id=>{const button=document.getElementById(id),anchor=document.createComment('Desktop '+id+' position');button.before(anchor);return {button,anchor};});
  const pageTwo=document.createElement('div');pageTwo.id='mobileAdminPageTwo';pageTwo.hidden=true;grid.after(pageTwo);
  const mobile=window.matchMedia('(max-width:720px)');let page=0;
  function draw(){document.body.dataset.adminPage=String(page);menu.hidden=!mobile.matches||page!==0;back.hidden=!mobile.matches||page===0;pageTwo.hidden=!mobile.matches||page!==2;control.setAttribute('aria-controls',grid.id||(grid.id='mobileMatchControl'));squad.setAttribute('aria-controls',pageTwo.id);}
  function switchPage(value){if(!mobile.matches)return;page=value;draw();window.scrollTo({top:0,behavior:'instant'});if(value===0)control.focus();else back.focus();}
  control.addEventListener('click',()=>switchPage(1));squad.addEventListener('click',()=>switchPage(2));back.addEventListener('click',()=>switchPage(0));
- function configure(){document.body.classList.toggle('mobile-admin-paged',mobile.matches);if(mobile.matches){pageTwo.append(stack);if(pending)stack.append(pending);}else{anchor.after(stack);if(pending)pendingAnchor.after(pending);}page=0;draw();}
+ function configure(){document.body.classList.toggle('mobile-admin-paged',mobile.matches);if(mobile.matches){pageTwo.append(stack);if(pending)stack.append(pending);for(const item of extras)menu.append(item.button);}else{anchor.after(stack);if(pending)pendingAnchor.after(pending);for(const item of extras)item.anchor.after(item.button);}page=0;draw();}
  mobile.addEventListener('change',configure);configure();
 })();
 </script>

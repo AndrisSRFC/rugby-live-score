@@ -13,6 +13,6 @@ document.getElementById('subscriptionAdminClose').onclick=close;
 panel.addEventListener('keydown',event=>{if(event.key==='Escape')close();if(event.key==='Tab'){const controls=[...panel.querySelectorAll('button')].filter(e=>!e.disabled),first=controls[0],last=controls[controls.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
 let debounce;
 pin.addEventListener('input',()=>{alertCount(0);box.replaceChildren();codeBox.textContent='';clearTimeout(debounce);debounce=setTimeout(()=>refresh(true),500);});
-setInterval(()=>{if(!document.hidden&&window.matchMedia('(min-width:721px)').matches&&pin.value)refresh(true);},15000);
-if(window.matchMedia('(min-width:721px)').matches)refresh(true);
+setInterval(()=>{if(!document.hidden&&pin.value)refresh(true);},15000);
+refresh(true);
 })();

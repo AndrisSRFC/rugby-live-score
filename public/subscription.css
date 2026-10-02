@@ -6,3 +6,10 @@
 @keyframes subscriptionRequestPulse{50%{background:#8b100b;box-shadow:0 0 15px #ff453a;opacity:.65}}
 @media(prefers-reduced-motion:reduce){.subscription-top-button.subscription-pending{animation:none;box-shadow:0 0 8px #ff453a}}
 @media(max-width:720px){.subscription-top-button,.subscription-admin-overlay{display:none!important}}
+
+@media(max-width:720px){
+ .subscription-admin-overlay:not([hidden]){display:block!important;padding:14px}
+ .subscription-admin-overlay .subscription-admin{display:block;padding:16px}
+ .subscription-admin-overlay .subscription-admin h2{font-size:23px}
+ .subscription-admin article button{font-size:14px;width:100%;margin:6px 0;white-space:normal}
+}
