@@ -1,9 +1,13 @@
 (()=>{
  const dialog=document.getElementById('touchlineHeroesDialog'),open=document.getElementById('touchlineHeroesOpen'),list=document.getElementById('touchlineHeroesList'),note=document.getElementById('touchlineHeroesNote');
- const title=document.querySelector('.title'),content=document.querySelector('.content'),anchor=document.createComment('Desktop Touchline Heroes position');
- open.before(anchor);const mobile=matchMedia('(max-width:700px)');
- function place(){if(mobile.matches){content.append(open);open.style.top=(title.offsetTop+title.offsetHeight+18)+'px';}else{anchor.after(open);open.style.removeProperty('top');}}
- mobile.addEventListener('change',place);new ResizeObserver(place).observe(title);place();
+ const help=document.querySelector('.score-help'),home=document.querySelector('.home-screen'),promos=document.querySelector('.home-promo-stack');
+ const anchor=document.createComment('Desktop Touchline Heroes position'),helpAnchor=document.createComment('Original Touchline Team position');
+ open.before(anchor);help.before(helpAnchor);
+ const tools=document.createElement('div');tools.className='touchline-mobile-tools';home.append(tools);
+ const mobile=matchMedia('(max-width:700px)');
+ function positionPromos(){if(mobile.matches)promos.style.top=(tools.offsetTop+tools.offsetHeight+12)+'px';else promos.style.removeProperty('top');}
+ function place(){if(mobile.matches){tools.append(help,open);open.style.removeProperty('top');}else{helpAnchor.after(help);anchor.after(open);}positionPromos();}
+ mobile.addEventListener('change',place);new ResizeObserver(positionPromos).observe(tools);place();
  document.getElementById('touchlineHeroesBack').onclick=()=>dialog.close();
  dialog.addEventListener('close',()=>open.focus());
  open.onclick=async()=>{
