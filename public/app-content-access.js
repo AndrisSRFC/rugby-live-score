@@ -2,7 +2,7 @@
  let prompt=null,lastFocus=null;
  const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
  const dialog=document.createElement('dialog');dialog.className='app-upgrade-dialog';dialog.id='appUpgradeDialog';dialog.setAttribute('aria-labelledby','appUpgradeTitle');
- dialog.innerHTML='<h2 id="appUpgradeTitle">GET MORE WITH THE RUGBY LIVE APP</h2><p id="appUpgradeText">Install the app to view player stats, match history and the NLD table.</p><p>30 days free · At least 50% of your payment supports the club.</p><button type="button" id="appUpgradeInstall">INSTALL APP</button><button type="button" id="appUpgradeSubscribe" hidden>SUBSCRIBE / SUPPORT</button><button type="button" class="app-upgrade-back" id="appUpgradeBack">BACK TO LIVE</button><p class="app-upgrade-note" id="appUpgradeNote" role="status"></p>';
+ dialog.innerHTML='<h2 id="appUpgradeTitle">GET MORE WITH THE RUGBY LIVE APP</h2><p id="appUpgradeText">Install the app to view player stats, match history and the NLD table.</p><p>30 days free · 50% of your payment supports the club.</p><button type="button" id="appUpgradeInstall">INSTALL APP</button><button type="button" id="appUpgradeSubscribe" hidden>SUBSCRIBE / SUPPORT</button><button type="button" class="app-upgrade-back" id="appUpgradeBack">BACK TO LIVE</button><p class="app-upgrade-note" id="appUpgradeNote" role="status"></p>';
  document.body.append(dialog);
  function id(){let value=localStorage.getItem('rugbyLiveInstallId');if(!value){const bytes=new Uint8Array(18);crypto.getRandomValues(bytes);value='rli_'+Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');localStorage.setItem('rugbyLiveInstallId',value);}return value;}
  async function access(){
