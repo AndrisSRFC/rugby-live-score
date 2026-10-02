@@ -332,6 +332,7 @@ white-space:nowrap;
  .mobile-admin-paged[data-admin-page="2"] .admin>h1,
  .mobile-admin-paged[data-admin-page="2"] .admin>.admin-top-panel{display:none}
 }
+@media(min-width:721px){.desktop-top-line>#subscriptionTopBtn{margin-left:auto;flex-shrink:0}.desktop-top-line #adminProtected{flex:0 1 auto}}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/subscription.css">
@@ -359,12 +360,11 @@ white-space:nowrap;
           <button id="revokeControl" type="button" class="red" onclick="revokeMatchControl()" style="display:none">Remove Operator Access</button>
           <a id="matchControlLink" href="/match-control.html" target="_blank" class="public-live-btn">⚙ Open Control ↗</a>
           <button id="refreshAccessRequests" type="button" onclick="loadControlRequests()">↻ Refresh Requests</button>
-          <button id="subscriptionTopBtn" class="subscription-top-button" type="button" aria-controls="subscriptionAdminPanel" aria-expanded="false">APP SUBSCRIPTIONS</button>
           <div class="pending-top-shortcut"><button id="pendingTopBtn" type="button" onclick="jumpToPending()">◷ Pending Results</button></div>
         </div>
         <div id="controlPinPreview" class="preview"></div>
       </div>
-
+      <button id="subscriptionTopBtn" class="subscription-top-button" type="button" aria-controls="subscriptionAdminPanel" aria-expanded="false">APP SUBSCRIPTIONS</button>
     </div>
     <div class="desktop-top-info">
       <div id="controlRequests" class="preview"><b>Match Control Requests:</b> Enter Admin PIN to check requests.</div>
