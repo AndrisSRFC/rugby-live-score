@@ -329,10 +329,18 @@ white-space:nowrap;
 
 @media(max-width:720px){
  .mobile-admin-pages-nav{display:none!important}
- .mobile-admin-paged[data-admin-page="2"] .admin>h1,
- .mobile-admin-paged[data-admin-page="2"] .admin>.admin-top-panel{display:none}
+
 }
 @media(min-width:721px){.desktop-top-line>#subscriptionTopBtn{margin-left:auto;flex-shrink:0}.desktop-top-line #adminProtected{flex:0 1 auto}}
+
+.mobile-admin-menu[hidden],.mobile-admin-back[hidden]{display:none!important}
+.mobile-admin-menu,.mobile-admin-back{display:none}
+@media(max-width:720px){
+ .mobile-admin-menu{display:grid;gap:14px;margin:18px 0}
+ .mobile-admin-menu button{width:100%;min-height:58px;background:#111;color:#39ff14;border:1px solid #39ff14;border-radius:12px;font-size:16px;font-weight:800}
+ .mobile-admin-back{display:block;margin:14px 0;min-height:44px;padding:10px 14px;font-size:14px}
+ .mobile-admin-paged[data-admin-page="0"] .admin>.grid{display:none}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/subscription.css">
@@ -1015,50 +1023,22 @@ setInterval(watchPendingResults,3000);
 
 <script>
 (()=>{
- const admin=document.querySelector('.admin'),grid=admin.querySelector('.grid');
- const stack=document.querySelector('.next-live-squad-stack');
+ const admin=document.querySelector('.admin'),grid=admin.querySelector('.grid'),stack=document.querySelector('.next-live-squad-stack');
  if(!stack)return;
  const pending=document.getElementById('pendingResultsPanel');
- const pendingAnchor=document.createComment('Original pending results position');
- if(pending)pending.before(pendingAnchor);
- const anchor=document.createComment('Original Next LIVE and squad position');
- stack.before(anchor);
- const nav=document.createElement('nav');nav.className='mobile-admin-pages-nav';nav.setAttribute('aria-label','Admin pages');
- const prev=document.createElement('button'),next=document.createElement('button'),status=document.createElement('span');
- prev.type=next.type='button';prev.textContent='‹';next.textContent='›';
- prev.setAttribute('aria-label','Previous admin page');next.setAttribute('aria-label','Next admin page');
- status.setAttribute('aria-live','polite');nav.append(prev,status,next);grid.before(nav);
+ const pendingAnchor=document.createComment('Original pending results position');if(pending)pending.before(pendingAnchor);
+ const anchor=document.createComment('Original Next LIVE and squad position');stack.before(anchor);
+ const menu=document.createElement('nav');menu.className='mobile-admin-menu';menu.setAttribute('aria-label','Admin sections');
+ const control=document.createElement('button'),squad=document.createElement('button'),back=document.createElement('button');
+ for(const button of [control,squad,back])button.type='button';
+ control.textContent='MATCH CONTROL';squad.textContent='MATCH SQUAD & NEXT LIVE';back.textContent='← Back to Admin';back.className='mobile-admin-back';
+ menu.append(control,squad);grid.before(menu,back);
  const pageTwo=document.createElement('div');pageTwo.id='mobileAdminPageTwo';pageTwo.hidden=true;grid.after(pageTwo);
- const mobile=window.matchMedia('(max-width:720px)');
- let page=1,start=null;const scrollPositions={1:0,2:0};
- function draw(){
-  document.body.dataset.adminPage=String(page);pageTwo.hidden=page!==2||!mobile.matches;
-  prev.disabled=page===1;next.disabled=page===2;
-  status.textContent=page+' / 2 · Swipe '+(page===1?'←':'→');
- }
- function switchPage(value){
-  if(!mobile.matches||value===page||value<1||value>2)return;
-  scrollPositions[page]=window.scrollY;page=value;draw();
-  window.scrollTo({top:scrollPositions[page]||0,behavior:'instant'});
- }
- prev.addEventListener('click',()=>switchPage(page-1));next.addEventListener('click',()=>switchPage(page+1));
- function configure(){
-  nav.hidden=!mobile.matches;document.body.classList.toggle('mobile-admin-paged',mobile.matches);
-  if(mobile.matches){pageTwo.append(stack);if(pending)stack.append(pending);}
-  else{anchor.after(stack);if(pending)pendingAnchor.after(pending);page=1;}
-  draw();
- }
- admin.addEventListener('touchstart',event=>{
-  start=null;
-  if(!mobile.matches||event.touches.length!==1||event.target.closest('input,button,select,textarea,label,a,dialog,[contenteditable]'))return;
-  start={x:event.touches[0].clientX,y:event.touches[0].clientY};
- },{passive:true});
- admin.addEventListener('touchend',event=>{
-  if(!start||!event.changedTouches.length)return;
-  const dx=event.changedTouches[0].clientX-start.x,dy=event.changedTouches[0].clientY-start.y;start=null;
-  if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4)switchPage(page+(dx<0?1:-1));
- },{passive:true});
- admin.addEventListener('touchcancel',()=>{start=null;},{passive:true});
+ const mobile=window.matchMedia('(max-width:720px)');let page=0;
+ function draw(){document.body.dataset.adminPage=String(page);menu.hidden=!mobile.matches||page!==0;back.hidden=!mobile.matches||page===0;pageTwo.hidden=!mobile.matches||page!==2;control.setAttribute('aria-controls',grid.id||(grid.id='mobileMatchControl'));squad.setAttribute('aria-controls',pageTwo.id);}
+ function switchPage(value){if(!mobile.matches)return;page=value;draw();window.scrollTo({top:0,behavior:'instant'});if(value===0)control.focus();else back.focus();}
+ control.addEventListener('click',()=>switchPage(1));squad.addEventListener('click',()=>switchPage(2));back.addEventListener('click',()=>switchPage(0));
+ function configure(){document.body.classList.toggle('mobile-admin-paged',mobile.matches);if(mobile.matches){pageTwo.append(stack);if(pending)stack.append(pending);}else{anchor.after(stack);if(pending)pendingAnchor.after(pending);}page=0;draw();}
  mobile.addEventListener('change',configure);configure();
 })();
 </script>
