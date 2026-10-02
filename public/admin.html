@@ -359,6 +359,7 @@ white-space:nowrap;
           <button id="revokeControl" type="button" class="red" onclick="revokeMatchControl()" style="display:none">Remove Operator Access</button>
           <a id="matchControlLink" href="/match-control.html" target="_blank" class="public-live-btn">⚙ Open Control ↗</a>
           <button id="refreshAccessRequests" type="button" onclick="loadControlRequests()">↻ Refresh Requests</button>
+          <button id="subscriptionTopBtn" class="subscription-top-button" type="button" aria-controls="subscriptionAdminPanel" aria-expanded="false">APP SUBSCRIPTIONS</button>
           <div class="pending-top-shortcut"><button id="pendingTopBtn" type="button" onclick="jumpToPending()">◷ Pending Results</button></div>
         </div>
         <div id="controlPinPreview" class="preview"></div>
@@ -371,7 +372,7 @@ white-space:nowrap;
     </div>
   </div>
 
-<details class="subscription-card subscription-admin"><summary>APP SUBSCRIPTIONS · Requests & activation codes</summary><p>50% of each payment is allocated to the club. Verify payment before approving. Codes are sent manually.</p><button type="button" id="subscriptionRefresh">REFRESH REQUESTS</button><p id="subscriptionAdminStatus" class="subscription-status" role="status"></p><output id="subscriptionAdminCode" class="subscription-code"></output><div id="subscriptionRequests"></div></details>
+<div id="subscriptionAdminPanel" class="subscription-admin-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="subscriptionAdminTitle"><section class="subscription-card subscription-admin"><button id="subscriptionAdminClose" type="button">← Back to Admin</button><h2 id="subscriptionAdminTitle">APP SUBSCRIPTIONS</h2><p>50% of each payment is allocated to the club. Verify payment before approving. Codes are sent manually.</p><button type="button" id="subscriptionRefresh">REFRESH REQUESTS</button><p id="subscriptionAdminStatus" class="subscription-status" role="status"></p><output id="subscriptionAdminCode" class="subscription-code"></output><div id="subscriptionRequests"></div></section></div>
   <div class="grid">
     <section class="primary-control-card panel">
       <label>Home Team</label>
