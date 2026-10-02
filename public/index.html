@@ -475,6 +475,24 @@
     .trial-ended-card p{margin:0 auto 22px;max-width:420px;color:#ccc;line-height:1.45}
     .trial-ended-card .support-btn{width:100%;padding:14px;border:0;border-radius:12px;background:#25ff18;color:#001b00;font-weight:1000;font-size:16px;cursor:pointer}
     .trial-ended-card .browser-note{display:block;margin-top:16px;color:#aaa;font-size:12px}
+
+.rugby-draw-demo{box-sizing:border-box;border:1px solid #39ff14;border-radius:16px;padding:16px;background:rgba(0,0,0,.8);color:#fff;text-align:center}
+.rugby-draw-demo h2{color:#ffd400;font-size:21px;margin:0 0 6px}
+.draw-demo-note{color:#aaa;font-size:12px;line-height:1.5;margin:8px 0}
+.draw-demo-price{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:12px 0;border-top:1px solid #333;border-bottom:1px solid #333}
+.draw-demo-price strong{color:#39ff14}
+.draw-demo-balls{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px 5px;margin:16px 0}
+.draw-demo-ball{display:flex;align-items:center;justify-content:center;aspect-ratio:1.4;border:2px solid #aaa;border-radius:50%;transform:rotate(-25deg);background:linear-gradient(145deg,#fff 0%,#ddd 40%,#333 42%,#333 53%,#eee 55%,#888 100%);box-shadow:inset 0 0 0 2px #222}
+.draw-demo-ball>span{transform:rotate(25deg);background:#eee;border-radius:50%;color:#111;font-size:13px;font-weight:900;padding:1px 3px}
+.draw-demo-prizes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px 0;border-top:1px solid #333;border-bottom:1px solid #333}
+.draw-demo-prizes b{display:block;color:#ffd400;font-size:13px;margin-bottom:6px}
+.draw-demo-prizes strong{font-size:18px}
+.rugby-draw-demo>button{width:100%;min-height:44px;border:1px solid #39ff14;border-radius:10px;background:#142114;color:#aaa;font-weight:800;font-size:12px}
+
+.home-draw-preview{display:none}
+@media(min-width:701px){
+ .home-draw-preview{display:block;position:absolute;z-index:3;right:26px;top:100px;width:clamp(290px,23vw,360px)}
+}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 </head>
@@ -491,6 +509,7 @@
   </div>
 
   <main class="home-screen">
+<div class="home-draw-preview"><section class="rugby-draw-demo" aria-label="Rugby ball draw preview"><h2>RUGBY BALL DRAW</h2><p class="draw-demo-note">DEMO · Example only</p><div class="draw-demo-price"><strong>£5 PER BALL</strong><span>10% TO THE CLUB</span></div><div class="draw-demo-balls"><span class="draw-demo-ball"><span>1</span></span><span class="draw-demo-ball"><span>2</span></span><span class="draw-demo-ball"><span>3</span></span><span class="draw-demo-ball"><span>4</span></span><span class="draw-demo-ball"><span>5</span></span><span class="draw-demo-ball"><span>6</span></span><span class="draw-demo-ball"><span>7</span></span><span class="draw-demo-ball"><span>8</span></span><span class="draw-demo-ball"><span>9</span></span><span class="draw-demo-ball"><span>10</span></span><span class="draw-demo-ball"><span>11</span></span><span class="draw-demo-ball"><span>12</span></span><span class="draw-demo-ball"><span>13</span></span><span class="draw-demo-ball"><span>14</span></span><span class="draw-demo-ball"><span>15</span></span><span class="draw-demo-ball"><span>16</span></span><span class="draw-demo-ball"><span>17</span></span><span class="draw-demo-ball"><span>18</span></span><span class="draw-demo-ball"><span>19</span></span><span class="draw-demo-ball"><span>20</span></span><span class="draw-demo-ball"><span>21</span></span></div><p class="draw-demo-note">21 example numbers · Entries are not open</p><div class="draw-demo-prizes"><div><b>1st</b><strong>£47.25</strong></div><div><b>2nd</b><strong>£28.35</strong></div><div><b>3rd</b><strong>£18.90</strong></div></div><p class="draw-demo-note">Example if all 21 balls sell: £105 total<br>£10.50 to the club · £94.50 prize fund</p><button type="button" disabled>DRAW WINNERS · DEMO ONLY</button></section></div>
 
     <div class="topbar">
 
