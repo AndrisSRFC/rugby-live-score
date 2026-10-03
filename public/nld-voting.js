@@ -7,6 +7,8 @@
  box.append(title,node('p','NLD matches only · Vote after full-time'));
  const groups=node('div',undefined,'nld-vote-groups');box.append(groups);
  const liveGroups=document.querySelector('.bottom .age-groups');
+ const desktopAnchor=document.createComment('Desktop LIVE and fan groups');liveGroups.before(desktopAnchor);
+ const liveHeading=node('h2','LIVE SCORES','home-live-heading');
  const actions=node('div',undefined,'home-primary-actions');
  liveGroups.before(actions);
  function groupPicker(id,title,content,label){
@@ -23,6 +25,16 @@
  const livePicker=groupPicker('liveGroupsDialog','LIVE SCORES',liveGroups,'LIVE SCORES');
  const fansPicker=groupPicker('fansGroupsDialog','FANS’ PLAYER OF THE MATCH',box,'FANS’ VOTE');
 
+ const phone=matchMedia('(max-width:700px)');
+ function arrangeGroups(){
+  if(phone.matches){
+   liveHeading.remove();livePicker.picker.append(liveGroups);fansPicker.picker.append(box);actions.style.display='grid';
+  }else{
+   if(livePicker.picker.open)livePicker.picker.close();if(fansPicker.picker.open)fansPicker.picker.close();
+   desktopAnchor.after(liveHeading,liveGroups,box);actions.style.display='none';
+  }
+ }
+ phone.addEventListener('change',arrangeGroups);arrangeGroups();
  const dialog=node('dialog',undefined,'nld-vote-dialog');dialog.id='nldVoteDialog';
  dialog.setAttribute('aria-labelledby','nldVoteTitle');
  const header=node('header'),back=node('button','← BACK TO HOME');back.type='button';header.append(back,node('span','RUGBY LIVE'));dialog.append(header);
@@ -37,7 +49,7 @@
  async function get(url){const r=await fetch(url,{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error || 'Could not load voting.');return d;}
  async function refresh(){try{const d=await get('/api/nld-voting/groups');for(const g of d.groups){const b=buttons.get(g.team);if(!b)continue;b.textContent=teamLabel(g.team)+(g.state==='published'?' 🏆':g.state==='open'?' · VOTE':'');b.setAttribute('aria-label',teamLabel(g.team)+(g.state==='published'?' - winner published':g.state==='open'?' - voting open':' - voting status'));}}catch(e){box.querySelector('p').textContent='NLD matches only · Voting temporarily unavailable';}}
  async function open(team,button){
-  fansPicker.picker.close();origin=fansPicker.trigger;const token=++serial;body.replaceChildren();message.textContent='Loading…';if(!dialog.open)dialog.showModal();
+  if(fansPicker.picker.open)fansPicker.picker.close();origin=phone.matches?fansPicker.trigger:button;const token=++serial;body.replaceChildren();message.textContent='Loading…';if(!dialog.open)dialog.showModal();
   try{
    const d=await get('/api/nld-voting/poll?team='+encodeURIComponent(team));if(token!==serial || !dialog.open)return;
    message.textContent='';
