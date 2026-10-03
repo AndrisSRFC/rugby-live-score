@@ -63,3 +63,5 @@
  .sponsor-card:nth-child(3){margin-top:24px}
  .sponsor-card:nth-child(6) .sponsor-text{font-size:clamp(11px,3.4vw,16px);min-height:28px}
 }
+
+.sponsors-dialog .sponsor-text,.sponsor-teaser .sponsor-text{color:#fff;-webkit-text-fill-color:#fff;opacity:1;visibility:visible}
