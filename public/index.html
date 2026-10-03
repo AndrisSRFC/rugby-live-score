@@ -582,7 +582,19 @@
 <link rel="stylesheet" href="/sponsors.css">
 <style>.operator-field{display:block;margin-top:12px;color:#aaa;font-size:11px;font-weight:800}.operator-field input{display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:1px solid #555;border-radius:8px;background:#050505;color:#fff;font:16px Arial;min-height:44px}.operator-privacy{font-size:11px;color:#aaa;line-height:1.5}.operator-consent{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5;text-align:left}.operator-consent input{flex-shrink:0;width:20px;height:20px;accent-color:#39ff14}.signup-card{max-height:calc(100svh - 32px);overflow-y:auto}</style>
 <style>#helpIntro[hidden]{display:none}.signup-card .team-pick.open{margin-top:0;border:0;padding:0}.signup-card .operator-back{display:block;margin:0 0 16px;background:#111;color:#fff;border:1px solid #444;padding:10px 14px;min-height:44px}.operator-consent:has(input:disabled){opacity:.5}</style>
-</head>
+<style>
+#matchAlertsOpen[hidden]{display:none!important}
+#matchAlertsOpen{grid-column:1 / -1;justify-self:center;min-height:36px;padding:6px 12px;border:1px solid #39ff14;border-radius:9px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:bold;cursor:pointer}
+#matchAlertsDialog{box-sizing:border-box;width:min(420px,calc(100vw - 24px));max-height:calc(100svh - 24px);overflow:auto;padding:18px;background:#080d08;border:1px solid #39ff14;border-radius:16px;color:white}
+#matchAlertsDialog::backdrop{background:rgba(0,0,0,.9)}
+#matchAlertsDialog h2{color:#39ff14;font-size:20px;margin:12px 0}
+#matchAlertsDialog p{font-size:12px;line-height:1.4}
+#matchAlertsDialog label{display:flex;align-items:center;gap:10px;padding:9px 4px}
+#matchAlertsDialog input{width:20px;height:20px;accent-color:#39ff14}
+#matchAlertsDialog .alert-groups{display:grid;grid-template-columns:1fr 1fr}
+#matchAlertsDialog button{min-height:44px;padding:9px 12px;border:1px solid #39ff14;border-radius:9px;background:#111;color:white;cursor:pointer;font-weight:bold}
+#matchAlertsDialog button[type=submit]{background:#39ff14;color:#000;width:100%;margin-top:12px}
+</style></head>
 
 <body>
 
@@ -643,6 +655,7 @@
         <button id="installApp">⬇ &nbsp; Install Rugby LIVE</button>
       </div>
       <div class="install-lift" aria-hidden="true">&nbsp;</div>
+      <button id="matchAlertsOpen" type="button" hidden>MATCH ALERTS</button>
       <div id="appTrialBadge" class="trial-badge" aria-live="polite"></div>
 
 
@@ -964,7 +977,7 @@ signupModal.addEventListener('click', e => { if (e.target === signupModal) signu
 </script>
 <div class="subscription-modal" id="subscriptionModal" hidden role="dialog" aria-modal="true" aria-labelledby="subscriptionTitle"><section class="subscription-card"><button id="subscriptionClose" type="button">← Back</button><h2 id="subscriptionTitle">SUBSCRIBE / SUPPORT</h2><p>Support Rugby LIVE — support your club.<br>50% of your payment supports Sleaford Rugby Club.</p><form id="subscriptionRequestForm"><label for="subscriptionPeriod">Choose your access period</label><select id="subscriptionPeriod" required></select><label for="subscriptionEmail">Email for your activation code</label><input id="subscriptionEmail" type="email" maxlength="254" autocomplete="email" required><p id="subscriptionPayment"></p><button id="subscriptionSubmit" type="submit">SEND REQUEST</button></form><p>After payment is verified, the administrator will send a one-time code. Activate it on this same app installation. Your period starts on activation; renewals extend existing active access.</p><form id="subscriptionActivateForm"><label for="subscriptionCode">Already have a code?</label><input id="subscriptionCode" autocomplete="off" maxlength="64" required placeholder="Activation code"><button type="submit">ACTIVATE ACCESS</button></form><p id="subscriptionStatus" class="subscription-status" role="status"></p></section></div><script src="/subscription-public.js"></script>
 <script>if(new URLSearchParams(location.search).get("subscribe")==="1" && isInstalledApp())window.openSubscription();</script>
-<dialog id="whyAppDialog" class="why-app-dialog" aria-labelledby="whyAppTitle"><h2 id="whyAppTitle">MORE RUGBY. MORE CONNECTION.</h2><p>Follow your club with the Rugby LIVE app.</p><div class="why-app-features"><p>📊 Player statistics — season and career totals</p><p>🏉 Match results and history</p><p>🏆 NLD league table</p><p>📅 All seasons and club history</p></div><h3>TRY FULL APP ACCESS FREE FOR 30 DAYS</h3><p>Then choose your access period. No automatic renewal.</p><div id="whyAppPrices" class="why-app-prices"></div><p><strong>50% of your payment supports Sleaford Rugby Club.</strong></p><p class="why-app-note">The website keeps LIVE scores, the match clock, Next LIVE, squad names, the W/D/L summary and fans’ voting free.</p><button id="whyAppInstall" type="button">INSTALL APP</button><button id="whyAppSupport" type="button" hidden>SUBSCRIBE / SUPPORT</button><button id="whyAppBack" type="button" class="why-app-back">BACK TO LIVE</button><p id="whyAppMessage" class="why-app-note" role="status"></p></dialog>
+<dialog id="whyAppDialog" class="why-app-dialog" aria-labelledby="whyAppTitle"><h2 id="whyAppTitle">MORE RUGBY. MORE CONNECTION.</h2><p>Follow your club with the Rugby LIVE app.</p><div class="why-app-features"><p>📊 Player statistics — season and career totals</p><p>🏉 Match results and history</p><p>🏆 NLD league table</p><p>📅 All seasons and club history</p><p>🔔 Match alerts for your chosen groups — coming soon</p></div><h3>TRY FULL APP ACCESS FREE FOR 30 DAYS</h3><p>Then choose your access period. No automatic renewal.</p><div id="whyAppPrices" class="why-app-prices"></div><p><strong>50% of your payment supports Sleaford Rugby Club.</strong></p><p class="why-app-note">The website keeps LIVE scores, the match clock, Next LIVE, squad names, the W/D/L summary and fans’ voting free.</p><button id="whyAppInstall" type="button">INSTALL APP</button><button id="whyAppSupport" type="button" hidden>SUBSCRIBE / SUPPORT</button><button id="whyAppBack" type="button" class="why-app-back">BACK TO LIVE</button><p id="whyAppMessage" class="why-app-note" role="status"></p></dialog>
 <script>
 (()=>{
  const dialog=document.getElementById('whyAppDialog'),open=document.getElementById('whyAppOpen'),install=document.getElementById('whyAppInstall'),support=document.getElementById('whyAppSupport'),message=document.getElementById('whyAppMessage');
@@ -980,5 +993,6 @@ signupModal.addEventListener('click', e => { if (e.target === signupModal) signu
 </script>
 <dialog id="touchlineHeroesDialog" class="touchline-heroes-dialog" aria-labelledby="touchlineHeroesTitle"><button id="touchlineHeroesBack" type="button">← Back to LIVE</button><h2 id="touchlineHeroesTitle">TOUCHLINE HEROES</h2><img class="touchline-heroes-dialog-art" src="/touchline-heroes-see.svg" alt="Rugby LIVE touchline volunteer" width="640" height="640"><p>The people helping keep Rugby LIVE from the touchline.</p><p>Thank you to our volunteer match operators. Your time and care help supporters follow the game, wherever they are.</p><div id="touchlineHeroesList"></div><p id="touchlineHeroesNote" role="status">Our touchline volunteers will be recognised here.</p><p style="color:#aaa;font-size:12px">Every contribution matters. This is a thank-you, not a ranking.</p></dialog><script src="/touchline-heroes.js"></script>
 <script src="/sponsors.js"></script>
+<script src="/match-alerts.js"></script>
 </body>
 </html>
