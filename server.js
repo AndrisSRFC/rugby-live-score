@@ -329,6 +329,7 @@ async function initDatabase() {
 
   await subscriptionApi.init(pool);
   await pool.query("CREATE TABLE IF NOT EXISTS rugby_alert_preferences(install_id TEXT PRIMARY KEY REFERENCES app_access(install_id),groups JSONB NOT NULL DEFAULT '[]',updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())");
+  await pushAlerts.init();
 
   // Restore saved access before retiring the temporary Admin testing feature.
   const savedAccessTable=await pool.query("SELECT to_regclass('public.rugby_app_access_tests') AS table_name");
@@ -402,6 +403,8 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 subscriptionApi.register(app,pool,ADMIN_PIN);
+const pushAlerts=require("./push-api")({app,pool,teams:TEAM_KEYS});
+setInterval(()=>pushAlerts.drain(),5000);
 visitCounter=require("./view-counting-api")({pool,app,io,adminPin:ADMIN_PIN,teamKeys:TEAM_KEYS});
 touchlineHeroes=require("./touchline-heroes-api")({pool,app,adminPin:ADMIN_PIN,teamKeys:TEAM_KEYS});
 
@@ -585,6 +588,7 @@ app.post("/api/admin", async (req, res) => {
     if(controlToken && String(pin)!==String(ADMIN_PIN))touchOperator(teamKey,secretHash(controlToken));
     commitClock(teamKey);
     let selectedState = getState(teamKey);
+    const wasRunning=selectedState.running,wasLive=selectedState.matchLive;
 
     switch (action) {
       case "score":
@@ -720,6 +724,8 @@ app.post("/api/admin", async (req, res) => {
       await pool.query("UPDATE match_control_access SET revoked=TRUE, session_hash=NULL WHERE team_key=$1", [teamKey]);
     }
     broadcast(teamKey);
+    const pushKind=action==="startMatch"&&!wasLive?"coverage":action==="toggleClock"&&!wasRunning&&selectedState.running&&selectedState.matchLive?"started":action==="endMatch"?"fulltime":null;
+    if(pushKind)await pushAlerts.enqueue(teamKey,pushKind,selectedState).catch(e=>console.error("Could not queue match alert",e.name));
 
     res.json({
       ok: true,
@@ -1080,7 +1086,7 @@ app.post("/api/match-alerts/preferences",async(req,res)=>{
  try{
   const access=await pool.query("SELECT 1 FROM app_access WHERE install_id=$1",[installId]);if(!access.rowCount)return res.status(400).json({error:"Register this app installation first."});
   if(save===true)await pool.query("INSERT INTO rugby_alert_preferences(install_id,groups) VALUES($1,$2::jsonb) ON CONFLICT(install_id) DO UPDATE SET groups=EXCLUDED.groups,updated_at=NOW()",[installId,JSON.stringify(groups)]);
-  const r=await pool.query("SELECT groups FROM rugby_alert_preferences WHERE install_id=$1",[installId]);res.json({groups:r.rows[0]?.groups||[],pushReady:false});
+  const r=await pool.query("SELECT groups FROM rugby_alert_preferences WHERE install_id=$1",[installId]);res.json({groups:r.rows[0]?.groups||[],pushReady:true});
  }catch(e){console.error("Alert preferences error",e.name);res.status(500).json({error:"Could not save alert preferences."});}
 });
 
