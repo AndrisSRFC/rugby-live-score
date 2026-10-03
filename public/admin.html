@@ -625,7 +625,7 @@ function setupTeamAutocomplete(id, onPick){
     matches.forEach(name=>{
       const row=document.createElement('div'); row.className='team-autocomplete-row';
       const b=document.createElement('button'); b.type='button'; b.className='team-autocomplete-option'; b.textContent=name;
-      b.addEventListener('pointerdown',e=>{e.preventDefault(); input.value=name; menu.classList.remove('open'); input.dispatchEvent(new Event('input',{bubbles:true})); if(onPick)onPick(name);});
+      b.addEventListener('pointerdown',e=>{e.preventDefault(); input.value=name; input.dispatchEvent(new Event('input',{bubbles:true})); if(onPick)onPick(name); menu.classList.remove('open');});
       row.appendChild(b);
       if(String(name).toLowerCase()!=='sleaford'){
         const remove=document.createElement('button'); remove.type='button'; remove.className='team-autocomplete-delete';
