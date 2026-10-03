@@ -580,6 +580,7 @@
 <link rel="stylesheet" href="/view-counting.css">
 <link rel="stylesheet" href="/rugby-watermark.css">
 <link rel="stylesheet" href="/sponsors.css">
+<style>.operator-field{display:block;margin-top:12px;color:#aaa;font-size:11px;font-weight:800}.operator-field input{display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:1px solid #555;border-radius:8px;background:#050505;color:#fff;font:16px Arial;min-height:44px}.operator-privacy{font-size:11px;color:#aaa;line-height:1.5}.operator-consent{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5;text-align:left}.operator-consent input{flex-shrink:0;width:20px;height:20px;accent-color:#39ff14}.signup-card{max-height:calc(100svh - 32px);overflow-y:auto}</style>
 </head>
 
 <body>
@@ -687,6 +688,10 @@
       </div>
       <div class="team-pick" id="teamPick">
         <select id="helpTeam"><option>U13</option><option>U14</option><option>U15</option><option>U16</option><option>Colts</option><option>1st XV</option><option>2nd XV</option></select><div class="request-status" id="teamCoverage"></div>
+        <label class="operator-field">YOUR NAME<input id="operatorName" type="text" maxlength="80" autocomplete="name" required></label>
+        <label class="operator-field">EMAIL<input id="operatorEmail" type="email" maxlength="254" autocomplete="email" required></label>
+        <p class="operator-privacy">Your name and email are shared privately with the Rugby LIVE administrator to manage match coverage. Your email will not be shown publicly.</p>
+        <label class="operator-consent"><input id="heroesConsent" type="checkbox"> I agree to have my name and covered match count shown in Touchline Heroes (optional).</label>
         <button type="button" id="requestAccessBtn" onclick="requestMatchControl()">REQUEST ACCESS</button>
         <div class="request-status" id="requestStatus"></div>
       </div>
@@ -902,7 +907,10 @@ async function refreshCoverage(){
 document.getElementById('helpTeam').addEventListener('change',refreshCoverage);
 async function requestMatchControl(){
   const team=document.getElementById('helpTeam').value;
-  const r=await fetch('/api/match-control/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team,mode:helpMode})});
+  const nameInput=document.getElementById('operatorName'),emailInput=document.getElementById('operatorEmail');
+  if(!nameInput.reportValidity()||!emailInput.reportValidity())return;
+  const operatorName=nameInput.value.trim(),operatorEmail=emailInput.value.trim(),heroesConsent=document.getElementById('heroesConsent').checked;
+  const r=await fetch('/api/match-control/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team,mode:helpMode,operatorName,operatorEmail,heroesConsent})});
   const d=await r.json(); if(!r.ok){document.getElementById('requestStatus').textContent=d.code==='OPERATOR_ACTIVE'?'Thank you for offering to help! A LIVE operator has already been assigned to this match. Enjoy the game!':(d.error||'Could not request access');refreshCoverage();return;}
   document.getElementById('requestAccessBtn').disabled=true;
   document.getElementById('requestStatus').textContent='Request sent — waiting for administrator approval…';

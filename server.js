@@ -279,6 +279,8 @@ async function initDatabase() {
     )
   `);
 
+  await operatorIdentity.init();
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS landing_reactions (
       device_id TEXT PRIMARY KEY,
@@ -538,6 +540,8 @@ require('./squad-api')({
   app, pool, adminPin: ADMIN_PIN, teamIds: TEAM_IDS, getState, broadcast
 });
 
+const operatorIdentity=require("./operator-identity-api")({pool,app,adminPin:ADMIN_PIN});
+
 app.post("/api/admin", async (req, res) => {
   const { pin, controlToken, action, payload = {}, team } = req.body || {};
   const teamKey = normalizeTeamKey(team);
@@ -683,6 +687,9 @@ app.post("/api/admin", async (req, res) => {
 
     selectedState.ageGroup = teamKey;
     await saveState(teamKey);
+    if (controlToken && String(pin)!==String(ADMIN_PIN) && (selectedState.matchLive || action==="endMatch") && ["startMatch","score","toggleClock","setHalf","setClock","endMatch"].includes(action)) {
+      await operatorIdentity.record(teamKey,secretHash(controlToken),selectedState.matchId);
+    }
     if (action === "endMatch" && controlToken) {
       await pool.query("UPDATE match_control_access SET revoked=TRUE, session_hash=NULL WHERE team_key=$1", [teamKey]);
     }
@@ -702,17 +709,19 @@ app.post("/api/admin", async (req, res) => {
 app.post("/api/match-control/request", async (req,res) => {
   const teamKey=normalizeTeamKey(req.body?.team);
   const mode=req.body?.mode === "in_progress" ? "in_progress" : "new";
+  const identity=operatorIdentity.validate(req.body);if(identity.error)return res.status(400).json({error:identity.error});
   const covered=await pool.query("SELECT pin_used,revoked FROM match_control_access WHERE team_key=$1 AND revoked=FALSE",[teamKey]);
   if(covered.rowCount && covered.rows[0].pin_used) return res.status(409).json({error:"This match already has a LIVE operator.",code:"OPERATOR_ACTIVE"});
   const requestToken=makeSessionToken();
   const result=await pool.query(
-    "INSERT INTO match_control_requests (team_key,mode,request_hash) VALUES ($1,$2,$3) RETURNING id,team_key,mode,status,created_at",
-    [teamKey,mode,secretHash(requestToken)]
+    "INSERT INTO match_control_requests (team_key,mode,request_hash,operator_name,operator_email,heroes_consent) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id,team_key,mode,status,created_at",
+    [teamKey,mode,secretHash(requestToken),identity.name,identity.email,identity.consent]
   );
   res.json({...result.rows[0],requestToken});
 });
 
 app.get("/api/match-control/request-status", async (req,res) => {
+  res.set("Cache-Control","no-store");
   const token=String(req.query.token||"");
   if(!token) return res.status(400).json({error:"Missing request token"});
   const result=await pool.query("SELECT id,team_key,mode,status FROM match_control_requests WHERE request_hash=$1",[secretHash(token)]);
@@ -722,8 +731,9 @@ app.get("/api/match-control/request-status", async (req,res) => {
 });
 
 app.get("/api/match-control/requests", async (req,res) => {
+  res.set("Cache-Control","no-store");
   if(String(req.query.pin)!==String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
-  const result=await pool.query("SELECT id,team_key,mode,status,created_at FROM match_control_requests WHERE status='pending' ORDER BY created_at ASC");
+  const result=await pool.query("SELECT id,team_key,mode,status,created_at,operator_name,operator_email,heroes_consent FROM match_control_requests WHERE status='pending' ORDER BY created_at ASC");
   res.json(result.rows);
 });
 
@@ -734,10 +744,10 @@ app.post("/api/match-control/request-decision", async (req,res) => {
   if(!found.rowCount) return res.status(404).json({error:"Pending request not found"});
   const row=found.rows[0];
   if(decision==="approved"){
-    await pool.query(`INSERT INTO match_control_access (team_key,pin_hash,session_hash,pin_used,revoked,created_at)
-      VALUES ($1,NULL,$2,TRUE,FALSE,NOW())
-      ON CONFLICT (team_key) DO UPDATE SET pin_hash=NULL,session_hash=EXCLUDED.session_hash,pin_used=TRUE,revoked=FALSE,created_at=NOW()`,
-      [row.team_key,row.request_hash]);
+    await pool.query(`INSERT INTO match_control_access (team_key,pin_hash,session_hash,pin_used,revoked,created_at,request_id)
+      VALUES ($1,NULL,$2,TRUE,FALSE,NOW(),$3)
+      ON CONFLICT (team_key) DO UPDATE SET pin_hash=NULL,session_hash=EXCLUDED.session_hash,pin_used=TRUE,revoked=FALSE,created_at=NOW(),request_id=EXCLUDED.request_id`,
+      [row.team_key,row.request_hash,row.id]);
     if(row.mode==="in_progress"){
       const st=getState(row.team_key);
       st.clockMode="liveOnly"; st.running=false; st.startedAt=null; st.matchLive=true; st.message="";
@@ -759,7 +769,7 @@ app.post("/api/match-control/generate", async (req, res) => {
   await pool.query(
     `INSERT INTO match_control_access (team_key, pin_hash, session_hash, pin_used, revoked, created_at)
      VALUES ($1,$2,NULL,FALSE,FALSE,NOW())
-     ON CONFLICT (team_key) DO UPDATE SET pin_hash=EXCLUDED.pin_hash, session_hash=NULL, pin_used=FALSE, revoked=FALSE, created_at=NOW()`,
+     ON CONFLICT (team_key) DO UPDATE SET pin_hash=EXCLUDED.pin_hash, session_hash=NULL, pin_used=FALSE, revoked=FALSE, created_at=NOW(), request_id=NULL`,
     [teamKey, secretHash(controlPin)]
   );
   res.json({ ok:true, team:teamKey, controlPin });

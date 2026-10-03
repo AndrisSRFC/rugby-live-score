@@ -1009,7 +1009,28 @@ async function loadControlRequests(){
   const box=$('controlRequests');
   const r=await fetch('/api/match-control/requests?pin='+encodeURIComponent($('pin').value));
   const d=await r.json(); if(!r.ok){box.textContent=d.error||'Could not load requests';return;}
-  box.innerHTML='<b>Match Control Requests</b><br>'+(d.length?d.map(x=>'<div style="margin-top:8px"><b>'+x.team_key+'</b> · '+(x.mode==='in_progress'?'MATCH ALREADY IN PROGRESS':'NEW MATCH')+' <button onclick="decideControlRequest('+x.id+',\'approve\')">Approve</button> <button class="red" onclick="decideControlRequest('+x.id+',\'decline\')">Decline</button></div>').join(''):'No pending requests.');
+  box.replaceChildren();
+  const heading=document.createElement('b');heading.textContent='Match Control Requests';box.append(heading);
+  if(!d.length){const p=document.createElement('p');p.textContent='No pending requests.';box.append(p);}
+  for(const x of d){
+    const row=document.createElement('div');row.style.cssText='margin-top:12px;padding-top:10px;border-top:1px solid #444;overflow-wrap:anywhere';
+    const name=document.createElement('b');name.textContent=(x.operator_name||'Name not recorded')+' · '+x.team_key;
+    const email=document.createElement('p');email.textContent=x.operator_email||'Email not recorded (older request)';
+    const info=document.createElement('p');info.textContent=(x.mode==='in_progress'?'MATCH ALREADY IN PROGRESS':'NEW MATCH')+' · Heroes publication: '+(x.heroes_consent?'agreed':'not agreed');
+    row.append(name,email,info);
+    for(const [decision,label] of [['approve','Approve'],['decline','Decline']]){const b=document.createElement('button');b.type='button';b.textContent=label;if(decision==='decline')b.className='red';b.addEventListener('click',()=>decideControlRequest(x.id,decision));row.append(b);}
+    box.append(row);
+  }
+  try{
+    const r=await fetch('/api/match-control/operators',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value})});
+    const operators=await r.json();
+    if(r.ok&&operators.length){
+      const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='OPERATOR COVERAGE RECORDS';details.append(summary);
+      const note=document.createElement('p');note.textContent='Names are self-reported. Counts are distinct matches operated using approved access. Publish only agreed names in Touchline Heroes; email stays private.';details.append(note);
+      for(const x of operators){const p=document.createElement('p');p.style.overflowWrap='anywhere';p.textContent=x.name+' · '+x.email+' · '+x.team+' · '+x.matches+' match'+(x.matches===1?'':'es')+' covered · Heroes: '+(x.consent?'agreed':'not agreed');details.append(p);}
+      box.append(details);
+    }
+  }catch(e){const note=document.createElement('p');note.textContent='Operator coverage records are temporarily unavailable.';box.append(note);}
   knownPendingRequestIds=new Set(d.map(x=>String(x.id)));
   requestWatchReady=true;
   setRequestAlert(false);
