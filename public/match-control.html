@@ -325,6 +325,8 @@ function render(s) {
   $('clock').textContent = fmt(s.remainingSeconds);
   $('clockBtn').textContent = s.running ? 'Pause Clock' : 'Start Clock';
   $('startLiveBtn').className = s.matchLive ? 'green' : '';
+  $('startLiveBtn').textContent = s.matchLive ? (s.message === 'Live updates paused' ? 'Resume LIVE' : 'LIVE active') : 'Start LIVE';
+  $('startLiveBtn').setAttribute('aria-pressed', s.matchLive ? 'true' : 'false');
   $('half1Btn').className = s.half === 1 ? 'active' : '';
   $('half2Btn').className = s.half === 2 ? 'active' : '';
 }
@@ -376,6 +378,7 @@ async function act(action, payload = {}) {
     alert(data.error || 'Error');
     return;
   }
+  if (data.state) render(data.state);
   if (action === 'endMatch') {
     sessionStorage.removeItem('matchControlToken');
     sessionStorage.removeItem('matchControlTeam');

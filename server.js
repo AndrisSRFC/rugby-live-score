@@ -588,7 +588,7 @@ app.post("/api/admin", async (req, res) => {
     if(controlToken && String(pin)!==String(ADMIN_PIN))touchOperator(teamKey,secretHash(controlToken));
     commitClock(teamKey);
     let selectedState = getState(teamKey);
-    const wasRunning=selectedState.running,wasLive=selectedState.matchLive;
+    
 
     switch (action) {
       case "score":
@@ -724,7 +724,7 @@ app.post("/api/admin", async (req, res) => {
       await pool.query("UPDATE match_control_access SET revoked=TRUE, session_hash=NULL WHERE team_key=$1", [teamKey]);
     }
     broadcast(teamKey);
-    const pushKind=action==="startMatch"&&!wasLive?"coverage":action==="toggleClock"&&!wasRunning&&selectedState.running&&selectedState.matchLive?"started":action==="endMatch"?"fulltime":null;
+    const pushKind=action==="startMatch"?"coverage":action==="endMatch"?"fulltime":null;
     if(pushKind)await pushAlerts.enqueue(teamKey,pushKind,selectedState).catch(e=>console.error("Could not queue match alert",e.name));
 
     res.json({
@@ -782,7 +782,9 @@ app.post("/api/match-control/request-decision", async (req,res) => {
       [row.team_key,row.request_hash,row.id]);
     if(row.mode==="in_progress"){
       const st=getState(row.team_key);
-      st.clockMode="liveOnly"; st.running=false; st.startedAt=null; st.matchLive=true; st.message="";
+      // Prepare unknown match time; Start LIVE activates coverage and queues its alert.
+      // Preserve existing LIVE coverage when another operator takes over.
+      st.clockMode="liveOnly"; st.running=false; st.startedAt=null;
       await saveState(row.team_key); broadcast(row.team_key);
     }
   }
