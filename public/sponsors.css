@@ -48,3 +48,18 @@
  .sponsor-dialog-logo{height:44px}
  .sponsor-dialog-logo .sponsor-logo{width:150px;height:105px}
 }
+
+/* Stagger the supporting sponsors around the centred main sponsor. */
+.sponsor-cards{grid-template-columns:repeat(12,minmax(0,1fr));gap:14px 8px;max-width:680px}
+.sponsor-card:nth-child(1){grid-column:1 / -1;grid-row:1}
+.sponsor-card:nth-child(2){grid-column:1 / span 6;grid-row:2}
+.sponsor-card:nth-child(3){grid-column:8 / span 5;grid-row:2;margin-top:28px}
+.sponsor-card:nth-child(4){grid-column:5 / span 8;grid-row:3}
+.sponsor-card:nth-child(5){grid-column:1 / span 6;grid-row:4}
+.sponsor-card:nth-child(6){grid-column:1 / -1;grid-row:5}
+.sponsor-card:nth-child(6) .sponsor-text{white-space:nowrap;font-size:clamp(12px,3.4vw,19px)}
+@media(max-width:700px){
+ .sponsor-cards{gap:12px 6px}
+ .sponsor-card:nth-child(3){margin-top:24px}
+ .sponsor-card:nth-child(6) .sponsor-text{font-size:clamp(11px,3.4vw,16px);min-height:28px}
+}
