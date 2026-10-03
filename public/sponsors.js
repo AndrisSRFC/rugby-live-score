@@ -21,6 +21,6 @@ c.append(logo(s));if(s.image)c.append(el('h3',s.name));if(s.url)c.append(link(s,
 document.body.append(dialog);tile.addEventListener('click',()=>dialog.showModal());back.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>tile.focus());
 const phone=matchMedia('(max-width:700px)');function place(){if(phone.matches)document.querySelector('.home-primary-actions').before(tile);else document.getElementById('whyAppOpen').after(tile);}
 phone.addEventListener('change',place);place();
-let current=0;function show(){const s=data[current];art.replaceChildren(el('span',s.name,'sponsor-text'));label.textContent=s.main?'MAIN SPONSOR':'';}
+let current=0;function show(){const s=data[current];art.replaceChildren(logo(s));label.textContent=s.main?'MAIN SPONSOR':s.image?s.name:'';}
 show();setInterval(()=>{if(document.hidden||dialog.open)return;current=(current+1)%data.length;show();},6000);
 })();
