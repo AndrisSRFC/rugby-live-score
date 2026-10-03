@@ -190,6 +190,8 @@ async function initDatabase() {
     )
   `);
 
+  await pool.query("ALTER TABLE nld_history ADD COLUMN IF NOT EXISTS team_key TEXT");
+  await pool.query("CREATE UNIQUE INDEX IF NOT EXISTS nld_history_group_opponent ON nld_history(team_key,LOWER(BTRIM(opponent))) WHERE team_key IS NOT NULL");
   await pool.query(`
     CREATE TABLE IF NOT EXISTS season_matches (
       id SERIAL PRIMARY KEY,
@@ -875,7 +877,11 @@ app.get("/api/season-stats", async (req, res) => {
     const fullAccess=await appContentAccess.allowed(req);
     const opponent=String(req.query.opponent||'').trim().toLowerCase();
     const versus=matches.filter(m=>opponent&&String(m.opponent).trim().toLowerCase()===opponent).reduce((v,m)=>{v.played++;if(m.outcome==='W')v.wins++;else if(m.outcome==='L')v.losses++;else v.draws++;return v;},{played:0,wins:0,draws:0,losses:0});
-    res.json({team:teamKey,played:matches.length,wins,draws,losses,pointsFor,pointsAgainst,versus,...(fullAccess?{matches}:{appRequired:true})});
+    const oldHistory=await pool.query("SELECT COALESCE(SUM(wins),0)::int AS wins,COALESCE(SUM(draws),0)::int AS draws,COALESCE(SUM(losses),0)::int AS losses FROM nld_history WHERE team_key=$1 AND LOWER(BTRIM(opponent))=$2",[teamKey,opponent]);
+    const historical=oldHistory.rows[0]||{wins:0,draws:0,losses:0};
+    for(const k of ["wins","draws","losses"])versus[k]+=Number(historical[k]||0);
+    versus.played=versus.wins+versus.draws+versus.losses;
+    res.json({historical:fullAccess?historical:undefined,team:teamKey,played:matches.length,wins,draws,losses,pointsFor,pointsAgainst,versus,...(fullAccess?{matches}:{appRequired:true})});
   } catch(error) { console.error("Season stats error:",error); res.status(500).json({error:"Database error"}); }
 });
 
@@ -1063,30 +1069,17 @@ app.get("/api/history", appContentAccess.requireAccess, async (req, res) => {
   }
 });
 
-app.post("/api/history", async (req, res) => {
-  try {
-    const {
-      generation,
-      opponent,
-      wins = 0,
-      draws = 0,
-      losses = 0
-    } = req.body;
-
-    const result = await pool.query(
-      `
-      INSERT INTO nld_history (generation, opponent, wins, draws, losses)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING *
-      `,
-      [generation, opponent, wins, draws, losses]
-    );
-
-    res.json(result.rows[0]);
-  } catch (error) {
-    console.error("Add history error:", error);
-    res.status(500).json({ error: "Database error" });
-  }
+app.post("/api/history", async(req,res)=>{
+ if(String(req.body?.pin)!==String(ADMIN_PIN))return res.status(401).json({error:"Incorrect Admin PIN"});
+ const {team,opponent,wins,draws,losses}=req.body||{};
+ if(!TEAM_KEYS.includes(team)||typeof opponent!=="string"||!opponent.trim()||opponent.trim().length>100||![wins,draws,losses].every(n=>Number.isSafeInteger(n)&&n>=0&&n<=100000))return res.status(400).json({error:"Choose a group, opponent and non-negative whole W/D/L counts."});
+ try{
+  const result=await pool.query(`INSERT INTO nld_history(generation,team_key,opponent,wins,draws,losses)
+   VALUES($1,$1,$2,$3,$4,$5)
+   ON CONFLICT(team_key,LOWER(BTRIM(opponent))) WHERE team_key IS NOT NULL
+   DO UPDATE SET opponent=EXCLUDED.opponent,wins=EXCLUDED.wins,draws=EXCLUDED.draws,losses=EXCLUDED.losses RETURNING *`,[team,opponent.trim(),wins,draws,losses]);
+  res.json(result.rows[0]);
+ }catch(e){console.error("History save error",e.name);res.status(500).json({error:"Could not save history."});}
 });
 
 io.on("connection", socket => {

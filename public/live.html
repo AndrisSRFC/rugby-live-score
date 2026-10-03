@@ -141,7 +141,7 @@ body.table-open .table-screen{transform:translateX(0);}
   <div class="half"><span id="half">1</span><span id="halfSuffix">st</span><span id="halfWord"> Half</span></div>
           <div class="center-line"></div>
           <div class="season-mini" aria-label="Sleaford season record">
-            <span class="season-label">SEASON</span>
+            <span class="season-label">HEAD TO HEAD</span>
             <span class="season-stat season-win">W <strong id="seasonWins">0</strong></span>
             <span class="season-stat season-draw">D <strong id="seasonDraws">0</strong></span>
             <span class="season-stat season-loss">L <strong id="seasonLosses">0</strong></span>
@@ -226,6 +226,8 @@ async function loadSeasonStats(full=false){
     $('statsPair').textContent=opponent?'SLEAFORD — '+opponent.toUpperCase():'SLEAFORD — OPPONENT';
     const box=document.querySelector('.stats-history');box.replaceChildren();
     if(!s.matches){if(full)RugbyAppAccess.show(RugbyAppAccess.installed());return false;}
+    const historical=s.historical;
+    if(historical&&(historical.wins||historical.draws||historical.losses)){const old=document.createElement('div');old.className='stats-empty';old.textContent='PREVIOUS MATCHES · W '+historical.wins+' · D '+historical.draws+' · L '+historical.losses;box.append(old);}
     const norm=v=>String(v||'').trim().toLowerCase();
     const matches=s.matches.filter(m=>opponent&&norm(m.opponent)===norm(opponent));
     if(!matches.length){const note=document.createElement('div');note.className='stats-empty';note.textContent='No confirmed matches against '+(opponent||'this opponent')+' yet';box.append(note);}
