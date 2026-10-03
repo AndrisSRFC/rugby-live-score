@@ -7,8 +7,22 @@
  box.append(title,node('p','NLD matches only · Vote after full-time'));
  const groups=node('div',undefined,'nld-vote-groups');box.append(groups);
  const liveGroups=document.querySelector('.bottom .age-groups');
- liveGroups.after(box);
- const liveHeading=node('h2','LIVE SCORES','home-live-heading');liveGroups.before(liveHeading);
+ const actions=node('div',undefined,'home-primary-actions');
+ liveGroups.before(actions);
+ function groupPicker(id,title,content,label){
+  const trigger=node('button',label,'home-primary-button');trigger.type='button';
+  trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-controls',id);
+  const picker=node('dialog',undefined,'home-group-picker');picker.id=id;
+  const heading=node('h2',title);heading.id=id+'Title';picker.setAttribute('aria-labelledby',heading.id);
+  const close=node('button','← BACK TO HOME','home-group-back');close.type='button';
+  picker.append(close,heading,content);document.body.append(picker);actions.append(trigger);
+  trigger.addEventListener('click',()=>picker.showModal());close.addEventListener('click',()=>picker.close());
+  picker.addEventListener('close',()=>trigger.focus());
+  return {picker,trigger};
+ }
+ const livePicker=groupPicker('liveGroupsDialog','LIVE SCORES',liveGroups,'LIVE SCORES');
+ const fansPicker=groupPicker('fansGroupsDialog','FANS’ PLAYER OF THE MATCH',box,'FANS’ VOTE');
+
  const dialog=node('dialog',undefined,'nld-vote-dialog');dialog.id='nldVoteDialog';
  dialog.setAttribute('aria-labelledby','nldVoteTitle');
  const header=node('header'),back=node('button','← BACK TO HOME');back.type='button';header.append(back,node('span','RUGBY LIVE'));dialog.append(header);
@@ -23,7 +37,7 @@
  async function get(url){const r=await fetch(url,{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error(d.error || 'Could not load voting.');return d;}
  async function refresh(){try{const d=await get('/api/nld-voting/groups');for(const g of d.groups){const b=buttons.get(g.team);if(!b)continue;b.textContent=teamLabel(g.team)+(g.state==='published'?' 🏆':g.state==='open'?' · VOTE':'');b.setAttribute('aria-label',teamLabel(g.team)+(g.state==='published'?' - winner published':g.state==='open'?' - voting open':' - voting status'));}}catch(e){box.querySelector('p').textContent='NLD matches only · Voting temporarily unavailable';}}
  async function open(team,button){
-  origin=button;const token=++serial;body.replaceChildren();message.textContent='Loading…';if(!dialog.open)dialog.showModal();
+  fansPicker.picker.close();origin=fansPicker.trigger;const token=++serial;body.replaceChildren();message.textContent='Loading…';if(!dialog.open)dialog.showModal();
   try{
    const d=await get('/api/nld-voting/poll?team='+encodeURIComponent(team));if(token!==serial || !dialog.open)return;
    message.textContent='';

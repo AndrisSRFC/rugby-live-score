@@ -138,3 +138,19 @@
 @media(min-width:701px){
  .bottom .nld-vote-home{left:7vw;right:auto}
 }
+
+/* Compact home actions; group lists live in their own dialogs. */
+.home-primary-actions{grid-column:1 / -1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(420px,100%);margin:0 auto 8px}
+.home-primary-button{min-height:48px;padding:12px 16px;border:1px solid #39ff14;border-radius:12px;background:rgba(0,0,0,.5);color:#fff;font:900 15px Arial,sans-serif;cursor:pointer;backdrop-filter:blur(3px)}
+.home-primary-button:last-child{color:#ffd400}
+.home-primary-button:hover,.home-primary-button:focus-visible{background:#142114;outline:2px solid #39ff14;outline-offset:2px}
+.home-group-picker{width:min(460px,calc(100vw - 28px));max-height:calc(100svh - 40px);box-sizing:border-box;padding:20px;border:1px solid #39ff14;border-radius:18px;background:#090909;color:#fff;overflow-y:auto}
+.home-group-picker::backdrop{background:rgba(0,0,0,.82)}
+.home-group-picker>h2{text-align:center;color:#39ff14;font-size:20px;margin:20px 0}
+.home-group-back{min-height:44px;padding:10px 12px;border:1px solid #444;border-radius:9px;background:#111;color:#fff;font-weight:800;cursor:pointer}
+.home-group-picker .age-groups,.home-group-picker .nld-vote-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;position:static;transform:none}
+.home-group-picker .age-btn,.home-group-picker .nld-vote-groups button{grid-column:auto;min-height:48px;padding:12px 8px;font-size:14px;border:1px solid #39ff14;border-radius:10px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-weight:800}
+.home-group-picker .nld-vote-home{padding:0;margin:0;background:transparent}
+.home-group-picker .nld-vote-home h2{display:none}
+.home-group-picker .nld-vote-home p{margin:0 0 18px;font-size:12px}
+@media(max-width:700px){.home-primary-actions{width:min(340px,100%);gap:8px}.home-primary-button{font-size:13px;min-height:46px;padding:10px}.home-group-picker{padding:16px}}
