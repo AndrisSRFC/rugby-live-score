@@ -1027,7 +1027,31 @@ async function loadControlRequests(){
     if(r.ok&&operators.length){
       const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='OPERATOR COVERAGE RECORDS';details.append(summary);
       const note=document.createElement('p');note.textContent='Names are self-reported. Counts are distinct matches operated using approved access. Publish only agreed names in Touchline Heroes; email stays private.';details.append(note);
-      for(const x of operators){const p=document.createElement('p');p.style.overflowWrap='anywhere';p.textContent=x.name+' · '+(x.email||'Email not provided')+' · '+x.team+' · '+x.matches+' match'+(x.matches===1?'':'es')+' covered · Heroes: '+(x.consent?'agreed':'not agreed');details.append(p);}
+      const tools=document.createElement('div'),rows=document.createElement('div'),status=document.createElement('p');status.setAttribute('role','status');
+      const archiveLabel=document.createElement('label'),archived=document.createElement('input');archived.type='checkbox';archiveLabel.append(archived,document.createTextNode(' Show archived'));
+      const deletedLabel=document.createElement('label'),deleted=document.createElement('input');deleted.type='checkbox';deletedLabel.style.marginLeft='16px';deletedLabel.append(deleted,document.createTextNode(' Show deleted test records'));
+      tools.append(archiveLabel,deletedLabel);details.append(tools,status,rows);
+      function drawOperators(){
+        rows.replaceChildren();
+        const visible=operators.filter(x=>x.deleted?deleted.checked:x.archived?archived.checked:true);
+        if(!visible.length){const p=document.createElement('p');p.textContent='No active operator records.';rows.append(p);}
+        for(const x of visible){
+          const row=document.createElement('div');row.style.cssText='padding:10px 0;border-bottom:1px solid #333;overflow-wrap:anywhere';
+          const p=document.createElement('p');p.textContent=x.name+' · '+(x.email||'Email not provided')+' · '+x.team+' · '+x.matches+' match'+(x.matches===1?'':'es')+' covered · Heroes: '+(x.consent?'agreed':'not agreed')+(x.deleted?' · DELETED TEST RECORD':x.archived?' · ARCHIVED':'');row.append(p);
+          const addAction=(action,label)=>{
+            const b=document.createElement('button');b.type='button';b.textContent=label;b.style.marginRight='8px';
+            b.addEventListener('click',async()=>{
+              row.querySelectorAll('button').forEach(n=>n.disabled=true);status.textContent='Saving…';
+              try{const response=await fetch('/api/match-control/operators/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value,key:x.key,action})});const result=await response.json();if(!response.ok)throw Error(result.error||'Could not update record.');
+                x.archived=action==='archive';x.deleted=action==='delete_test';status.textContent=action==='delete_test'?'Test record removed. Use Show deleted test records → Restore to undo.':action==='archive'?'Archived. Use Show archived → Restore to bring it back.':'Record restored.';drawOperators();
+              }catch(e){status.textContent=e.message;row.querySelectorAll('button').forEach(n=>n.disabled=false);}
+            });row.append(b);
+          };
+          if(x.archived||x.deleted)addAction('restore','Restore');else{addAction('archive','Archive');if(Number(x.matches)===0)addAction('delete_test','Delete test record');}
+          rows.append(row);
+        }
+      }
+      archived.addEventListener('change',drawOperators);deleted.addEventListener('change',drawOperators);drawOperators();
       box.append(details);
     }
   }catch(e){const note=document.createElement('p');note.textContent='Operator coverage records are temporarily unavailable.';box.append(note);}
