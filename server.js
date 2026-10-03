@@ -19,6 +19,7 @@ const pool = new Pool({
 const appContentAccess=require("./app-content-access")(pool,ADMIN_PIN);
 let visitCounter;
 let touchlineHeroes;
+let appAccessTest;
 
 const TEAM_CONFIG = [
   { key: "U13", id: 1, label: "U13's" },
@@ -328,6 +329,7 @@ async function initDatabase() {
   await subscriptionApi.init(pool);
   await visitCounter.init();
   await touchlineHeroes.init();
+  await appAccessTest.init();
 
   const result = await pool.query(
     "SELECT id, data FROM rugby_state ORDER BY id"
@@ -377,6 +379,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 subscriptionApi.register(app,pool,ADMIN_PIN);
+appAccessTest=require('./app-access-test-api')({pool,app,adminPin:ADMIN_PIN});
 visitCounter=require("./view-counting-api")({pool,app,io,adminPin:ADMIN_PIN,teamKeys:TEAM_KEYS});
 touchlineHeroes=require("./touchline-heroes-api")({pool,app,adminPin:ADMIN_PIN,teamKeys:TEAM_KEYS});
 
