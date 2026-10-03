@@ -17,7 +17,7 @@ const title=el('h2','OUR SPONSORS');title.id='sponsorsTitle';dialog.append(back,
 const list=el('div',null,'sponsor-cards');dialog.append(list);
 function link(s,text){const a=el('a',text,'sponsor-visit');a.href=s.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label','Visit '+s.name+' (opens in a new tab)');return a;}
 data.forEach(s=>{const c=el('section',null,'sponsor-card');if(s.main){c.classList.add('sponsor-main');c.append(el('strong','MAIN SPONSOR','sponsor-role'));}
-c.append(logo(s));if(s.image)c.append(el('h3',s.name));if(s.url)c.append(link(s,'Visit '+(s.url.includes('facebook.com')?'Facebook':'website')+' ↗'));list.append(c);});
+if(s.image){const crop=el('div',null,'sponsor-dialog-logo');crop.append(logo(s));c.append(crop);}else c.append(logo(s));if(s.url)c.append(link(s,'Visit '+(s.url.includes('facebook.com')?'Facebook':'website')+' ↗'));list.append(c);});
 document.body.append(dialog);tile.addEventListener('click',()=>dialog.showModal());back.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>tile.focus());
 const phone=matchMedia('(max-width:700px)');function place(){if(phone.matches)document.querySelector('.home-primary-actions').before(tile);else document.getElementById('whyAppOpen').after(tile);}
 phone.addEventListener('change',place);place();
