@@ -962,8 +962,11 @@ app.post("/api/results/add", async (req,res) => {
 
 app.get("/api/pending-results", async (req,res) => {
   if (String(req.query.pin) !== String(ADMIN_PIN)) return res.status(401).json({error:"Incorrect Admin PIN"});
+  res.set("Cache-Control","no-store");
   const teamKey=normalizeTeamKey(req.query.team);
-  const result=await pool.query("SELECT * FROM season_matches WHERE team_key=$1 AND status='pending' ORDER BY played_at DESC,id DESC",[teamKey]);
+  const result=req.query.all==="1"
+    ? await pool.query("SELECT * FROM season_matches WHERE status='pending' ORDER BY played_at DESC,id DESC")
+    : await pool.query("SELECT * FROM season_matches WHERE team_key=$1 AND status='pending' ORDER BY played_at DESC,id DESC",[teamKey]);
   res.json(result.rows);
 });
 
