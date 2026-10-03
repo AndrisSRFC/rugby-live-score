@@ -356,6 +356,13 @@ white-space:nowrap;
  .mobile-admin-menu #heroesAdminOpen,
  .mobile-admin-menu #viewCountOpen{display:block!important;margin:0;width:100%;white-space:normal}
 }
+
+.operator-records-toggle{display:flex;align-items:center;gap:8px;width:fit-content;max-width:100%;min-height:36px;padding:6px 8px 6px 0;box-sizing:border-box;cursor:pointer;color:#fff;font-weight:800;list-style:none;border-radius:6px}
+.operator-records-toggle::-webkit-details-marker{display:none}
+.operator-records-toggle::before{content:"";width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid #fff;flex-shrink:0}
+details[open]>.operator-records-toggle::before{transform:rotate(90deg)}
+.operator-records-toggle:hover{background:#202820;color:#39ff14}
+.operator-records-toggle:focus-visible{outline:2px solid #39ff14;outline-offset:3px}
 </style>
 <link rel="stylesheet" href="/nld-voting.css">
 <link rel="stylesheet" href="/subscription.css">
@@ -1025,7 +1032,7 @@ async function loadControlRequests(){
     const r=await fetch('/api/match-control/operators',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value})});
     const operators=await r.json();
     if(r.ok&&operators.length){
-      const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='OPERATOR COVERAGE RECORDS';details.append(summary);
+      const details=document.createElement('details'),summary=document.createElement('summary');summary.className='operator-records-toggle';summary.textContent='OPERATOR COVERAGE RECORDS';details.append(summary);
       const note=document.createElement('p');note.textContent='Names are self-reported. Counts are distinct matches operated using approved access. Publish only agreed names in Touchline Heroes; email stays private.';details.append(note);
       const tools=document.createElement('div'),rows=document.createElement('div'),status=document.createElement('p');status.setAttribute('role','status');
       const archiveLabel=document.createElement('label'),archived=document.createElement('input');archived.type='checkbox';archiveLabel.append(archived,document.createTextNode(' Show archived'));
