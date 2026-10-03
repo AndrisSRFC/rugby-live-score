@@ -1,6 +1,6 @@
 /* Public branding stays visible in screenshots without blocking interaction. */
 body::after{
- content:"RUGBY LIVE · rugby-live-score.onrender.com";
+ content:"RUGBY LIVE SRFC";
  position:fixed;right:10px;bottom:max(5px,env(safe-area-inset-bottom));
  z-index:90;pointer-events:none;user-select:none;
  color:rgba(255,255,255,.42);font:700 8px/1.2 Arial,sans-serif;
