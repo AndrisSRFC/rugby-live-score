@@ -154,3 +154,9 @@
 .home-group-picker .nld-vote-home h2{display:none}
 .home-group-picker .nld-vote-home p{margin:0 0 18px;font-size:12px}
 @media(max-width:700px){.home-primary-actions{width:min(340px,100%);gap:8px}.home-primary-button{font-size:13px;min-height:46px;padding:10px}.home-group-picker{padding:16px}}
+
+/* Reset home-grid offsets when LIVE links are moved into the phone picker. */
+@media(max-width:700px){
+ #liveGroupsDialog .age-groups{width:100%;min-width:0;grid-template-columns:repeat(2,minmax(0,1fr))}
+ #liveGroupsDialog .age-btn:nth-child(n){grid-column:auto;transform:none;position:static;min-width:0;width:100%;margin:0;box-sizing:border-box}
+}
