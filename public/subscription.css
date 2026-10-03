@@ -13,3 +13,27 @@
  .subscription-admin-overlay .subscription-admin h2{font-size:23px}
  .subscription-admin article button{font-size:14px;width:100%;margin:6px 0;white-space:normal}
 }
+
+/* Compact public app-access dialogs on phones; retain scrolling for small screens and keyboards. */
+@media(max-width:720px){
+ #whyAppDialog{padding:12px;width:calc(100vw - 20px);max-height:calc(100svh - 20px);border-radius:14px;font-size:13px}
+ #whyAppDialog h2{font-size:21px;line-height:1.15;margin:4px 0 7px}
+ #whyAppDialog h3{font-size:12px;line-height:1.25;margin:10px 0 6px}
+ #whyAppDialog p{line-height:1.3;margin:7px 0}
+ #whyAppDialog .why-app-features{gap:5px;margin:10px 0}
+ #whyAppDialog .why-app-features p{padding:7px 8px;margin:0;font-size:13px}
+ #whyAppDialog .why-app-prices{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:9px 0}
+ #whyAppDialog .why-app-prices div{padding:7px 2px;font-size:10px}
+ #whyAppDialog .why-app-prices strong{font-size:17px;margin-top:3px}
+ #whyAppDialog .why-app-note{font-size:11px}
+ #whyAppDialog button{min-height:44px;padding:8px 10px;margin:3px 2px;font-size:12px}
+ #whyAppDialog #whyAppMessage:empty{display:none}
+ #subscriptionModal{box-sizing:border-box;padding:10px}
+ #subscriptionModal .subscription-card{padding:12px;font-size:13px}
+ #subscriptionModal h2{font-size:20px;margin:8px 0}
+ #subscriptionModal p{line-height:1.3;margin:8px 0}
+ #subscriptionModal label{margin-top:7px}
+ #subscriptionModal input,#subscriptionModal select{margin:4px 0;padding:9px;font-size:16px}
+ #subscriptionModal button{padding:8px 11px;min-height:44px}
+ #subscriptionStatus:empty{display:none}
+}
