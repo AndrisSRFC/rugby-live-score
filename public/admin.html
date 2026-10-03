@@ -1014,8 +1014,8 @@ async function loadControlRequests(){
   if(!d.length){const p=document.createElement('p');p.textContent='No pending requests.';box.append(p);}
   for(const x of d){
     const row=document.createElement('div');row.style.cssText='margin-top:12px;padding-top:10px;border-top:1px solid #444;overflow-wrap:anywhere';
-    const name=document.createElement('b');name.textContent=(x.operator_name||'Name not recorded')+' · '+x.team_key;
-    const email=document.createElement('p');email.textContent=x.operator_email||'Email not recorded (older request)';
+    const name=document.createElement('b');name.textContent=(x.operator_name||'Anonymous volunteer')+' · '+x.team_key;
+    const email=document.createElement('p');email.textContent=x.operator_email||'Email not provided';
     const info=document.createElement('p');info.textContent=(x.mode==='in_progress'?'MATCH ALREADY IN PROGRESS':'NEW MATCH')+' · Heroes publication: '+(x.heroes_consent?'agreed':'not agreed');
     row.append(name,email,info);
     for(const [decision,label] of [['approve','Approve'],['decline','Decline']]){const b=document.createElement('button');b.type='button';b.textContent=label;if(decision==='decline')b.className='red';b.addEventListener('click',()=>decideControlRequest(x.id,decision));row.append(b);}
@@ -1027,7 +1027,7 @@ async function loadControlRequests(){
     if(r.ok&&operators.length){
       const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='OPERATOR COVERAGE RECORDS';details.append(summary);
       const note=document.createElement('p');note.textContent='Names are self-reported. Counts are distinct matches operated using approved access. Publish only agreed names in Touchline Heroes; email stays private.';details.append(note);
-      for(const x of operators){const p=document.createElement('p');p.style.overflowWrap='anywhere';p.textContent=x.name+' · '+x.email+' · '+x.team+' · '+x.matches+' match'+(x.matches===1?'':'es')+' covered · Heroes: '+(x.consent?'agreed':'not agreed');details.append(p);}
+      for(const x of operators){const p=document.createElement('p');p.style.overflowWrap='anywhere';p.textContent=x.name+' · '+(x.email||'Email not provided')+' · '+x.team+' · '+x.matches+' match'+(x.matches===1?'':'es')+' covered · Heroes: '+(x.consent?'agreed':'not agreed');details.append(p);}
       box.append(details);
     }
   }catch(e){const note=document.createElement('p');note.textContent='Operator coverage records are temporarily unavailable.';box.append(note);}

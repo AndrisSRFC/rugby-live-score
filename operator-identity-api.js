@@ -4,16 +4,16 @@ module.exports=function({pool,app,adminPin}){
   await pool.query("CREATE TABLE IF NOT EXISTS rugby_operator_coverage(request_id INTEGER NOT NULL REFERENCES match_control_requests(id),match_id UUID NOT NULL,team_key TEXT NOT NULL,first_action_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),last_action_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),PRIMARY KEY(request_id,match_id))");
  }
  function validate(body){
-  if(typeof body?.operatorName!=='string'||typeof body?.operatorEmail!=='string')return {error:'Please enter your name and email address.'};
+  if((body?.operatorName!==undefined&&typeof body.operatorName!=='string')||(body?.operatorEmail!==undefined&&typeof body.operatorEmail!=='string'))return {error:'Please enter your name and email address.'};
   const name=String(body?.operatorName||'').trim(),email=String(body?.operatorEmail||'').trim().toLowerCase();
-  if(!name||name.length>80||/[\u0000-\u001f]/.test(name))return {error:'Please enter your name (up to 80 characters).'};
-  if(email.length>254||! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return {error:'Please enter a valid email address.'};
+  if(name.length>80||/[\u0000-\u001f]/.test(name))return {error:'Please enter your name (up to 80 characters).'};
+  if(email && (email.length>254||! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))return {error:'Please enter a valid email address.'};
   if(body?.heroesConsent!==undefined&&typeof body.heroesConsent!=='boolean')return {error:'Invalid publication consent.'};
-  return {name,email,consent:body?.heroesConsent===true};
+  return {name:name||null,email:email||null,consent:!!name&&body?.heroesConsent===true};
  }
  async function record(team,hash,matchId){
   await pool.query(`INSERT INTO rugby_operator_coverage(request_id,match_id,team_key)
-   SELECT request_id,$3,$1 FROM match_control_access WHERE team_key=$1 AND session_hash=$2 AND pin_used=TRUE AND revoked=FALSE AND request_id IS NOT NULL
+   SELECT request_id,$3,$1 FROM match_control_access WHERE team_key=$1 AND session_hash=$2 AND pin_used=TRUE AND revoked=FALSE AND request_id IS NOT NULL AND EXISTS (SELECT 1 FROM match_control_requests r WHERE r.id=request_id AND r.operator_name IS NOT NULL)
    ON CONFLICT(request_id,match_id) DO UPDATE SET last_action_at=NOW()`,[team,hash,matchId]);
  }
  app.post('/api/match-control/operators',async(req,res)=>{
@@ -22,7 +22,7 @@ module.exports=function({pool,app,adminPin}){
   try{const r=await pool.query(`SELECT r.operator_name AS name,r.operator_email AS email,r.team_key AS team,
    bool_and(r.heroes_consent) AS consent,COUNT(DISTINCT c.match_id)::int AS matches,MAX(c.last_action_at) AS last_covered
    FROM match_control_requests r LEFT JOIN rugby_operator_coverage c ON c.request_id=r.id
-   WHERE r.status='approved' AND r.operator_email IS NOT NULL
+   WHERE r.status='approved' AND r.operator_name IS NOT NULL
    GROUP BY r.operator_name,r.operator_email,r.team_key ORDER BY MAX(r.decided_at) DESC LIMIT 200`);
    res.json(r.rows);
   }catch(e){console.error('Operator records error',e.name);res.status(500).json({error:'Could not load operators.'});}

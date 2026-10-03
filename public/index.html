@@ -581,6 +581,7 @@
 <link rel="stylesheet" href="/rugby-watermark.css">
 <link rel="stylesheet" href="/sponsors.css">
 <style>.operator-field{display:block;margin-top:12px;color:#aaa;font-size:11px;font-weight:800}.operator-field input{display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:1px solid #555;border-radius:8px;background:#050505;color:#fff;font:16px Arial;min-height:44px}.operator-privacy{font-size:11px;color:#aaa;line-height:1.5}.operator-consent{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5;text-align:left}.operator-consent input{flex-shrink:0;width:20px;height:20px;accent-color:#39ff14}.signup-card{max-height:calc(100svh - 32px);overflow-y:auto}</style>
+<style>#helpIntro[hidden]{display:none}.signup-card .team-pick.open{margin-top:0;border:0;padding:0}.signup-card .operator-back{display:block;margin:0 0 16px;background:#111;color:#fff;border:1px solid #444;padding:10px 14px;min-height:44px}.operator-consent:has(input:disabled){opacity:.5}</style>
 </head>
 
 <body>
@@ -662,7 +663,7 @@
 
   <div class="signup-modal" id="signupModal">
     <div class="signup-card">
-      <h2>HELP BRING RUGBY LIVE 🏉</h2>
+      <div id="helpIntro"><h2>HELP BRING RUGBY LIVE 🏉</h2>
       <p class="signup-lead">Be part of match day from the touchline.</p>
       <p>Help supporters follow the game by keeping the LIVE score updated. No experience needed — Match Control is quick and simple to use.</p>
       <div class="control-preview">
@@ -686,12 +687,16 @@
         <button type="button" onclick="chooseHelpMode('new')">NEW MATCH</button>
         <button type="button" onclick="chooseHelpMode('in_progress')">MATCH ALREADY IN PROGRESS</button>
       </div>
+      </div>
       <div class="team-pick" id="teamPick">
+        <button type="button" class="operator-back" onclick="showHelpIntro()">← BACK</button>
+        <h2 id="operatorStepTitle">REQUEST ACCESS</h2>
+        <p class="operator-privacy">Choose your group. You can leave your name and email blank and still help keep the score LIVE.</p>
         <select id="helpTeam"><option>U13</option><option>U14</option><option>U15</option><option>U16</option><option>Colts</option><option>1st XV</option><option>2nd XV</option></select><div class="request-status" id="teamCoverage"></div>
-        <label class="operator-field">YOUR NAME<input id="operatorName" type="text" maxlength="80" autocomplete="name" required></label>
-        <label class="operator-field">EMAIL<input id="operatorEmail" type="email" maxlength="254" autocomplete="email" required></label>
+        <label class="operator-field">YOUR NAME (OPTIONAL)<input id="operatorName" type="text" maxlength="80" autocomplete="name"></label>
+        <label class="operator-field">EMAIL (OPTIONAL)<input id="operatorEmail" type="email" maxlength="254" autocomplete="email"></label>
         <p class="operator-privacy">Your name and email are shared privately with the Rugby LIVE administrator to manage match coverage. Your email will not be shown publicly.</p>
-        <label class="operator-consent"><input id="heroesConsent" type="checkbox"> I agree to have my name and covered match count shown in Touchline Heroes (optional).</label>
+        <label class="operator-consent"><input id="heroesConsent" type="checkbox" disabled> I agree to have my name and covered match count shown in Touchline Heroes (optional).</label>
         <button type="button" id="requestAccessBtn" onclick="requestMatchControl()">REQUEST ACCESS</button>
         <div class="request-status" id="requestStatus"></div>
       </div>
@@ -894,9 +899,19 @@ homeSocket.on('reactions',renderReactionCounts);
 let helpMode='new', requestPoll=null;
 function chooseHelpMode(mode){
   helpMode=mode;
+  document.getElementById('helpIntro').hidden=true;
+  document.getElementById('operatorStepTitle').textContent=mode==='in_progress'?'MATCH IN PROGRESS':'NEW MATCH';
   document.getElementById('teamPick').classList.add('open');
+  document.querySelector('.signup-card').scrollTop=0;
+  document.getElementById('helpTeam').focus();
   document.getElementById('requestStatus').textContent=mode==='in_progress'?'You can join now. The public clock will show LIVE — never guess the match time.':'Choose the team, then request access before kickoff.'; refreshCoverage();
 }
+function showHelpIntro(){
+ document.getElementById('teamPick').classList.remove('open');document.getElementById('helpIntro').hidden=false;document.querySelector('.signup-card').scrollTop=0;
+}
+document.getElementById('operatorName').addEventListener('input',()=>{
+ const consent=document.getElementById('heroesConsent');consent.disabled=!document.getElementById('operatorName').value.trim();if(consent.disabled)consent.checked=false;
+});
 async function refreshCoverage(){
   try{
     const teams=await fetch('/api/teams',{cache:'no-store'}).then(r=>r.json()), team=document.getElementById('helpTeam').value, t=teams.find(x=>x.key===team), box=document.getElementById('teamCoverage');
@@ -928,7 +943,7 @@ async function requestMatchControl(){
   },2000);
 }
 const signupModal = document.getElementById('signupModal');
-document.getElementById('scoreHelpBtn').addEventListener('click', () => signupModal.classList.add('open'));
+document.getElementById('scoreHelpBtn').addEventListener('click', () => {showHelpIntro();signupModal.classList.add('open');});
 document.getElementById('closeSignup').addEventListener('click', () => signupModal.classList.remove('open'));
 signupModal.addEventListener('click', e => { if (e.target === signupModal) signupModal.classList.remove('open'); });
 </script>
