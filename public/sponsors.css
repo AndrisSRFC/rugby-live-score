@@ -22,10 +22,10 @@
 /* Display the supplied logos without added frames or cards. */
 .sponsor-teaser,.sponsor-card,.sponsor-main{border:0;border-radius:0;box-shadow:none;background:transparent}
 .sponsor-logo{background:none;width:240px;max-width:100%;height:130px;object-fit:contain}
-.sponsor-text{display:flex;align-items:center;justify-content:center;min-height:90px;color:#fff;font-size:22px;font-weight:900;text-align:center;overflow-wrap:anywhere}
+.club-partner-name{display:flex;align-items:center;justify-content:center;min-height:90px;color:#fff;font-size:22px;font-weight:900;text-align:center;overflow-wrap:anywhere}
 .sponsor-teaser-art{min-height:130px}
 .sponsor-card{padding:14px 8px}
-@media(max-width:700px){.bottom>.sponsor-teaser{padding:0;margin-bottom:12px}.sponsor-teaser-art{min-height:100px}.sponsor-teaser .sponsor-logo{height:100px;width:220px}.sponsor-text{min-height:100px;font-size:18px}.sponsor-card .sponsor-logo{height:110px}}
+@media(max-width:700px){.bottom>.sponsor-teaser{padding:0;margin-bottom:12px}.sponsor-teaser-art{min-height:100px}.sponsor-teaser .sponsor-logo{height:100px;width:220px}.club-partner-name{min-height:100px;font-size:18px}.sponsor-card .sponsor-logo{height:110px}}
 
 /* Compact sponsor overview; keep each visit link with its own logo. */
 .sponsors-dialog{padding:18px 20px}
@@ -33,7 +33,7 @@
 .sponsors-dialog>p{font-size:12px;margin:6px 0 14px}
 .sponsor-cards{gap:12px;margin:12px auto;align-items:start}
 .sponsor-card{padding:6px 4px;gap:3px;justify-content:flex-start;min-width:0}
-.sponsor-card .sponsor-text{min-height:44px;font-size:17px;line-height:1.2}
+.sponsor-card .club-partner-name{min-height:44px;font-size:17px;line-height:1.2}
 .sponsor-dialog-logo{position:relative;overflow:hidden;width:100%;height:48px}
 .sponsor-dialog-logo .sponsor-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:160px;height:110px;max-width:none;object-fit:contain}
 .sponsor-card .sponsor-visit{min-height:36px;font-size:12px;justify-content:center}
@@ -44,7 +44,7 @@
  .sponsors-dialog>p{margin:4px 0 10px}
  .sponsor-cards{gap:10px 12px;margin:10px auto}
  .sponsor-card{padding:4px 0;gap:2px}
- .sponsor-card .sponsor-text{min-height:44px;font-size:15px}
+ .sponsor-card .club-partner-name{min-height:44px;font-size:15px}
  .sponsor-dialog-logo{height:44px}
  .sponsor-dialog-logo .sponsor-logo{width:150px;height:105px}
 }
@@ -57,11 +57,11 @@
 .sponsor-card:nth-child(4){grid-column:5 / span 8;grid-row:3}
 .sponsor-card:nth-child(5){grid-column:1 / span 6;grid-row:4}
 .sponsor-card:nth-child(6){grid-column:1 / -1;grid-row:5}
-.sponsor-card:nth-child(6) .sponsor-text{white-space:nowrap;font-size:clamp(12px,3.4vw,19px)}
+.sponsor-card:nth-child(6) .club-partner-name{white-space:nowrap;font-size:clamp(12px,3.4vw,19px)}
 @media(max-width:700px){
  .sponsor-cards{gap:12px 6px}
  .sponsor-card:nth-child(3){margin-top:24px}
- .sponsor-card:nth-child(6) .sponsor-text{font-size:clamp(11px,3.4vw,16px);min-height:28px}
+ .sponsor-card:nth-child(6) .club-partner-name{font-size:clamp(11px,3.4vw,16px);min-height:28px}
 }
 
-.sponsors-dialog .sponsor-text,.sponsor-teaser .sponsor-text{color:#fff;-webkit-text-fill-color:#fff;opacity:1;visibility:visible}
+.sponsors-dialog .club-partner-name,.sponsor-teaser .club-partner-name{color:#fff;-webkit-text-fill-color:#fff;opacity:1;visibility:visible}
