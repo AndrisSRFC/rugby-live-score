@@ -13,7 +13,12 @@ async function init(pool){await pool.query(`
  code_hash TEXT UNIQUE,code_expires_at TIMESTAMPTZ,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
  approved_at TIMESTAMPTZ,activated_at TIMESTAMPTZ,subscription_until TIMESTAMPTZ);
  CREATE UNIQUE INDEX IF NOT EXISTS app_subscription_open_install ON app_subscription_requests(install_id) WHERE status IN('pending','approved');
-`);}
+`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS rugby_operator_rewards(
+   id UUID PRIMARY KEY,record_key TEXT NOT NULL,email TEXT NOT NULL,covered_through INTEGER NOT NULL,
+   code_hash TEXT UNIQUE,code_expires_at TIMESTAMPTZ NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+   activated_at TIMESTAMPTZ,install_id TEXT REFERENCES app_access(install_id),subscription_until TIMESTAMPTZ)`);
+}
 function register(app,pool,adminPin){
  const valid=id=>/^[a-zA-Z0-9_-]{16,100}$/.test(id);
  const hash=value=>crypto.createHash('sha256').update(value).digest('hex');
@@ -55,13 +60,16 @@ function register(app,pool,adminPin){
    await client.query('BEGIN');
    const access=await client.query('SELECT access_status,subscription_until FROM app_access WHERE install_id=$1 FOR UPDATE',[installId]);
    if(!access.rowCount){await client.query('ROLLBACK');return res.status(400).json({error:'App installation not registered.'});}
-   const r=await client.query("SELECT * FROM app_subscription_requests WHERE install_id=$1 AND code_hash=$2 AND status='approved' AND code_expires_at>NOW() FOR UPDATE",[installId,hash(code)]);
+   let r=await client.query("SELECT * FROM app_subscription_requests WHERE install_id=$1 AND code_hash=$2 AND status='approved' AND code_expires_at>NOW() FOR UPDATE",[installId,hash(code)]);
+   let operatorReward=false;
+   if(!r.rowCount){r=await client.query("SELECT *,1 AS months FROM rugby_operator_rewards WHERE code_hash=$1 AND activated_at IS NULL AND code_expires_at>NOW() FOR UPDATE",[hash(code)]);operatorReward=!!r.rowCount;}
    if(!r.rowCount){await client.query('ROLLBACK');return res.status(400).json({error:'Code is invalid, expired, used, or belongs to another installation.'});}
    if(access.rows[0].access_status==='owner'){await client.query('ROLLBACK');return res.status(409).json({error:'Owner access does not require a subscription.'});}
    const current=access.rows[0].subscription_until,base=access.rows[0].access_status==='subscriber'&&current&&new Date(current)>new Date()?new Date(current):new Date();
    const until=addMonths(base,r.rows[0].months);
    await client.query("UPDATE app_access SET access_status='subscriber',subscription_until=$2,updated_at=NOW() WHERE install_id=$1",[installId,until]);
-   await client.query("UPDATE app_subscription_requests SET status='activated',activated_at=NOW(),subscription_until=$2,code_hash=NULL WHERE id=$1",[r.rows[0].id,until]);
+   if(operatorReward)await client.query("UPDATE rugby_operator_rewards SET activated_at=NOW(),install_id=$2,subscription_until=$3,code_hash=NULL WHERE id=$1",[r.rows[0].id,installId,until]);
+   else await client.query("UPDATE app_subscription_requests SET status='activated',activated_at=NOW(),subscription_until=$2,code_hash=NULL WHERE id=$1",[r.rows[0].id,until]);
    await client.query('COMMIT');attempts.delete(key);res.json({ok:true,status:'subscriber',subscriptionUntil:until});
   }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
  }));

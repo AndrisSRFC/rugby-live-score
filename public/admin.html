@@ -1055,6 +1055,23 @@ async function loadControlRequests(){
             });row.append(b);
           };
           if(x.archived||x.deleted)addAction('restore','Restore');else{addAction('archive','Archive');if(Number(x.matches)===0)addAction('delete_test','Delete test record');}
+          
+          const history=document.createElement('div');
+          for(const reward of x.rewards||[]){const item=document.createElement('p');item.textContent='FREE MONTH · '+new Date(reward.created_at).toLocaleDateString()+' · '+(reward.activated_at?'Activated · Access until '+new Date(reward.subscription_until).toLocaleDateString():'Awaiting activation · Code expires '+new Date(reward.code_expires_at).toLocaleDateString());history.append(item);}
+          row.append(history);
+          if(!x.archived&&!x.deleted&&x.email){
+            const pending=(x.rewards||[]).some(r=>!r.activated_at),through=Math.max(0,...(x.rewards||[]).map(r=>r.covered_through));
+            const rewardButton=document.createElement('button');rewardButton.type='button';rewardButton.textContent=pending?'REISSUE FREE MONTH CODE':'GIVE 1 MONTH FREE';rewardButton.disabled=!pending&&Number(x.matches)<through+2;
+            const explain=document.createElement('p');explain.textContent='One free month per 2 covered matches, after your review. '+Math.max(0,Number(x.matches)-through)+' uncredited matches. Give the code privately to this operator; it activates once on their app.';
+            rewardButton.addEventListener('click',async()=>{
+              if(!confirm(pending?'Reissue this operator’s pending code? The previous code will stop working.':'Confirm this operator has satisfactorily covered 2 additional matches and award 1 free month?'))return;
+              rewardButton.disabled=true;status.textContent='Issuing code…';
+              try{const response=await fetch('/api/match-control/operators/reward',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:$('pin').value,key:x.key,confirmed:true})});const result=await response.json();if(!response.ok)throw Error(result.error||'Could not issue reward.');
+                x.rewards=(x.rewards||[]).filter(r=>r.id!==result.reward.id);x.rewards.unshift(result.reward);drawOperators();
+                status.replaceChildren();const message=document.createElement('p');message.textContent='Send privately to '+result.email+'. No payment required. Valid for 30 days. '+(result.reissued?'Previous code cancelled.':'');const code=document.createElement('input');code.readOnly=true;code.value=result.code;code.setAttribute('aria-label','One-time free month activation code');code.style.width='100%';code.addEventListener('click',()=>code.select());status.append(message,code);
+              }catch(e){status.textContent=e.message;rewardButton.disabled=false;}
+            });row.append(explain,rewardButton);
+          }
           rows.append(row);
         }
       }
