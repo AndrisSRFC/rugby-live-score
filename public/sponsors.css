@@ -26,3 +26,25 @@
 .sponsor-teaser-art{min-height:130px}
 .sponsor-card{padding:14px 8px}
 @media(max-width:700px){.bottom>.sponsor-teaser{padding:0;margin-bottom:12px}.sponsor-teaser-art{min-height:100px}.sponsor-teaser .sponsor-logo{height:100px;width:220px}.sponsor-text{min-height:100px;font-size:18px}.sponsor-card .sponsor-logo{height:110px}}
+
+/* Compact sponsor overview; keep each visit link with its own logo. */
+.sponsors-dialog{padding:18px 20px}
+.sponsors-dialog>h2{font-size:24px;margin:16px 0 6px}
+.sponsors-dialog>p{font-size:12px;margin:6px 0 14px}
+.sponsor-cards{gap:12px;margin:12px auto;align-items:start}
+.sponsor-card{padding:6px 4px;gap:3px;justify-content:flex-start;min-width:0}
+.sponsor-card .sponsor-text{min-height:44px;font-size:17px;line-height:1.2}
+.sponsor-dialog-logo{position:relative;overflow:hidden;width:100%;height:48px}
+.sponsor-dialog-logo .sponsor-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:160px;height:110px;max-width:none;object-fit:contain}
+.sponsor-card .sponsor-visit{min-height:36px;font-size:12px;justify-content:center}
+.sponsor-role{font-size:11px;margin-bottom:2px}
+@media(max-width:700px){
+ .sponsors-dialog{padding:12px 14px}
+ .sponsors-dialog>h2{font-size:22px;margin:12px 0 4px}
+ .sponsors-dialog>p{margin:4px 0 10px}
+ .sponsor-cards{gap:10px 12px;margin:10px auto}
+ .sponsor-card{padding:4px 0;gap:2px}
+ .sponsor-card .sponsor-text{min-height:44px;font-size:15px}
+ .sponsor-dialog-logo{height:44px}
+ .sponsor-dialog-logo .sponsor-logo{width:150px;height:105px}
+}
