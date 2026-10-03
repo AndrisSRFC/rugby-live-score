@@ -368,7 +368,13 @@ details[open]>.operator-records-toggle::before{transform:rotate(90deg)}
 <link rel="stylesheet" href="/subscription.css">
 <link rel="stylesheet" href="/view-counting.css">
 <link rel="stylesheet" href="/touchline-heroes-admin.css">
-</head>
+<style>
+@media(max-width:720px){#historySavedDesktop{display:none!important}}
+.saved-history-row{display:flex;align-items:end;flex-wrap:wrap;gap:12px;padding:14px 0;border-top:1px solid #333}
+.saved-history-row strong{min-width:180px;align-self:center;overflow-wrap:anywhere}
+.saved-history-row label{display:block;margin:0}
+.saved-history-row input{display:block;width:90px;margin-top:5px}
+</style></head>
 <body>
 <datalist id="teamSuggestions"></datalist>
 <div class="admin">
@@ -527,6 +533,12 @@ details[open]>.operator-records-toggle::before{transform:rotate(90deg)}
 <label>Losses (L)<input id="historyLosses" type="number" min="0" step="1" value="0"></label>
     <button type="button" onclick="addHistory()">CONFIRM HISTORY</button><p>Enter previous W/D/L totals for this group against this opponent. Saving replaces the previous manual totals; confirmed match results are added automatically.</p>
   </div>
+<div id="historySavedDesktop" style="margin-top:18px;border-top:1px solid #333;padding-top:16px">
+<h3 style="font-size:16px">SAVED PREVIOUS MATCH HISTORY</h3>
+<button type="button" id="refreshSavedHistory">REFRESH HISTORY</button>
+<label style="margin-left:12px">Group <select id="savedHistoryFilter"><option value="">All groups</option><option>U13</option><option>U14</option><option>U15</option><option>U16</option><option>Colts</option><option>1st XV</option><option>2nd XV</option></select></label>
+<p id="savedHistoryStatus" role="status">Enter Admin PIN and refresh. Edit only previous match totals; confirmed results are added separately.</p><div id="savedHistoryRows"></div>
+</div>
 </section>
 </div>
 <dialog id="squadDialog" aria-labelledby="squadTitle">
@@ -829,6 +841,7 @@ async function editPending(id,homeName,awayName,homeScore,awayScore,matchType){
   }
 
   alert('NLD history saved');
+  window.refreshSavedHistory?.();
 }
 const $ = id => document.getElementById(id);
 loadTeamSuggestions();
@@ -1135,5 +1148,6 @@ setInterval(watchPendingResults,3000);
 <script src="/subscription-admin.js"></script>
 <dialog id="viewCountDialog" class="view-count-dialog" aria-labelledby="viewCountTitle"><button id="viewCountClose" type="button">← Back to Admin</button><h2 id="viewCountTitle">VIEW COUNTING</h2><label class="exclude-visits-label"><input type="checkbox" id="excludeMyVisits"> Exclude my visits on this browser</label><p>Excludes public page visits from WATCHING and TOTAL VIEWS. Admin and Match Control connections are always excluded.</p><p id="viewCountStatus" role="status"></p><button id="viewCountStart" type="button">START VIEW COUNTING</button><button id="viewCountRefresh" type="button">REFRESH TOTALS</button><table><thead><tr><th>Page / group</th><th>Total visits</th></tr></thead><tbody id="viewCountRows"></tbody></table></dialog><script src="/view-counting-admin.js"></script>
 <dialog id="heroesAdminDialog" class="heroes-admin-dialog" aria-labelledby="heroesAdminTitle"><button id="heroesAdminClose" type="button">← Back to Admin</button><h2 id="heroesAdminTitle">TOUCHLINE HEROES</h2><p>Add volunteers’ names, groups and manually recorded matches covered. Publish names with the volunteer’s agreement. Untick “Show publicly” to hide a name.</p><div id="heroesAdminRows"></div><button id="heroesAdminAdd" type="button">ADD VOLUNTEER</button><button id="heroesAdminSave" type="button">SAVE HEROES</button><p id="heroesAdminStatus" role="status"></p></dialog><script src="/touchline-heroes-admin.js"></script>
+<script src="/history-admin.js"></script>
 </body>
 </html>

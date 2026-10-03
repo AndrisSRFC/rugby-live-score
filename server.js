@@ -1069,6 +1069,23 @@ app.get("/api/history", appContentAccess.requireAccess, async (req, res) => {
   }
 });
 
+
+app.post("/api/history/admin/list",async(req,res)=>{
+ res.set("Cache-Control","no-store");
+ if(String(req.body?.pin)!==String(ADMIN_PIN))return res.status(401).json({error:"Incorrect Admin PIN"});
+ try{const r=await pool.query("SELECT id,team_key,opponent,wins,draws,losses FROM nld_history WHERE team_key IS NOT NULL ORDER BY team_key,LOWER(opponent),id");res.json(r.rows);}
+ catch(e){console.error("History list error",e.name);res.status(500).json({error:"Could not load history."});}
+});
+app.post("/api/history/admin/update",async(req,res)=>{
+ res.set("Cache-Control","no-store");
+ if(String(req.body?.pin)!==String(ADMIN_PIN))return res.status(401).json({error:"Incorrect Admin PIN"});
+ const {id,wins,draws,losses,original}=req.body||{};
+ if(!Number.isSafeInteger(id)||id<1||![wins,draws,losses,original?.wins,original?.draws,original?.losses].every(n=>Number.isSafeInteger(n)&&n>=0&&n<=100000))return res.status(400).json({error:"Enter non-negative whole W/D/L counts."});
+ try{const r=await pool.query("UPDATE nld_history SET wins=$2,draws=$3,losses=$4 WHERE id=$1 AND team_key IS NOT NULL AND wins=$5 AND draws=$6 AND losses=$7 RETURNING id,team_key,opponent,wins,draws,losses",[id,wins,draws,losses,original.wins,original.draws,original.losses]);
+ if(!r.rowCount)return res.status(409).json({error:"This record has changed. Refresh the list and try again."});res.json(r.rows[0]);}
+ catch(e){console.error("History update error",e.name);res.status(500).json({error:"Could not update history."});}
+});
+
 app.post("/api/history", async(req,res)=>{
  if(String(req.body?.pin)!==String(ADMIN_PIN))return res.status(401).json({error:"Incorrect Admin PIN"});
  const {team,opponent,wins,draws,losses}=req.body||{};
