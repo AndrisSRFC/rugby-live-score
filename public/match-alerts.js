@@ -1,6 +1,9 @@
 
 (()=>{
  const open=document.getElementById('matchAlertsOpen');if(!isInstalledApp())return;open.hidden=false;
+ const actions=document.querySelector('.home-primary-actions'),phone=matchMedia('(max-width:700px)'),anchor=document.createComment('Match alerts desktop position');open.before(anchor);
+ function place(){if(phone.matches&&actions){actions.before(open);open.style.display='block';open.style.margin='0 auto 8px';}else{anchor.after(open);open.style.display='';open.style.margin='';}}
+ phone.addEventListener('change',place);place();
  const groups=['U13','U14','U15','U16','Colts','1st XV','2nd XV'],dialog=document.createElement('dialog');dialog.id='matchAlertsDialog';dialog.setAttribute('aria-labelledby','matchAlertsTitle');
  dialog.innerHTML='<button type="button" id="matchAlertsBack">← BACK TO HOME</button><h2 id="matchAlertsTitle">MATCH ALERTS</h2><p>Choose the groups you want to follow. Push notifications are coming soon; saving this selection does not enable notifications yet.</p><form><label><input type="checkbox" id="matchAlertsAll"> ALL GROUPS</label><div class="alert-groups"></div><button type="submit">SAVE PREFERENCES</button></form><p role="status" id="matchAlertsStatus"></p>';
  document.body.append(dialog);const all=dialog.querySelector('#matchAlertsAll'),box=dialog.querySelector('.alert-groups'),status=dialog.querySelector('[role=status]'),save=dialog.querySelector('[type=submit]'),checks=[];
