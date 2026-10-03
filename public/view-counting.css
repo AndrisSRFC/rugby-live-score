@@ -13,7 +13,7 @@
 .view-count-dialog #excludeMyVisits{width:20px;height:20px;padding:0}
 @media(max-width:720px){.view-count-desktop{display:none!important}}
 
-@media(min-width:701px){.home-link{top:52px}}
+@media(min-width:701px){.home-link{top:80px}}
 
 @media(max-width:720px){
  .view-count-dialog{padding:16px}
