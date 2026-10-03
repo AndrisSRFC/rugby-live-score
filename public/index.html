@@ -591,7 +591,8 @@
       <h2 id="trialEndedTitle">YOUR 30-DAY TRIAL HAS ENDED</h2>
       <p>Keep Rugby LIVE running and support the project.</p>
       <button id="trialSupportBtn" class="support-btn" type="button">SUBSCRIBE / SUPPORT RUGBY LIVE</button>
-      <span class="browser-note">Rugby LIVE remains free in your web browser.</span>
+      <button id="trialBackLive" type="button" style="margin-top:14px;padding:12px;border:1px solid #444;border-radius:10px;background:#111;color:#fff;font-weight:800;cursor:pointer">← BACK TO LIVE</button>
+      <span class="browser-note">LIVE scores remain free. Full statistics require active app access.</span>
     </div>
   </div>
 
@@ -745,6 +746,7 @@ async function getServerAppAccess(){
   if(!r.ok) throw new Error('Could not load app access');
   return r.json();
 }
+let trialNoticeDismissed=false;
 async function renderTrialStatus(){
   if(!isInstalledApp()){
     appTrialBadge.style.display='none';
@@ -776,7 +778,7 @@ async function renderTrialStatus(){
     appTrialBadge.innerHTML=expired
       ? '<strong>APP TRIAL ENDED</strong> · Day '+day+' · Support/Subscribe coming next'
       : '<strong>APP TRIAL</strong> · Day '+day+' of '+TRIAL_DAYS+' · '+remaining+' day'+(remaining===1?'':'s')+' remaining';
-    if(endedScreen) endedScreen.style.display=expired ? 'flex' : 'none';
+    if(endedScreen) endedScreen.style.display=expired && !trialNoticeDismissed && document.getElementById('subscriptionModal')?.hidden!==false ? 'flex' : 'none';
   }catch(error){
     console.error('App access error:',error);
     appTrialBadge.style.display='block';
@@ -804,6 +806,7 @@ if(isInstalledApp() && ownerParams.get('ownerSetup')==='1'){
   }
 }
 
+document.getElementById('trialBackLive')?.addEventListener('click',()=>{trialNoticeDismissed=true;document.getElementById('trialEndedScreen').style.display='none';document.getElementById('whyAppOpen').focus();});
 document.getElementById('trialSupportBtn')?.addEventListener('click',()=>{
   window.openSubscription();
 });
