@@ -404,7 +404,7 @@ function connectControl() {
   if (!selectedTeam) return;
   fetch('/api/state?team=' + encodeURIComponent(selectedTeam)).then(r => r.json()).then(render);
   if (socket) socket.disconnect();
-  socket = io({query:{team:selectedTeam}});
+  socket = io({query:{team:selectedTeam,role:"operator",controlToken}});
   socket.on('state', render);
 }
 $('matchPin').addEventListener('keydown', e => {

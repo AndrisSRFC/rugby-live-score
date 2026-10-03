@@ -579,6 +579,7 @@ app.post("/api/admin", async (req, res) => {
   if (!authorized) return res.status(401).json({ error: "Access expired or incorrect PIN" });
 
   try {
+    if(controlToken && String(pin)!==String(ADMIN_PIN))touchOperator(teamKey,secretHash(controlToken));
     commitClock(teamKey);
     let selectedState = getState(teamKey);
 
@@ -815,12 +816,32 @@ app.post("/api/match-control/verify", async (req, res) => {
   res.json({ ok:true, team:teamKey, controlToken:token });
 });
 
+// Authenticated operator presence. Allow short reconnects before pausing coverage.
+const operatorPresence=new Map();
+function touchOperator(team,hash){
+ let entry=operatorPresence.get(team);
+ if(!entry||entry.hash!==hash){entry={hash,lastSeen:Date.now(),sockets:new Set()};operatorPresence.set(team,entry);}
+ entry.lastSeen=Date.now();return entry;
+}
+async function pauseAbsentOperators(){
+ for(const [team,entry] of operatorPresence){
+  if(entry.sockets.size||Date.now()-entry.lastSeen<60000)continue;
+  const st=getState(team);if(!st.matchLive){operatorPresence.delete(team);continue;}
+  const revoked=await pool.query("UPDATE match_control_access SET revoked=TRUE,session_hash=NULL WHERE team_key=$1 AND session_hash=$2 AND revoked=FALSE RETURNING team_key",[team,entry.hash]);
+  if(!revoked.rowCount){operatorPresence.delete(team);continue;}
+  operatorPresence.delete(team);
+  commitClock(team);const paused=getState(team);paused.matchLive=false;paused.running=false;paused.startedAt=null;paused.message="Live updates paused";await saveState(team);broadcast(team);
+ }
+}
+let presenceCheckRunning=false;
+setInterval(async()=>{if(presenceCheckRunning)return;presenceCheckRunning=true;try{await pauseAbsentOperators();}catch(e){console.error("Operator presence check failed",e.name);}finally{presenceCheckRunning=false;}},5000);
+
 app.post("/api/match-control/stop-coverage", async (req,res) => {
   const {controlToken,team}=req.body||{}; const teamKey=normalizeTeamKey(team);
   const found=await pool.query("SELECT 1 FROM match_control_access WHERE team_key=$1 AND session_hash=$2 AND pin_used=TRUE AND revoked=FALSE",[teamKey,secretHash(controlToken||"")]);
   if(!found.rowCount) return res.status(401).json({error:"Access expired"});
   await pool.query("UPDATE match_control_access SET revoked=TRUE,session_hash=NULL WHERE team_key=$1",[teamKey]);
-  const st=getState(teamKey); st.running=false; st.startedAt=null; st.message="Live updates paused"; await saveState(teamKey); broadcast(teamKey);
+  commitClock(teamKey); const st=getState(teamKey); st.matchLive=false; st.running=false; st.startedAt=null; st.message="Live updates paused"; await saveState(teamKey); broadcast(teamKey);
   res.json({ok:true,team:teamKey});
 });
 
@@ -1074,6 +1095,14 @@ io.on("connection", socket => {
   const excluded=socket.handshake.query?.excludeVisits==="1";
   const visitId=socket.handshake.query?.visitId;
   const isViewer = role === "viewer" && !excluded;
+  if(role==="operator"){
+   const hash=secretHash(String(socket.handshake.query?.controlToken||""));
+   pool.query("SELECT 1 FROM match_control_access WHERE team_key=$1 AND session_hash=$2 AND pin_used=TRUE AND revoked=FALSE",[teamKey,hash]).then(result=>{
+    if(!result.rowCount||!socket.connected)return;
+    const entry=touchOperator(teamKey,hash);entry.sockets.add(socket.id);
+    socket.on("disconnect",()=>{entry.sockets.delete(socket.id);entry.lastSeen=Date.now();});
+   }).catch(e=>console.error("Operator socket authorization failed",e.name));
+  }
 
   if (role === "landing") {
     visitCounter.send(socket,"HOME",visitId,excluded);
@@ -1135,6 +1164,8 @@ setInterval(() => {
 async function startServer() {
   try {
     await initDatabase();
+    const previousOperators=await pool.query("SELECT team_key,session_hash FROM match_control_access WHERE pin_used=TRUE AND revoked=FALSE AND session_hash IS NOT NULL");
+    for(const operator of previousOperators.rows)touchOperator(operator.team_key,operator.session_hash);
 
     server.listen(PORT, () => {
       console.log(`Rugby Live Score running on port \${PORT}`);
