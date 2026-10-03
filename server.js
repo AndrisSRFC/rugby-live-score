@@ -19,7 +19,6 @@ const pool = new Pool({
 const appContentAccess=require("./app-content-access")(pool,ADMIN_PIN);
 let visitCounter;
 let touchlineHeroes;
-let appAccessTest;
 
 const TEAM_CONFIG = [
   { key: "U13", id: 1, label: "U13's" },
@@ -327,9 +326,30 @@ async function initDatabase() {
   `);
 
   await subscriptionApi.init(pool);
+
+  // Restore saved access before retiring the temporary Admin testing feature.
+  const savedAccessTable=await pool.query("SELECT to_regclass('public.rugby_app_access_tests') AS table_name");
+  if(savedAccessTable.rows[0]?.table_name){
+    const restoreClient=await pool.connect();
+    try{
+      await restoreClient.query("BEGIN");
+      await restoreClient.query("LOCK TABLE rugby_app_access_tests IN ACCESS EXCLUSIVE MODE");
+      await restoreClient.query(`UPDATE app_access a SET
+        access_status=t.snapshot->>'access_status',
+        trial_started_at=(t.snapshot->>'trial_started_at')::timestamptz,
+        subscription_until=(t.snapshot->>'subscription_until')::timestamptz,
+        updated_at=NOW()
+        FROM rugby_app_access_tests t WHERE a.install_id=t.install_id`);
+      await restoreClient.query(`UPDATE app_subscription_requests r SET status='declined',code_hash=NULL
+        FROM rugby_app_access_tests t WHERE r.install_id=t.install_id AND r.created_at>=t.started_at
+        AND r.status IN ('pending','approved','activated')`);
+      await restoreClient.query("DELETE FROM rugby_app_access_tests");
+      await restoreClient.query("COMMIT");
+    }catch(e){await restoreClient.query("ROLLBACK");throw e;}finally{restoreClient.release();}
+  }
+
   await visitCounter.init();
   await touchlineHeroes.init();
-  await appAccessTest.init();
 
   const result = await pool.query(
     "SELECT id, data FROM rugby_state ORDER BY id"
@@ -379,7 +399,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 subscriptionApi.register(app,pool,ADMIN_PIN);
-appAccessTest=require('./app-access-test-api')({pool,app,adminPin:ADMIN_PIN});
 visitCounter=require("./view-counting-api")({pool,app,io,adminPin:ADMIN_PIN,teamKeys:TEAM_KEYS});
 touchlineHeroes=require("./touchline-heroes-api")({pool,app,adminPin:ADMIN_PIN,teamKeys:TEAM_KEYS});
 
