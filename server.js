@@ -830,7 +830,7 @@ async function pauseAbsentOperators(){
   const revoked=await pool.query("UPDATE match_control_access SET revoked=TRUE,session_hash=NULL WHERE team_key=$1 AND session_hash=$2 AND revoked=FALSE RETURNING team_key",[team,entry.hash]);
   if(!revoked.rowCount){operatorPresence.delete(team);continue;}
   operatorPresence.delete(team);
-  commitClock(team);const paused=getState(team);paused.matchLive=false;paused.running=false;paused.startedAt=null;paused.message="Live updates paused";await saveState(team);broadcast(team);
+  commitClock(team);const paused=getState(team);paused.running=false;paused.startedAt=null;paused.message="Live updates paused";await saveState(team);broadcast(team);
  }
 }
 let presenceCheckRunning=false;
@@ -841,7 +841,7 @@ app.post("/api/match-control/stop-coverage", async (req,res) => {
   const found=await pool.query("SELECT 1 FROM match_control_access WHERE team_key=$1 AND session_hash=$2 AND pin_used=TRUE AND revoked=FALSE",[teamKey,secretHash(controlToken||"")]);
   if(!found.rowCount) return res.status(401).json({error:"Access expired"});
   await pool.query("UPDATE match_control_access SET revoked=TRUE,session_hash=NULL WHERE team_key=$1",[teamKey]);
-  commitClock(teamKey); const st=getState(teamKey); st.matchLive=false; st.running=false; st.startedAt=null; st.message="Live updates paused"; await saveState(teamKey); broadcast(teamKey);
+  commitClock(teamKey); const st=getState(teamKey); st.running=false; st.startedAt=null; st.message="Live updates paused"; await saveState(teamKey); broadcast(teamKey);
   res.json({ok:true,team:teamKey});
 });
 
